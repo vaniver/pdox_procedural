@@ -9,6 +9,17 @@ class SplitChunkMaxIterationExceeded(Exception):
     pass
 
 
+def check_contiguous(chunk):
+    """ Given a chunk (list of cubes), see if all cubes on the list can be reached from each other."""
+    visited = set([chunk[0]])
+    to_visit = set([cn for cn in chunk[0].neighbors() if cn in chunk])
+    while len(to_visit) > 0:
+        visiting = to_visit.pop()
+        visited.add(visiting)
+        to_visit = to_visit.union([cn for cn in visiting.neighbors() if cn in chunk and cn not in visited])
+    return len(visited) == len(chunk)
+
+
 def make_chunk(size, seed=0):
     """ Make a contiguous chunk of a given size """
     rng = random.Random(seed)

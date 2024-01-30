@@ -1,8 +1,6 @@
-from cube import Cube
-from alt_map import create_hex_map, valid_cubes
-from functools import reduce
-from itertools import permutations
+import random
 
+from cube import Cube
 
 def simple_voronoi(centers, weights_from_cube):
     """Uses the domain of weights_from_cube to determine which cubes are eligible to be filled.
@@ -64,6 +62,56 @@ def voronoi(centers, weight_from_cube):
         mindistmap[cub] = min(dists.values())
     return centers, result, mindistmap
 
+
+def growing_voronoi(centers, region_sizes, weight_from_cube):
+    """Grow regions from their centers out to the appropriate size from region_sizes.
+    Demands that all centers be unique.
+    They'll steal from neighbors if necessary to reach the correct size."""
+    centers = [Cube(x) for x in centers]  #If they're tuples, make them cubes.
+    # If any of the centers are duplicates, delete them. This will unfortunately muck up the ordering.
+    assert len(centers) == sum([sum([x == c for x in centers]) for c in centers])
+    group_from_cube = {k: -1 for k in weight_from_cube}
+    num_centers = len(centers)
+    options = dict()
+    easy_options = dict()
+    for ind, cen in enumerate(centers):
+        group_from_cube[cen] = ind
+        options[ind] = {x: weight_from_cube[x] for x in cen.neighbors() if x in weight_from_cube}
+    for ind, cen in enumerate(centers):
+        easy_options[ind] = {k:v for k,v in options[ind].items() if group_from_cube[k] == -1}
+    hist = {x:0 for x in range(-1,num_centers)}
+    for v in group_from_cube.values():
+        hist[v] += 1
+    # At this point we know hist is {-1:lots, 0:1, ... n-1:1}
+    poss = [v for v in range(num_centers) if hist[v] != region_sizes[v]]
+    while len(poss) > 0:  # We still need to do a swap.
+        # While we could start with the region that's the most off, that will preferentially fill the big regions first, which is not what we want.
+        # Instead let's compute how many options each has and pick the one with the fewest options (in a weighted way).
+        taker = random.choices(poss, weights=[2**(-len(easy_options[ind])) for ind in poss])[0]
+        if len(easy_options[taker]) > 0:
+            taken = min(easy_options[taker], key=options[taker].get)
+        else: #We need to steal from someone else.
+            ok_options = {k:v for k,v in options[taker].items() if len(easy_options[group_from_cube[k]]) > 0}
+            taken = min(ok_options, key=options[taker].get)
+        hist[group_from_cube[taken]] -= 1
+        hist[taker] += 1
+        if hist[taker] == region_sizes[taker]:
+            poss.remove(taker)
+        group_from_cube[taken] = taker
+        for p in poss:
+            if taken in easy_options[p]:
+                easy_options[p].pop(taken)
+        for tn in taken.neighbors():
+            if tn not in weight_from_cube:
+                continue
+            elif tn in options[taker]:
+                options[taker][tn] = min(options[taker][tn], options[taker][taken] + weight_from_cube[tn])
+            else:
+                options[taker][tn] = options[taker][taken] + weight_from_cube[tn]
+            if group_from_cube.get(tn,0) == -1:
+                easy_options[taker][tn] = options[taker][tn]
+    return centers, group_from_cube
+    
 
 def iterative_voronoi(num_centers, weight_from_cube, min_size, max_iters=5):
     """Given a set of weights, seed num_centers random centers and then keep going until all of the regions are at least min_size.
