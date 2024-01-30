@@ -5,7 +5,7 @@ import PIL.Image
 
 from cube import Cube
 
-def create_hex_map(rgb_from_ijk, max_x, max_y, n_x=235, n_y=72):
+def create_hex_map(rgb_from_ijk, max_x, max_y, mode='RGB', default="black", n_x=235, n_y=72):
     """Draw a hex map with size (max_x,max_y) with colors from rgb_from_ijk.
     There will be n_x hexes horizontally and n_y hexes vertically. 
     n_x will be assumed odd and n_y is assumed even (to have split hexes in all corners)."""
@@ -23,7 +23,7 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x=235, n_y=72):
     # We want the edges between hexes to be always uniform. (Later we'll have an option to save this hex-by-hex.)
     # This is more awkward than trusting the triangle function but what are you gonna do
     river_border = [x*box_height//box_width for x in range(box_width)]
-    img = PIL.Image.new('RGB', (max_x,max_y),  "black")
+    img = PIL.Image.new(mode, (max_x,max_y), default)
     pix = img.load()
     # try:
     for hor in range(n_x):
@@ -108,6 +108,46 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x=235, n_y=72):
             # Move to the next one
             current = current.add(Cube(0,-1,1)) # Move down
     return img
+
+def closest_xy(fr, to, box_height, box_width, shrinkage=2):
+    """Rather than the strict closest x,y position, this function returns either
+    - the midpoint of the edge for all hexes that are in a straight line (shrunk a few pixels towards the center)
+    - the closest corner for all hexes in the wedge between straight lines (shrunk a few pixels towards the center)"""
+    hor = fr.x
+    ver = -fr.y - hor % 2 - hor // 2
+    # Compute the center of the from hex
+    start_x = (3 * hor) * box_width
+    start_y = (2 * ver + (hor % 2)) * box_height
+    # Compute the direction
+    # I'm just going to do the 12-way splitting.
+    if to.x > fr.x:  # ne wedge, ne line, e wedge, se line, se wedge
+        if to.y == fr.y:  # ne line
+            return (start_x + 3*box_width // 2 - shrinkage, start_y - box_height // 2)
+        elif to.z == fr.z: # se line
+            return (start_x + 3*box_width // 2- shrinkage, start_y + box_height // 2)
+        elif to.y < fr.y and to.z < fr.z: # e wedge
+            return (start_x + 2*box_width - shrinkage, start_y)
+        elif to.y < fr.y and to.z > fr.z: # se wedge
+            return (start_x + box_width - shrinkage, start_y + box_height - shrinkage)
+        else: # ne wedge
+            return (start_x + box_width - shrinkage, start_y - box_height + shrinkage)
+    elif to.x == fr.x:  # n line, s line
+        if to.y > fr.y:
+            return (start_x, start_y - box_height + shrinkage)
+        else:
+            return (start_x, start_y + box_height - shrinkage)
+    else:  # nw wedge, nw line, w wedge, sw line, sw wedge
+        if to.y == fr.y:  # sw line
+            return (start_x - 3*box_width // 2 + shrinkage, start_y + box_height // 2)
+        elif to.z == fr.z: # nw line
+            return (start_x - 3*box_width // 2 + shrinkage, start_y - box_height // 2)
+        elif to.y > fr.y and to.z > fr.z: # w wedge
+            return (start_x - 2*box_width + shrinkage, start_y)
+        elif to.y < fr.y and to.z > fr.z: # sw wedge
+            return (start_x - box_width + shrinkage, start_y + box_height - shrinkage)
+        else: # nw wedge
+            return (start_x - box_width + shrinkage, start_y - box_height + shrinkage)
+
 
 def valid_cubes(n_x=235, n_y=72):
     """Construct the list of on-map cube positions."""
