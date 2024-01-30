@@ -1,0 +1,47 @@
+BORDER_SIZE_LIST:
+- 4
+- 4
+- 4
+- 4
+- 4
+- 4
+BORDER_TERRAIN_TEMPLATE:
+  farmlands: 0
+  hills: 6
+  mountains: 6
+  plains: 6
+  rough: 6
+CENTER_SIZE_LIST:
+- 7
+- 5
+- 5
+- 5
+CENTER_TERRAIN_TEMPLATE:
+  farmlands: 4
+  hills: 4
+  mountains: 2
+  plains: 8
+  rough: 4
+KINGDOM_SIZE_LIST:
+- - 6
+  - 4
+  - 4
+  - 4
+  - 4
+- - 4
+  - 4
+  - 3
+  - 3
+- - 4
+  - 4
+  - 3
+  - 3
+- - 4
+  - 4
+  - 3
+KINGDOM_TERRAIN_TEMPLATE:
+  farmlands: 1
+  hills: 16
+  mountains: 8
+  plains: 20
+  rough: 16

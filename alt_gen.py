@@ -1,22 +1,23 @@
 import random
+import yaml
 
 from alt_map import create_hex_map, valid_cubes
 from area import Area
 from chunk_split import check_contiguous, split_chunk, SplitChunkMaxIterationExceeded
 from voronoi import growing_voronoi, voronoi
 
-CENTER_SIZE_LIST = [7,5,5,5]
-CENTER_SIZE = sum(CENTER_SIZE_LIST)
-KINGDOM_SIZE_LIST = [[6,4,4,4,4], [4,4,3,3], [4,4,3,3], [4,4,3]]
-KINGDOM_DUCHY_LIST = [sum(x) for x in KINGDOM_SIZE_LIST]
-KINGDOM_SIZE = sum(KINGDOM_DUCHY_LIST)
-BORDER_SIZE_LIST = [4,4,4,4,4,4]
-BORDER_SIZE = sum(BORDER_SIZE_LIST)
+# CENTER_SIZE_LIST = [7,5,5,5]
+# CENTER_SIZE = sum(CENTER_SIZE_LIST)
+# KINGDOM_SIZE_LIST = [[6,4,4,4,4], [4,4,3,3], [4,4,3,3], [4,4,3]]
+# KINGDOM_DUCHY_LIST = [sum(x) for x in KINGDOM_SIZE_LIST]
+# KINGDOM_SIZE = sum(KINGDOM_DUCHY_LIST)
+# BORDER_SIZE_LIST = [4,4,4,4,4,4]
+# BORDER_SIZE = sum(BORDER_SIZE_LIST)
 
 class CreationError(Exception):
     pass
 
-def create_chunks(weight_from_cube, n_x, n_y, num_centers):
+def create_chunks(weight_from_cube, num_centers):
     """Create num_centers different voronoi chunks using weight_from_cube."""
     centers = random.sample(sorted(weight_from_cube.keys()),num_centers)
     centers, result, distmap = voronoi(centers, weight_from_cube=weight_from_cube)
@@ -71,7 +72,7 @@ def compute_func(chunks, cids, size):
         return sorted(pents, key=lambda x: x[1], reverse=True)
 
 
-def create_triangular_continent(weight_from_cube, chunks, candidate):
+def create_triangular_continent(weight_from_cube, chunks, candidate, config):
     """Chunks is a list of chunks; candidates is a tuple of chunk ids (of length 3, 4, or 5).
     This generates a continent out of a series of triangular chunk cliques and will return CreationFailure if the adjacencies aren't right.
     Returns a list cube_from_pid"""
@@ -87,7 +88,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate):
         options = {k:weight_from_cube[k] for k in cdistmap.keys() if k in chunks[other].members and k not in cube_from_pid}
         _, _, selection = voronoi([min(options, key=cdistmap.get)],options)
         ss = sorted(selection, key=selection.get)
-        for k in ss[:CENTER_SIZE_LIST[cid+1]]:
+        for k in ss[:config["CENTER_SIZE_LIST"][cid+1]]:
             cube_from_pid.append(k)
     allocated = set([x for x in cube_from_pid])
     # Set up the centers for the annular regions
@@ -101,18 +102,18 @@ def create_triangular_continent(weight_from_cube, chunks, candidate):
         options = {k: min([k.sub(nc).mag() for nc in new_centers[:3]]) for k in chunks[o].members if k not in allocated and any([kn in allocated for kn in k.neighbors()])}
         new_centers.append(max(options, key=options.get))
     subweights = {k:v for k,v in weight_from_cube.items() if k not in allocated}
-    new_centers, group_from_cube = growing_voronoi(new_centers, [BORDER_SIZE]*3 + [KINGDOM_SIZE]*3, subweights)
+    new_centers, group_from_cube = growing_voronoi(new_centers, [config["BORDER_SIZE"]]*3 + [config["KINGDOM_SIZE"]]*3, subweights)
     # Split the border duchies into counties
     for ind in range(3):
         duchy = [k for k,v in group_from_cube.items() if v==ind]
         try:
-            counties = split_chunk(duchy, BORDER_SIZE_LIST)
+            counties = split_chunk(duchy, config["BORDER_SIZE_LIST"])
         except:  # Covers both difficult-to-split and incorrectly-sized regions.
             raise CreationError
         for county in counties:
             cube_from_pid.extend(county)
     # Split the kingdoms into duchies
-    adj_size_list = [x for x in KINGDOM_DUCHY_LIST]
+    adj_size_list = [x for x in config["KINGDOM_DUCHY_LIST"]]
     adj_size_list[0] -= 6
     for kind in range(3,6):  # 3 border duchies - 3 kingdoms
         kingdom = [k for k,v in group_from_cube.items() if v==kind]
@@ -148,7 +149,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate):
             for dind, duchy in enumerate(ksplit):
                 start_ind = 1 if dind == 0 else 0  # We don't need to split out the capital county for the capital duchy; it's already done for us.
                 try:
-                    dsplit = split_chunk(duchy, KINGDOM_SIZE_LIST[dind][start_ind:])
+                    dsplit = split_chunk(duchy, config["KINGDOM_SIZE_LIST"][dind][start_ind:])
                 except:
                         raise CreationError
                 for county in dsplit:
@@ -164,7 +165,7 @@ def create_triangle_continents(size_list, weight_from_cube = None, n_x=129, n_y=
     continents = []
     if weight_from_cube is None:
         weight_from_cube = {cub: random.randint(1,8) for cub in valid_cubes(n_x,n_y)}
-    centers, chunks, cids = create_chunks(weight_from_cube, n_x, n_y, num_centers)
+    centers, chunks, cids = create_chunks(weight_from_cube, num_centers)
     ind = -1
     for cind, size in enumerate(size_list):
         candidates = compute_func(chunks, cids, size)
@@ -178,10 +179,21 @@ def create_triangle_continents(size_list, weight_from_cube = None, n_x=129, n_y=
                 print("Creation error")
                 if ind == len(candidates):
                     print(f"Failed to make enough of size {size}, had to rechunk.")
-                    centers, chunks, cids = create_chunks(subweights, n_x, n_y, num_centers)
+                    centers, chunks, cids = create_chunks(subweights, num_centers)
                     candidates = compute_func(chunks, cids, size)
                     ind = -1
     return continents
+
+
+def assign_terrain_subregion(region, template):
+    """Assign terrain to the region according to the template."""
+    pass
+
+
+def assign_terrain_continent(region, templates):
+    """Assign terrain to the continent according to the template list.
+    Also generates the heightmap."""
+    pass
 
 
 def arrange_triangle_continents(continents):
@@ -190,13 +202,23 @@ def arrange_triangle_continents(continents):
 
 
 if __name__ == "__main__":
-    random.seed(1945)
-    n_x = 129
-    n_y = 65
+    with open("config.yaml", 'r') as inf:
+        config = yaml.load(inf, yaml.Loader)
+    for k,v in config.items():  # We should compute the sizes of the templates here rather than making the user do it.
+        if "SIZE_LIST" in k:
+            sumk = k.replace("SIZE_LIST", "SIZE")
+            if sumk not in config:
+                if type(v[0]) is list:
+                    config[sumk] = [sum(x) for x in v]
+                else:
+                    config[sumk] = sum(v)
+    random.seed(config.get("seed", 1945))
+    n_x = config.get("n_x", 129)
+    n_y = config.get("n_x", 65)
     rgb_from_ijk = {cub.tuple():(random.randint(0,64), random.randint(0,64), random.randint(0,64)) for cub in valid_cubes(n_x,n_y)}
-    max_x = 10*(n_x*3-3)
-    max_y = 17*(n_y*2-2)
-    continents = create_triangle_continents([3,3,3], n_x=n_x, n_y=n_y, num_centers=40)
+    max_x = config.get("box_width", 10)*(n_x*3-3)
+    max_y = config.get("box_height", 17)*(n_y*2-2)
+    continents = create_triangle_continents(config.get("size_list", [3,3,3]), n_x=n_x, n_y=n_y, num_centers=config.get("num_centers", 40))
     for cind, cont in enumerate(continents):
         print(cind, len(cont), cont[0], cont[-1])
         for pid, k in enumerate(cont):

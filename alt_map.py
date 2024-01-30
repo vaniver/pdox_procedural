@@ -23,7 +23,7 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, mode='RGB', default="black", n_x=
     # We want the edges between hexes to be always uniform. (Later we'll have an option to save this hex-by-hex.)
     # This is more awkward than trusting the triangle function but what are you gonna do
     river_border = [x*box_height//box_width for x in range(box_width)]
-    img = PIL.Image.new(mode, (max_x,max_y), default)
+    img = PIL.Image.new(mode, (max_x, max_y), default)
     pix = img.load()
     # try:
     for hor in range(n_x):
