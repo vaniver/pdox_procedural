@@ -1,10 +1,14 @@
+from enum import Enum
 import random
 import yaml
 
 from alt_map import create_hex_map, valid_cubes
 from area import Area
 from chunk_split import check_contiguous, split_chunk, SplitChunkMaxIterationExceeded
+from terrain import BaseTerrain
 from voronoi import growing_voronoi, voronoi
+
+
 
 # CENTER_SIZE_LIST = [7,5,5,5]
 # CENTER_SIZE = sum(CENTER_SIZE_LIST)
@@ -288,7 +292,7 @@ def assign_terrain_subregion(region, template, rough="forest"):
     terr_from_cube = {}
     random.shuffle(template)
     for ind, cube in enumerate(region.values()):
-        terr_from_cube[cube] = rough if template[pid] == "rough" else template[pid]
+        terr_from_cube[cube] = BaseTerrain[rough] if template[ind] == "rough" else BaseTerrain[template[ind]]
     return terr_from_cube
 
 def assign_terrain_continent(cube_from_pid, templates):

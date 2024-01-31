@@ -1,18 +1,7 @@
-from enum import Enum
 import os
 
 from alt_map import *
-
-CK3Terrain = Enum('CK3Terrain','plains farmlands hills mountains desert desert_mountains oasis jungle forest taiga wetlands steppe floodplains drylands')
-
-TERRAIN_HEIGHT = {
-    CK3Terrain.farmlands: (0,1), CK3Terrain.plains: (0,1), CK3Terrain.floodplains: (0,1), CK3Terrain.taiga: (0,1),
-    CK3Terrain.wetlands: (0,1), CK3Terrain.steppe: (0,1), CK3Terrain.drylands: (0,1),
-    CK3Terrain.oasis: (0,1), CK3Terrain.desert: (0,1),
-    CK3Terrain.jungle: (1,3), CK3Terrain.forest: (1,3),
-    CK3Terrain.hills: (1,5), 
-    CK3Terrain.mountains: (3,10),  CK3Terrain.desert_mountains: (3,10),
-}
+from terrain import *
 
 TERRAIN_MASK_TYPES = [
     'beach_02', 'beach_02_mediterranean', 'beach_02_pebbles', 'coastline_cliff_brown', 'coastline_cliff_desert',
@@ -58,38 +47,8 @@ USED_MOBJ_MASKS = {
     CK3Terrain.forest: 'tree_leaf_01_mask.png',
 }
 
-# HEIGHTMAP constants
-WATER_HEIGHT = 18
-
 # PROVINCES constants
 IMPASSABLE = (0, 0, 255)
-
-# RIVERS constants
-MAJOR_RIVER_THRESHOLD = 9
-RIVER_EXTEND = 3
-RIVER_BRANCH_CHANCE = 0.5
-SOURCE = 0
-MERGE = 1
-SPLIT = 2
-WATER = 254
-LAND = 255
-
-# I've got some things:
-# - a cube_from_pid for each continent where each barony is assigned a unique pid
-# - a landed title tree for each continent which uses the barony pid
-# - some ocean stuff idk
-
-# I think what's convenient for the maps is:
-# - a mapping between cubes and (r,g,b) tuples
-# - a mapping between pids and (r,g,b) tuples  (I would do the V3 thing everywhere but the other games insist on pids)
-
-
-def create_title_tree():
-    """Given the config file, determine name_from_pid and the title tree."""
-    # I'm not actually sure what needs to be done here. It looks like most things key off of title name,
-    # and so we don't actually really need to link up the pid and the title tree?
-
-    # We do need name_from_pid. 
 
 
 class CK3Map:
@@ -128,11 +87,19 @@ class CK3Map:
             f.write("should_wrap_x=no\n")
             f.write("level_offsets={ { 0 0 }{ 0 0 }{ 0 0 }{ 0 0 }{ 0 7 }}\n")
 
+    def create_terrain_masks(self, terr_from_cube):
+        """Creates all the terrain masks; just fills each cube."""
+        raise NotImplementedError
 
-def create_terrain(file_dir):
-    """Creates all the terrain masks."""
-    # Was historically wrapped into create_heightmap.
-    raise NotImplementedError
+
+def create_terrain_file(file_dir, terr_from_pid):
+    """Writes out common/province_terrain."""
+    # Masks were historically wrapped into create_heightmap, and should maybe be again.
+    os.makedirs(os.path.join(file_dir, "common", "province_terrain"), exist_ok=True)
+    with open(os.path.join(file_dir, "common", "province_terrain", "00_province_terrain.txt"), 'w') as outf:
+        outf.write("default_land=plains\ndefault_sea=sea\ndefault_coastal_sea=coastal_sea\n")
+        for pid, terr in terr_from_pid.items():
+            outf.write(f"{str(pid)}={CK3Terrain_from_BaseTerrain[terr].name}\n")
 
 
 def create_adjacencies(file_dir, straits, cube_from_pid, name_from_pid, closest_xy = None):
