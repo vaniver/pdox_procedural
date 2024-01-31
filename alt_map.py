@@ -1,18 +1,18 @@
 # This file is for map-rendering code / file-IO that's game-independent.
-
-
+import os
 import PIL.Image
 
 from cube import Cube
 
-def create_hex_map(rgb_from_ijk, max_x, max_y, mode='RGB', default="black", n_x=235, n_y=72):
+def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, mode='RGB', default="black", n_x=235, n_y=72, palette_loc=None):
     """Draw a hex map with size (max_x,max_y) with colors from rgb_from_ijk.
     There will be n_x hexes horizontally and n_y hexes vertically. 
-    n_x will be assumed odd and n_y is assumed even (to have split hexes in all corners)."""
+    n_x will be assumed odd and n_y is assumed even (to have split hexes in all corners).
+    rgb_from_edge should be a dictionary from (cube,cube) tuples to (rgb, thickness) tuples."""
     # We have three different positions to track:
     #  - i,j,k of the hex
     #  - hor, ver of the hex: (0,0) to (n_x,n_y), where hor=x and ver=z-y
-    #  - x,y of the pixel: really the rectangle or triangle of the underlying sector.
+    #  - x,y of the pixel: really the rectangle or triangle of the underlying section.
     
     # Calculate hex size
     # There are 2n_y-2 vertical boxes.
@@ -24,6 +24,9 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, mode='RGB', default="black", n_x=
     # This is more awkward than trusting the triangle function but what are you gonna do
     river_border = [x*box_height//box_width for x in range(box_width)]
     img = PIL.Image.new(mode, (max_x, max_y), default)
+    if palette_loc is not None:
+        with open(palette_loc, "r") as f:
+            img.putpalette([int(s) for s in f.read().split(',')])
     pix = img.load()
     # try:
     for hor in range(n_x):
@@ -35,9 +38,11 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, mode='RGB', default="black", n_x=
         else:
             current = Cube(hor, -hor2, -hor2)
             max_ver = n_y
+        start_x = (3 * hor - 2) * box_width
         for ver in range(max_ver):
-            rgb = rgb_from_ijk[current.tuple()]
-            start_x = (3 * hor - 2) * box_width
+            rgb = rgb_from_ijk.get(current.tuple(), None)
+            if rgb is None:
+                continue
             start_y = (2 * ver - 1 + (hor % 2)) * box_height
             # Compute what we actually need to paint for this:            
             if hor == 0:
@@ -107,6 +112,10 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, mode='RGB', default="black", n_x=
                     pix[start_x + box_width + x,start_y + y] = rgb
             # Move to the next one
             current = current.add(Cube(0,-1,1)) # Move down
+    for (k1, k2), (rgb, thickness) in rgb_from_edge.items():
+        if k1.sub(k2).mag() != 1:
+            continue
+        raise NotImplementedError
     return img
 
 def closest_xy(fr, to, box_height, box_width, shrinkage=2):
