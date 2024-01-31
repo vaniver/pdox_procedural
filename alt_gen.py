@@ -17,6 +17,91 @@ from voronoi import growing_voronoi, voronoi
 class CreationError(Exception):
     pass
 
+DEPTH_MAP = {"e": 0, "k": 1, "d": 2, "c": 3, "b": 4}
+
+class RegionTree:
+    """A class to hold the region tree.
+    This is game-agnostic, which means it needs to have the basic details for all games.
+    The ordering goes something like:
+    - era ( the continent-grouping used for )
+      - continent
+        - region
+          - area
+            - county
+              - barony
+    The overall divisions of the world are not a tree, but landed_titles and related things are.
+    At the county level, children (the baronies) is just a list of strings instead of a list of RegionTrees.
+    """
+    def __init__(self, title=None, culture=None, religion=None, rough="forest", holy_site=None, color=("0","0","0"), capital_title=None, children = []):
+        self.capital_title = capital_title
+        self.culture = culture
+        self.religion = religion
+        self.rough = rough
+        self.holy_site = holy_site
+        self.title = title
+        self.color = color
+        if len(children) > 0:
+            self.children = children
+        else:
+            self.children = []
+
+    def all_ck3_titles(self):
+        """Returns all ck3 titles defined in this region tree.
+        There are four types:
+        e_ (continents)
+        k_ (regions)
+        d_ (areas)
+        c_ (counties)
+        b_ (baronies)"""
+        if self.title is None:
+            return []
+        title_list = [self.title]
+        for child in self.children:
+            if isinstance(child,RegionTree):
+                title_list.extend(child.all_ck3_titles())
+            else:
+                title_list.append(child)
+        return title_list
+    
+    def capital(self):
+        if self.capital_title is not None:
+            return self.capital_title
+        if self.title[0] == "c":
+            return self.title
+        if isinstance(self.children[0], RegionTree):
+            return self.children[0].capital()
+        return ""
+        
+    @classmethod
+    def from_csv(cls, filename):
+        with open(filename) as inf:
+            current = {}
+            for line in inf.readlines():
+                lsplit = line.split(",")
+                depth = DEPTH_MAP[lsplit[0][0]]
+                if depth == 4:  # This is a barony, and so just needs to be appended to children of the current county.
+                    current[3].children.append(lsplit[0].strip())
+                    continue
+                if depth in current:  # We finished a unit and are on to the next one.
+                    current[depth-1].children.append(current.pop(depth))
+                title = lsplit[0]
+                color = tuple([x.strip() for x in lsplit[1:4]]) if len(lsplit) > 3 else ("0","0","0")
+                culture, religion, rough = lsplit[4:7] if len(lsplit) > 6 else [None, None, "forest"]
+                holy_site = lsplit[7] if len(lsplit) > 7 else None
+                current[depth] = cls(title=title, color=color, culture=culture, religion=religion, rough=rough, holy_site=holy_site)
+            while len(current) > 0:
+                depth = max(current.keys())
+                if depth-1 in current:
+                    current[depth-1].children.append(current.pop(depth))
+                else:
+                    result = current[depth]
+                    break
+        return result
+
+
+
+
+
 def create_chunks(weight_from_cube, num_centers):
     """Create num_centers different voronoi chunks using weight_from_cube."""
     centers = random.sample(sorted(weight_from_cube.keys()),num_centers)
@@ -76,10 +161,16 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
     """Chunks is a list of chunks; candidates is a tuple of chunk ids (of length 3, 4, or 5).
     This generates a continent out of a series of triangular chunk cliques and will return CreationFailure if the adjacencies aren't right.
     Returns a list cube_from_pid"""
-    a,b,c = candidate[0]
-    abc_center = list(chunks[a].self_edges[b].intersection(chunks[a].self_edges[c]))[0]
-    _, _, cdistmap = voronoi([abc_center], weight_from_cube)
-    cube_from_pid = [abc_center] + list(abc_center.neighbors())
+    terr_templates = []
+    if len(candidate[0]) == 3:
+        a,b,c = candidate[0]
+        abc_center = list(chunks[a].self_edges[b].intersection(chunks[a].self_edges[c]))[0]
+        _, _, cdistmap = voronoi([abc_center], weight_from_cube)
+        cube_from_pid = [abc_center] + list(abc_center.neighbors())
+    elif len(candidate[0]) == 4:
+        raise NotImplementedError
+    elif len(candidate[0]) == 5:
+        raise NotImplementedError
     # We're going to mostly hardcode how the central duchy works.
     if not all([x in weight_from_cube for x in cube_from_pid]):  # Check to make sure the center is actually contained.
         raise CreationError
@@ -91,6 +182,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
         for k in ss[:config["CENTER_SIZE_LIST"][cid+1]]:
             cube_from_pid.append(k)
     allocated = set([x for x in cube_from_pid])
+    terr_templates.append(config["CENTER_TERRAIN_TEMPLATE"])
     # Set up the centers for the annular regions
     new_centers = []
     # Add the borders
@@ -112,6 +204,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
             raise CreationError
         for county in counties:
             cube_from_pid.extend(county)
+        terr_templates.append(config["BORDER_TERRAIN_TEMPLATE"])
     # Split the kingdoms into duchies
     adj_size_list = [x for x in config["KINGDOM_DUCHY_LIST"]]
     adj_size_list[0] -= 6
@@ -146,6 +239,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
                         raise CreationError
         if not to_be_continued:
             cube_from_pid.extend(this_capital)
+            terr_templates.append(config["KINGDOM_TERRAIN_TEMPLATE"])
             for dind, duchy in enumerate(ksplit):
                 start_ind = 1 if dind == 0 else 0  # We don't need to split out the capital county for the capital duchy; it's already done for us.
                 try:
@@ -154,7 +248,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
                         raise CreationError
                 for county in dsplit:
                     cube_from_pid.extend(county)
-    return cube_from_pid
+    return cube_from_pid, terr_templates
     
 
 def create_triangle_continents(size_list, weight_from_cube = None, n_x=129, n_y=65, num_centers=40):
@@ -163,6 +257,7 @@ def create_triangle_continents(size_list, weight_from_cube = None, n_x=129, n_y=
     assert max(size_list) <= 3
     assert min(size_list) >= 3
     continents = []
+    terr_templates = []
     if weight_from_cube is None:
         weight_from_cube = {cub: random.randint(1,8) for cub in valid_cubes(n_x,n_y)}
     centers, chunks, cids = create_chunks(weight_from_cube, num_centers)
@@ -174,7 +269,9 @@ def create_triangle_continents(size_list, weight_from_cube = None, n_x=129, n_y=
             print(ind)
             subweights = {k:v for k,v in weight_from_cube.items() if any([k in chunks[cid].members for cid in candidates[ind][0]])}
             try:
-                continents.append(create_triangular_continent(subweights, chunks, candidates[ind]))
+                continent, terr_template = create_triangular_continent(subweights, chunks, candidates[ind])
+                continents.append(continent)
+                terr_templates.append(terr_template)
             except CreationError:
                 print("Creation error")
                 if ind == len(candidates):
@@ -182,23 +279,60 @@ def create_triangle_continents(size_list, weight_from_cube = None, n_x=129, n_y=
                     centers, chunks, cids = create_chunks(subweights, num_centers)
                     candidates = compute_func(chunks, cids, size)
                     ind = -1
-    return continents
+    return continents, terr_templates
 
 
-def assign_terrain_subregion(region, template):
+def assign_terrain_subregion(region, template, rough="forest"):
     """Assign terrain to the region according to the template."""
-    pass
+    # TODO: treat farmland right
+    terr_from_cube = {}
+    random.shuffle(template)
+    for ind, cube in enumerate(region.values()):
+        terr_from_cube[cube] = rough if template[pid] == "rough" else template[pid]
+    return terr_from_cube
 
-
-def assign_terrain_continent(region, templates):
+def assign_terrain_continent(cube_from_pid, templates):
     """Assign terrain to the continent according to the template list.
-    Also generates the heightmap."""
-    pass
+    TODO: also generate the heightmap and creates rivers."""
+    min_pid = min(cube_from_pid.keys())
+    terr_from_cube = {}
+    for template in templates:
+        max_pid = min_pid + sum(template.values())
+        region = {k:v for k,v in cube_from_pid.items() if min_pid <= k < max_pid}
+        terr_from_cube.update(assign_terrain_subregion(region, template))
+    return terr_from_cube
 
 
 def arrange_triangle_continents(continents):
-    """Given three continents, arrange them to have straits around a central inner sea."""
+    """Given three continents, arrange them to have straits around a central inner sea.
+    Also computes wastelands."""
     assert len(continents) == 3
+    # TODO: Actually move things around. This is banking on the fact that with the 1945 seed the continents don't overlap.
+    return continents
+
+
+def create_data(config):
+    """The main function that calls all the other functions in order. 
+    The resulting data structure should be enough to make the mod for any particular game."""
+    random.seed(config.get("seed", 1945))
+    continents, terr_templates = create_triangle_continents(config.get("size_list", [3,3,3]), n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", 40))
+    continents = arrange_triangle_continents(continents)
+    cube_from_pid = {}
+    land_cubes = set()
+    sea_cubes = set()
+    last_pid = 0
+    terr_from_cube = {}
+    for cind, continent in enumerate(continents):
+        for pid, cube in continent.items():
+            cube_from_pid[pid + last_pid] = cube
+        land_cubes = land_cubes.union(continent.values())
+        last_pid += len(continent)
+        terr_from_cube.update(assign_terrain_continent(continent, terr_templates[cind]))
+    sea_cubes = set(valid_cubes(config["n_x"], config["n_y"])) - land_cubes
+    terr_from_cube.update({k:"ocean" for k in sea_cubes})
+    height_from_cube = {k: 16 for k in sea_cubes}
+    height_from_cube.update({k: 20 for k in land_cubes})
+
 
 
 if __name__ == "__main__":
@@ -213,17 +347,17 @@ if __name__ == "__main__":
                 else:
                     config[sumk] = sum(v)
     random.seed(config.get("seed", 1945))
-    n_x = config.get("n_x", 129)
-    n_y = config.get("n_x", 65)
-    rgb_from_ijk = {cub.tuple():(random.randint(0,64), random.randint(0,64), random.randint(0,64)) for cub in valid_cubes(n_x,n_y)}
-    max_x = config.get("box_width", 10)*(n_x*3-3)
-    max_y = config.get("box_height", 17)*(n_y*2-2)
-    continents = create_triangle_continents(config.get("size_list", [3,3,3]), n_x=n_x, n_y=n_y, num_centers=config.get("num_centers", 40))
+    config["n_x"] = config.get("n_x", 129)
+    config["n_y"] = config.get("n_y", 65)
+    rgb_from_ijk = {cub.tuple():(random.randint(0,64), random.randint(0,64), random.randint(0,64)) for cub in valid_cubes(config["n_x"],config["n_y"])}
+    max_x = config.get("box_width", 10)*(config["n_x"]*3-3)
+    max_y = config.get("box_height", 17)*(config["n_y"]*2-2)
+    continents = create_triangle_continents(config.get("size_list", [3,3,3]), n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", 40))
     for cind, cont in enumerate(continents):
         print(cind, len(cont), cont[0], cont[-1])
         for pid, k in enumerate(cont):
             color_tuple = (62*(cind+1),min(255,pid),0)
             rgb_from_ijk[k.tuple()] = color_tuple[cind:] + color_tuple[:cind]
-    img = create_hex_map(rgb_from_ijk, max_x,max_y,n_x,n_y)
+    img = create_hex_map(rgb_from_ijk, max_x,max_y,config["n_x"],config["n_y"])
     img.show()
     img.save("continent_test.png")
