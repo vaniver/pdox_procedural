@@ -124,7 +124,14 @@ def create_adjacencies(file_dir, straits, cube_from_pid, name_from_pid, closest_
         outf.write("-1;-1;;-1;-1;-1;-1;-1;\n")
 
 
-def make_coa(file_dir, base_dir, custom_dir, title_list):
+def create_climate(file_dir):
+    """Creates the climate file."""
+    # TODO: Actually determine climate from location / terrain / etc.
+    os.makedirs(os.path.join(file_dir, "map_data"), exist_ok=True)
+    with open(os.path.join(file_dir, "map_data","climate.txt"),'w') as outf:
+        outf.write("mild_winter = {\n}\nnormal_winter = {\n}\nsevere_winter = {\n}\n")
+
+def create_coa(file_dir, base_dir, custom_dir, title_list):
     """Populate common/coat_of_arms/coat_of_arms/01 and 90 with all the titles in title_list, drawing first from custom_dir and then from base_dir."""
     os.makedirs(os.path.join(file_dir, "common", "coat_of_arms", "coat_of_arms"), exist_ok=True)
     with open(os.path.join(file_dir, "common", "coat_of_arms", "coat_of_arms","01_landed_titles.txt"),'w') as outf:
@@ -148,7 +155,50 @@ def make_coa(file_dir, base_dir, custom_dir, title_list):
     print(f"After processing coats of arms, there were {len(title_list)} titles without coas.")
 
 
-def make_landed_titles(file_dir, pid_from_title, regions, special_titles=None):
+def create_geographical_regions(file_dir, regions, all_material_types = None, no_material_types=None, all_animal_types=None, no_animal_types=None):
+    """Create the geographical_regions/geographical_region.txt file.
+    regions is a list of RegionTrees.
+    This includes a bunch of material / animal things which could maybe be customized--but for now I'm going to leave this to the end user."""
+    if all_material_types is None:
+        all_material_types = ["wood_elm", "wood_walnut", "wood_maple", "woods_pine_and_fir", "woods_yew", "woods_dogwood", "woods_hazel", "cloth_linen", "hsb_deer_antler", "hsb_boar_tusk", "hsb_seashell",]
+    if no_material_types is None:
+        no_material_types = ["woods_subsaharan", "woods_paduak", "woods_india", "woods_india_burma", "woods_ebony", "woods_bamboo", "woods_cherry", "woods_hickory", "woods_palm", "woods_mulberry", "woods_mediterranean", "woods_sri_lanka", "cloth_no_silk","cloth_cotton", "metal_wootz", "metal_damascus", "metal_bulat", "hsb_camel_bone", "hsb_ivory_imported", "hsb_ivory_native", "hsb_mother_of_pearl", "hsb_tortoiseshell", ]
+    if all_animal_types is None:
+        all_animal_types = ["deer", "boar", "bear"]
+    if no_animal_types is None:
+        no_animal_types = ["antelope", "gazelle", "big_cat", "bison", "aurochs", "reindeer", "elk"]
+    graphical_types = {
+        "western": "255 0 0",
+        "mena": "255 255 0",
+        "india": "0 255 0",
+        "mediterranean": "0 0 255",
+        "steppe": "0 255 255"
+    }
+    os.makedirs(os.path.join(file_dir, "map_data", "geographical_regions"), exist_ok=True)
+    with open(os.path.join(file_dir, "map_data", "geographical_regions","geographical_region.txt"),'w') as outf:
+        all_regions = []
+        for region in regions:
+            region_title = "world_" + region.title.split("_")[1]
+            all_regions.append(region_title)
+            outf.write(region_title + " = {\n\tduchies= {\n\t\t")
+            outf.write(" ".join([x for x in region.all_ck3_titles() if x[0] == 'd']))
+            outf.write("\t}\n}\n")
+        all_regions = " ".join(all_regions)
+        for material in all_material_types:
+            outf.write("material_"+material+" = {\n\tregions = {\n\t\t"+all_regions+"\n\t}\n}\n")
+        for material in no_material_types:
+            outf.write("material_"+material+" = {\n\tregions = {\n\t\t\n\t}\n}\n")
+        for graphical, color in graphical_types.items():
+            buffer = all_regions if graphical == "western" else ""
+            outf.write("graphical_" + graphical + " {\n\tgraphical=yes\n\tcolor={ "+color+" }\n\tregions = {\n\t\t"+buffer+"\n\t}\n}\n")
+        for animal in all_animal_types:
+            outf.write("hunt_animal_"+animal+"_region = {\n\tregions = {\n\t\t"+all_regions+"\n\t}\n}\n")
+        for animal in no_animal_types:
+            outf.write("hunt_animal_"+animal+"_region = {\n\tregions = {\n\t\t\n\t}\n}\n")
+            
+
+
+def create_landed_titles(file_dir, pid_from_title, regions, special_titles=None):
     """Make common/landed_titles."""
     os.makedirs(os.path.join(file_dir, "common", "landed_titles"), exist_ok=True)
     with open(os.path.join(file_dir, "common", "landed_titles","00_landed_titles.txt"), 'w') as outf:
@@ -182,6 +232,16 @@ def make_landed_titles(file_dir, pid_from_title, regions, special_titles=None):
                 outf.write("\t}\n")
             outf.write("}\n")
 
+
+def create_history(file_dir, regions):
+    """Create the history files"""
+    os.makedirs(os.path.join(file_dir, "history", "wars"), exist_ok=True)
+    with open(os.path.join(file_dir, "history","wars","00_landed_titles.txt"), 'w') as outf:
+        outf.write("\n")
+    os.makedirs(os.path.join(file_dir, "history", "province_mapping"), exist_ok=True)
+    with open(os.path.join(file_dir, "history","province_mapping","00_world.txt"), 'w') as outf:
+        outf.write("\n")
+    
 
 def strip_base_files(file_dir, src_dir, subpaths):
     """There's a bunch of base game files that are necessary but contain _some_ hardcoded references to provinces.
@@ -246,7 +306,7 @@ def strip_base_files(file_dir, src_dir, subpaths):
                 outf.write(file_buffer)
 
 
-def make_dot_mod(file_dir, mod_name, mod_disp_name):
+def create_dot_mod(file_dir, mod_name, mod_disp_name):
     """Creates the basic mod structure.
     -common
     --decisions
@@ -288,11 +348,12 @@ def make_dot_mod(file_dir, mod_name, mod_disp_name):
 def create_mod(file_dir, config, pid_from_cube, terr_from_cube, rgb_from_pid, height_from_cube, pid_from_title, name_from_pid, region_tree):
     """Creates the CK3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
-    make_dot_mod(file_dir=file_dir)
+    create_dot_mod(file_dir=file_dir)
     # make common
-    make_coa(file_dir, base_dir=os.path.join(config["BASE_DIR"], "common", "coat_of_arms", "coat_of_arms"), custom_dir=config.get("COA_DIR", None), title_list=region_tree.all_ck3_titles("CK3"))
-    make_landed_titles(file_dir, pid_from_title, region_tree.children)  # TODO: add special_titles
+    create_coa(file_dir, base_dir=os.path.join(config["BASE_DIR"], "common", "coat_of_arms", "coat_of_arms"), custom_dir=config.get("COA_DIR", None), title_list=region_tree.all_ck3_titles("CK3"))
+    create_landed_titles(file_dir, pid_from_title, region_tree.children)  # TODO: add special_titles
     # make history
     # Make map
     map = CK3Map(file_dir,config["max_x"], config["max_y"], config["n_x"], config["n_y"])
     map.create_provinces(rgb_from_pid,pid_from_cube, name_from_pid)
+    create_geographical_regions(file_dir, region_tree.children)
