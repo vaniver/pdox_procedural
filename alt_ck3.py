@@ -183,6 +183,69 @@ def make_landed_titles(file_dir, pid_from_title, regions, special_titles=None):
             outf.write("}\n")
 
 
+def strip_base_files(file_dir, src_dir, subpaths):
+    """There's a bunch of base game files that are necessary but contain _some_ hardcoded references to provinces.
+    Rather than having to manually remove them, let's try to do it automatically.
+    
+    Currently known to work with the following subpaths:
+    - 
+    and suspected to work with:
+    - common/travel/point_of_interest_types/travel_point_of_interest_types.txt  # TODO: add poi_grand_city for the central cities.
+    """
+    expanded_subpaths = []
+    while len(subpaths) > 0:
+        subpath = subpaths.pop()
+        if os.path.isdir(os.path.join(src_dir, subpath)):
+            subpaths.extend([os.path.join(src_dir, subpath, more) for more in os.listdir(os.path.join(src_dir, subpath))])
+        else:
+            expanded_subpaths.append(subpath)
+
+    for subpath in expanded_subpaths:
+        file_stripped = False
+        file_buffer = ""
+        with open(os.path.join(src_dir, subpath), encoding='utf-8') as inf:
+            valid = True
+            brackets = 0
+            mod_brackets = 0
+            mod = False
+            buffer = ""
+            mod_buffer = ""
+            for line in inf:
+                brackets += line.count("{")
+                if brackets > 0 and ("province:" in line or "title:" in line or "character:" in line):
+                    valid = False
+                    file_stripped = True
+                if brackets > 0 and valid and "modifier = {" in line:
+                    mod = True
+                    mod_brackets = brackets - 1  # This is when it closes
+                if mod:
+                    mod_buffer += line
+                elif valid:
+                    buffer += line
+                brackets -= line.count("}")
+                if mod and brackets == mod_brackets:
+                    if valid:
+                        buffer += mod_buffer
+                        mod_buffer = ""
+                    else:
+                        valid = True
+                        mod_buffer = ""
+                    mod = False
+                if brackets == 0:
+                    if valid and mod:
+                        print(f"There's an issue with parsing {subpath}")
+                    elif valid:
+                        file_buffer = file_buffer + buffer
+                    buffer = ""
+                    valid = True
+        if file_stripped:  # We did a replacement, so need to write out buffer.
+            relpath = os.path.relpath(subpath,src_dir)
+            print(relpath)
+            os.makedirs(os.path.join(file_dir, os.path.dirname(relpath)), exist_ok=True)
+            with open(os.path.join(file_dir, relpath), 'w', encoding='utf-8') as outf:
+                outf.write(file_buffer)
+
+
 def make_dot_mod(file_dir, mod_name, mod_disp_name):
     """Creates the basic mod structure.
     -common
