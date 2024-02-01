@@ -5,6 +5,7 @@ import yaml
 from alt_map import create_hex_map, valid_cubes
 from area import Area
 from chunk_split import check_contiguous, split_chunk, SplitChunkMaxIterationExceeded
+from cube import Cube
 from terrain import BaseTerrain
 from voronoi import growing_voronoi, voronoi
 
@@ -103,9 +104,6 @@ class RegionTree:
         return result
 
 
-
-
-
 def create_chunks(weight_from_cube, num_centers):
     """Create num_centers different voronoi chunks using weight_from_cube."""
     centers = random.sample(sorted(weight_from_cube.keys()),num_centers)
@@ -192,13 +190,18 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
     # Add the borders
     for o1, o2 in [(a,b),(b,c),(a,c)]:
         options = {k for k in chunks[o1].self_edges[o2].union(chunks[o1].other_edges[o2]) if k not in allocated}
+        if len(options) == 0:
+            raise CreationError
         new_centers.append(min(options, key=cdistmap.get))
     # Add the kingdoms
     for o in [a,b,c]:
         options = {k: min([k.sub(nc).mag() for nc in new_centers[:3]]) for k in chunks[o].members if k not in allocated and any([kn in allocated for kn in k.neighbors()])}
         new_centers.append(max(options, key=options.get))
     subweights = {k:v for k,v in weight_from_cube.items() if k not in allocated}
-    new_centers, group_from_cube = growing_voronoi(new_centers, [config["BORDER_SIZE"]]*3 + [config["KINGDOM_SIZE"]]*3, subweights)
+    try:
+        new_centers, group_from_cube = growing_voronoi(new_centers, [config["BORDER_SIZE"]]*3 + [config["KINGDOM_SIZE"]]*3, subweights)
+    except ValueError:
+        raise CreationError
     # Split the border duchies into counties
     for ind in range(3):
         duchy = [k for k,v in group_from_cube.items() if v==ind]
@@ -249,13 +252,13 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
                 try:
                     dsplit = split_chunk(duchy, config["KINGDOM_SIZE_LIST"][dind][start_ind:])
                 except:
-                        raise CreationError
+                    raise CreationError
                 for county in dsplit:
                     cube_from_pid.extend(county)
     return cube_from_pid, terr_templates
     
 
-def create_triangle_continents(size_list, weight_from_cube = None, n_x=129, n_y=65, num_centers=40):
+def create_triangle_continents(size_list, config, weight_from_cube = None, n_x=129, n_y=65, num_centers=40):
     """Create len(size_list) continents with size_list kingdoms. (Currently ordered from smallest to largest.)
     Uses the standard triangle-border system, which requires size_list to have elements between 3 and 5."""
     assert max(size_list) <= 3
@@ -273,7 +276,7 @@ def create_triangle_continents(size_list, weight_from_cube = None, n_x=129, n_y=
             print(ind)
             subweights = {k:v for k,v in weight_from_cube.items() if any([k in chunks[cid].members for cid in candidates[ind][0]])}
             try:
-                continent, terr_template = create_triangular_continent(subweights, chunks, candidates[ind])
+                continent, terr_template = create_triangular_continent(subweights, chunks, candidates[ind], config)
                 continents.append(continent)
                 terr_templates.append(terr_template)
             except CreationError:
@@ -307,20 +310,37 @@ def assign_terrain_continent(cube_from_pid, templates):
     return terr_from_cube
 
 
-def arrange_triangle_continents(continents):
+def arrange_inner_sea(continents, sea_center, angles=[2,4,0]):
     """Given three continents, arrange them to have straits around a central inner sea.
     Also computes wastelands."""
     assert len(continents) == 3
-    # TODO: Actually move things around. This is banking on the fact that with the 1945 seed the continents don't overlap.
-    return continents
+    moved_continents = {}
+    longest_dim = 0
+    for ind,continent in enumerate(continents):
+        ac = Area(ind, continent.keys())  # Area has unordered membership, which is why we have to construct the dict again later. Continent should probably be a Tile (old code w/ ordered membership).
+        off1 = ac.calc_average()
+        ac.rectify()
+        ac.calc_boundary()
+        ac.calc_bounding_hex()
+        longest_dim = max(longest_dim, ac.max_x-ac.min_x, ac.max_y-ac.min_y, ac.max_z-ac.min_z)
+        off2, rot = ac.best_corner(angles[ind])
+        moved_continents.append({k.sub(off1).rotate_right(rot).sub(off2).add(sea_center):v for k,v in continent.items()})
+    return moved_continents
+
+def arrange_mediterranean(continents):
+    """Given two continents, arrange them to have straits around a central inner sea. Because of how bounding boxes work, might have to be north/south? :/"""
+    assert len(continents) == 2
+    raise NotImplementedError
 
 
 def create_data(config):
     """The main function that calls all the other functions in order. 
     The resulting data structure should be enough to make the mod for any particular game."""
     random.seed(config.get("seed", 1945))
-    continents, terr_templates = create_triangle_continents(config.get("size_list", [3,3,3]), n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", 40))
-    continents = arrange_triangle_continents(continents)
+    continents, terr_templates = create_triangle_continents(config.get("size_list", [3,3,3]), config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", 40))
+    m_x = config["n_x"]//2
+    m_y = (config["n_y"]-config["n_x"])//2
+    continents = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
     cube_from_pid = {}
     land_cubes = set()
     sea_cubes = set()
@@ -336,32 +356,41 @@ def create_data(config):
     terr_from_cube.update({k:"ocean" for k in sea_cubes})
     height_from_cube = {k: 16 for k in sea_cubes}
     height_from_cube.update({k: 20 for k in land_cubes})
+    return continents, terr_from_cube, height_from_cube
 
 
 
 if __name__ == "__main__":
     with open("config.yaml", 'r') as inf:
         config = yaml.load(inf, yaml.Loader)
+    buffer = {}
     for k,v in config.items():  # We should compute the sizes of the templates here rather than making the user do it.
         if "SIZE_LIST" in k:
             sumk = k.replace("SIZE_LIST", "SIZE")
             if sumk not in config:
                 if type(v[0]) is list:
-                    config[sumk] = [sum(x) for x in v]
+                    buffer[sumk] = [sum(x) for x in v]
                 else:
-                    config[sumk] = sum(v)
+                    buffer[sumk] = sum(v)
+    config.update(buffer)
     random.seed(config.get("seed", 1945))
     config["n_x"] = config.get("n_x", 129)
     config["n_y"] = config.get("n_y", 65)
+
     rgb_from_ijk = {cub.tuple():(random.randint(0,64), random.randint(0,64), random.randint(0,64)) for cub in valid_cubes(config["n_x"],config["n_y"])}
     max_x = config.get("box_width", 10)*(config["n_x"]*3-3)
     max_y = config.get("box_height", 17)*(config["n_y"]*2-2)
-    continents = create_triangle_continents(config.get("size_list", [3,3,3]), n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", 40))
+    continents, terr_from_cube, height_from_cube = create_data(config)
     for cind, cont in enumerate(continents):
-        print(cind, len(cont), cont[0], cont[-1])
         for pid, k in enumerate(cont):
             color_tuple = (62*(cind+1),min(255,pid),0)
             rgb_from_ijk[k.tuple()] = color_tuple[cind:] + color_tuple[:cind]
     img = create_hex_map(rgb_from_ijk, max_x,max_y,config["n_x"],config["n_y"])
     img.show()
     img.save("continent_test.png")
+    with open("rgb_from_ijk.yaml", 'w') as outf:
+        outf.write(yaml.dump(rgb_from_ijk))
+    with open("terr_from_cube.yaml", 'w') as outf:
+        outf.write(yaml.dump(terr_from_cube))
+    with open("height_from_cube.yaml", 'w') as outf:
+        outf.write(yaml.dump(height_from_cube))

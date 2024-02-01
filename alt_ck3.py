@@ -90,7 +90,10 @@ class CK3Map:
     def create_terrain_masks(self, terr_from_cube):
         """Creates all the terrain masks; just fills each cube."""
         raise NotImplementedError
-
+    
+    def create_rivers(self):
+        """Determine which rivers are major rivers and create rivers.png"""
+        raise NotImplementedError
 
 def create_terrain_file(file_dir, terr_from_pid):
     """Writes out common/province_terrain."""
