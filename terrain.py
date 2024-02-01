@@ -62,7 +62,7 @@ HOI4Terrain_from_BaseTerrain = {
     BaseTerrain.plains: HOI4Terrain.plains,
     BaseTerrain.farmlands: HOI4Terrain.urban,
     BaseTerrain.hills: HOI4Terrain.hills,
-    BaseTerrain.mountains: HOI4Terrain.mountains,
+    BaseTerrain.mountains: HOI4Terrain.mountain,
     BaseTerrain.forest: HOI4Terrain.forest,
     BaseTerrain.desert: HOI4Terrain.desert,
     BaseTerrain.marsh: HOI4Terrain.marsh,

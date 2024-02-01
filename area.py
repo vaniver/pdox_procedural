@@ -99,7 +99,7 @@ class Area:
             return NotImplementedError
         
     def best_corner(self, angle):
-        if len(self.bounary) == 0:
+        if len(self.boundary) == 0:
             self.calc_boundary()
         cdist = [self.min_dist(el) for el in self.corners()]
         corner_idx = cdist.index(max(cdist))
@@ -128,7 +128,7 @@ class Area:
             total_x += member.x
             total_y += member.y
         avg_x = total_x // len(self.members)
-        avg_y = total_x // len(self.members)
+        avg_y = total_y // len(self.members)
         return Cube(avg_x, avg_y, -avg_x-avg_y)
 
     def rectify(self, other=None):

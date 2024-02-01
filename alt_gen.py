@@ -289,13 +289,20 @@ def create_triangle_continents(size_list, config, weight_from_cube = None, n_x=1
     return continents, terr_templates
 
 
+def assign_sea_zones(sea_cubes):
+    return None
+
+
 def assign_terrain_subregion(region, template, rough="forest"):
     """Assign terrain to the region according to the template."""
     # TODO: treat farmland right
     terr_from_cube = {}
-    random.shuffle(template)
+    template_list = []
+    for k,v in template.items():
+        template_list.extend([k] * v)
+    random.shuffle(template_list)
     for ind, cube in enumerate(region.values()):
-        terr_from_cube[cube] = BaseTerrain[rough] if template[ind] == "rough" else BaseTerrain[template[ind]]
+        terr_from_cube[cube] = BaseTerrain[rough] if template_list[ind] == "rough" else BaseTerrain[template_list[ind]]
     return terr_from_cube
 
 def assign_terrain_continent(cube_from_pid, templates):
@@ -314,17 +321,19 @@ def arrange_inner_sea(continents, sea_center, angles=[2,4,0]):
     """Given three continents, arrange them to have straits around a central inner sea.
     Also computes wastelands."""
     assert len(continents) == 3
-    moved_continents = {}
+    moved_continents = []
     longest_dim = 0
+    offs = [Cube(0,0,0),Cube(1,-1,0),Cube(-1,0,1)]  # These are hardcoded for the 1945 seed.
     for ind,continent in enumerate(continents):
-        ac = Area(ind, continent.keys())  # Area has unordered membership, which is why we have to construct the dict again later. Continent should probably be a Tile (old code w/ ordered membership).
+        ac = Area(ind, continent)  # Area has unordered membership, which is why we have to construct the dict again later. Continent should probably be a Tile (old code w/ ordered membership).
         off1 = ac.calc_average()
         ac.rectify()
         ac.calc_boundary()
         ac.calc_bounding_hex()
         longest_dim = max(longest_dim, ac.max_x-ac.min_x, ac.max_y-ac.min_y, ac.max_z-ac.min_z)
         off2, rot = ac.best_corner(angles[ind])
-        moved_continents.append({k.sub(off1).rotate_right(rot).sub(off2).add(sea_center):v for k,v in continent.items()})
+        moved_continents.append([k.sub(off1).rotate_right(rot+3).sub(off2).add(sea_center).add(offs[ind]) for k in continent])
+    # TODO: Iteratively move them closer to each other until the strait situation is good.
     return moved_continents
 
 def arrange_mediterranean(continents):
@@ -339,24 +348,25 @@ def create_data(config):
     random.seed(config.get("seed", 1945))
     continents, terr_templates = create_triangle_continents(config.get("size_list", [3,3,3]), config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", 40))
     m_x = config["n_x"]//2
-    m_y = (config["n_y"]-config["n_x"])//2
+    m_y = -(config["n_y"]+config["n_x"]//2)//2
     continents = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
-    cube_from_pid = {}
+    pid_from_cube = {}
     land_cubes = set()
     sea_cubes = set()
     last_pid = 0
     terr_from_cube = {}
     for cind, continent in enumerate(continents):
-        for pid, cube in continent.items():
-            cube_from_pid[pid + last_pid] = cube
-        land_cubes = land_cubes.union(continent.values())
+        for pid, cube in enumerate(continent):
+            pid_from_cube[cube] = pid + last_pid
+        land_cubes = land_cubes.union(continent)
         last_pid += len(continent)
-        terr_from_cube.update(assign_terrain_continent(continent, terr_templates[cind]))
+        terr_from_cube.update(assign_terrain_continent({v:k for k,v in pid_from_cube.items() if k in continent}, terr_templates[cind]))
     sea_cubes = set(valid_cubes(config["n_x"], config["n_y"])) - land_cubes
+    sid_from_cube = assign_sea_zones(sea_cubes)
     terr_from_cube.update({k:"ocean" for k in sea_cubes})
     height_from_cube = {k: 16 for k in sea_cubes}
     height_from_cube.update({k: 20 for k in land_cubes})
-    return continents, terr_from_cube, height_from_cube
+    return continents, pid_from_cube, terr_from_cube, height_from_cube
 
 
 
@@ -368,8 +378,9 @@ if __name__ == "__main__":
         if "SIZE_LIST" in k:
             sumk = k.replace("SIZE_LIST", "SIZE")
             if sumk not in config:
-                if type(v[0]) is list:
-                    buffer[sumk] = [sum(x) for x in v]
+                if isinstance(v[0],list):
+                    buffer[k.replace("SIZE_LIST", "DUCHY_LIST")] = [sum(x) for x in v]
+                    buffer[sumk] = sum([sum(x) for x in v])
                 else:
                     buffer[sumk] = sum(v)
     config.update(buffer)
@@ -380,12 +391,12 @@ if __name__ == "__main__":
     rgb_from_ijk = {cub.tuple():(random.randint(0,64), random.randint(0,64), random.randint(0,64)) for cub in valid_cubes(config["n_x"],config["n_y"])}
     max_x = config.get("box_width", 10)*(config["n_x"]*3-3)
     max_y = config.get("box_height", 17)*(config["n_y"]*2-2)
-    continents, terr_from_cube, height_from_cube = create_data(config)
+    continents, cube_from_pid, terr_from_cube, height_from_cube = create_data(config)
     for cind, cont in enumerate(continents):
         for pid, k in enumerate(cont):
             color_tuple = (62*(cind+1),min(255,pid),0)
             rgb_from_ijk[k.tuple()] = color_tuple[cind:] + color_tuple[:cind]
-    img = create_hex_map(rgb_from_ijk, max_x,max_y,config["n_x"],config["n_y"])
+    img = create_hex_map(rgb_from_ijk, max_x,max_y,n_x=config["n_x"],n_y=config["n_y"])
     img.show()
     img.save("continent_test.png")
     with open("rgb_from_ijk.yaml", 'w') as outf:
