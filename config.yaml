@@ -1,3 +1,33 @@
+MOD_NAME: "testmod"
+MOD_DISPLAY_NAME: "testing_worldgen"
+MOD_OUTPUTS:
+- "CK3"
+BASE_CK3_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Crusader Kings III\\game"
+CONTINENT_LISTS:
+- - "e_islam"
+  - "k_egypt"
+  - "k_yemen"
+  - "k_syria"
+  - "c_mecca"
+  - "b_bahrain"
+  - "b_najd"
+  - "b_shammar"
+- - "e_europe"
+  - "k_east_francia"
+  - "k_france"
+  - "k_bavaria"
+  - "c_latium"
+  - "b_alsace"
+  - "b_toscana"
+  - "b_genoa"
+- - "e_eeurope"
+  - "k_norway"
+  - "k_burgundy"
+  - "k_hungary"
+  - "c_kiev"
+  - "b_silesia"
+  - "b_bohemia"
+  - "b_amdo"
 BORDER_SIZE_LIST:
 - 4
 - 4

@@ -131,11 +131,11 @@ def closest_xy(fr, to, box_height, box_width, shrinkage=2):
     # I'm just going to do the 12-way splitting.
     if to.x > fr.x:  # ne wedge, ne line, e wedge, se line, se wedge
         if to.y == fr.y:  # ne line
-            return (start_x + 3*box_width // 2 - shrinkage, start_y - box_height // 2)
+            return (start_x + 3 * box_width // 2 - shrinkage, start_y - box_height // 2)
         elif to.z == fr.z: # se line
-            return (start_x + 3*box_width // 2- shrinkage, start_y + box_height // 2)
+            return (start_x + 3 * box_width // 2- shrinkage, start_y + box_height // 2)
         elif to.y < fr.y and to.z < fr.z: # e wedge
-            return (start_x + 2*box_width - shrinkage, start_y)
+            return (start_x + 2 * box_width - shrinkage, start_y)
         elif to.y < fr.y and to.z > fr.z: # se wedge
             return (start_x + box_width - shrinkage, start_y + box_height - shrinkage)
         else: # ne wedge
@@ -147,11 +147,11 @@ def closest_xy(fr, to, box_height, box_width, shrinkage=2):
             return (start_x, start_y + box_height - shrinkage)
     else:  # nw wedge, nw line, w wedge, sw line, sw wedge
         if to.y == fr.y:  # sw line
-            return (start_x - 3*box_width // 2 + shrinkage, start_y + box_height // 2)
+            return (start_x - 3 * box_width // 2 + shrinkage, start_y + box_height // 2)
         elif to.z == fr.z: # nw line
-            return (start_x - 3*box_width // 2 + shrinkage, start_y - box_height // 2)
+            return (start_x - 3 * box_width // 2 + shrinkage, start_y - box_height // 2)
         elif to.y > fr.y and to.z > fr.z: # w wedge
-            return (start_x - 2*box_width + shrinkage, start_y)
+            return (start_x - 2 * box_width + shrinkage, start_y)
         elif to.y < fr.y and to.z > fr.z: # sw wedge
             return (start_x - box_width + shrinkage, start_y + box_height - shrinkage)
         else: # nw wedge

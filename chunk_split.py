@@ -11,13 +11,35 @@ class SplitChunkMaxIterationExceeded(Exception):
 
 def check_contiguous(chunk):
     """ Given a chunk (list of cubes), see if all cubes on the list can be reached from each other."""
-    visited = set([chunk[0]])
-    to_visit = set([cn for cn in chunk[0].neighbors() if cn in chunk])
+    visited = {chunk[0]}
+    to_visit = {cn for cn in chunk[0].neighbors() if cn in chunk}
     while len(to_visit) > 0:
         visiting = to_visit.pop()
         visited.add(visiting)
         to_visit = to_visit.union([cn for cn in visiting.neighbors() if cn in chunk and cn not in visited])
     return len(visited) == len(chunk)
+
+
+def find_contiguous(cubes):
+    """ Given an iterable of cubes, return a list of lists of cubes, each of which can be reached from each other."""
+    unvisited = {x for x in cubes}
+    result = []
+    to_visit = set()
+    visited = set()
+    while len(unvisited) > 0:
+        if len(to_visit) == 0:
+            visiting = unvisited.pop()
+            result.append([visiting])
+            to_visit = {cn for cn in visiting.neighbors() if cn in unvisited}
+            visited.add(visiting)
+        else:
+            visiting = to_visit.pop()
+            unvisited.remove(visiting)
+            visited.add(visiting)
+            to_visit.update([cn for cn in visiting.neighbors() if cn in unvisited])
+            result[-1].append(visiting)
+    assert sum([len(x) for x in result]) == len(cubes)
+    return result
 
 
 def make_chunk(size, seed=0):

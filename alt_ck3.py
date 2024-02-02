@@ -55,6 +55,7 @@ class CK3Map:
     def __init__(self, file_dir, max_x, max_y, n_x, n_y):
         """Creates a map of size max_x * max_y, which is n_x hexes wide and n_y hexes tall."""
         self.file_dir = file_dir
+        os.makedirs(os.path.join(file_dir, "map_data"), exist_ok=True)
         self.max_x = max_x
         self.max_y = max_y
         self.n_x = n_x
@@ -144,17 +145,22 @@ def create_coa(file_dir, base_dir, custom_dir, title_list):
             with open(os.path.join(src_dir, "01_landed_titles.txt"), 'r') as inf:
                 brackets = 0
                 title_name = ""
+                buffer = ""
                 for line in inf.readlines():
                     line = line.split("#")[0]  # Drop all comments
                     brackets += line.count("{")
-                    if brackets == 1:
+                    if len(title_name) == 0 and brackets == 1:
                         title_name = line.split("=")[0].strip()
                     if title_name in title_list:
-                        outf.write(line)
+                        buffer += line
                     brackets -= line.count("}")
                     if brackets == 0 and len(title_name) > 0:
-                        title_list.remove(title_name)
+                        if title_name in title_list:
+                            title_list.remove(title_name)
+                            buffer += line
+                            outf.write(buffer)
                         title_name = ""
+                        buffer = ""
     print(f"After processing coats of arms, there were {len(title_list)} titles without coas.")
 
 
@@ -178,7 +184,7 @@ def create_geographical_regions(file_dir, regions, all_material_types = None, no
         "steppe": "0 255 255"
     }
     os.makedirs(os.path.join(file_dir, "map_data", "geographical_regions"), exist_ok=True)
-    with open(os.path.join(file_dir, "map_data", "geographical_regions","geographical_region.txt"),'w') as outf:
+    with open(os.path.join(file_dir, "map_data", "geographical_regions", "geographical_region.txt"),'w') as outf:
         all_regions = []
         for region in regions:
             region_title = "world_" + region.title.split("_")[1]
@@ -198,7 +204,9 @@ def create_geographical_regions(file_dir, regions, all_material_types = None, no
             outf.write("hunt_animal_"+animal+"_region = {\n\tregions = {\n\t\t"+all_regions+"\n\t}\n}\n")
         for animal in no_animal_types:
             outf.write("hunt_animal_"+animal+"_region = {\n\tregions = {\n\t\t\n\t}\n}\n")
-            
+    with open(os.path.join(file_dir, "map_data", "island_region.txt"),'w') as outf:
+        # TODO: figuring out islands will depend on chunking the land elsewhere. For this basic one, we're fine.
+        outf.write("\n")
 
 
 def create_landed_titles(file_dir, pid_from_title, regions, special_titles=None):
@@ -224,7 +232,10 @@ def create_landed_titles(file_dir, pid_from_title, regions, special_titles=None)
                     outf.write("\t\t\tcolor = { " + " ".join(duchy.color) + " }\n")
                     outf.write("\t\t\tcapital = " + duchy.capital()+"\n\n")
                     for county in duchy.children:
-                        outf.write("\t\t\t" + county.title + " = {\n")
+                        try:
+                            outf.write("\t\t\t" + county.title + " = {\n")
+                        except:
+                            print(county)
                         outf.write("\t\t\t\tcolor = { " + " ".join(county.color) + " }\n")
                         for barony in county.children:
                             outf.write("\t\t\t\t" + barony + " = {\n")
@@ -348,15 +359,26 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
         f.write(shared)
 
 
-def create_mod(file_dir, config, pid_from_cube, terr_from_cube, rgb_from_pid, height_from_cube, pid_from_title, name_from_pid, region_tree):
+def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, pid_from_title, name_from_pid, region_trees):
     """Creates the CK3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
-    create_dot_mod(file_dir=file_dir)
+    create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
     # make common
-    create_coa(file_dir, base_dir=os.path.join(config["BASE_DIR"], "common", "coat_of_arms", "coat_of_arms"), custom_dir=config.get("COA_DIR", None), title_list=region_tree.all_ck3_titles("CK3"))
-    create_landed_titles(file_dir, pid_from_title, region_tree.children)  # TODO: add special_titles
+    all_titles = []
+    for region_tree in region_trees:
+        all_titles.extend(region_tree.all_ck3_titles())
+    print(f"there are {len(all_titles)} titles.")
+    create_coa(file_dir, base_dir=os.path.join(config["BASE_CK3_DIR"], "common", "coat_of_arms", "coat_of_arms"), custom_dir=config.get("COA_DIR", None), title_list=all_titles)
+    create_landed_titles(file_dir, pid_from_title, region_trees)  # TODO: add special_titles
+    create_terrain_file(file_dir=file_dir, terr_from_pid=terr_from_pid)
     # make history
     # Make map
     map = CK3Map(file_dir,config["max_x"], config["max_y"], config["n_x"], config["n_y"])
+    print("Made map")
     map.create_provinces(rgb_from_pid,pid_from_cube, name_from_pid)
-    create_geographical_regions(file_dir, region_tree.children)
+    print("Made provinces")
+    map.create_heightmap(height_from_cube=height_from_cube)
+    print("Made heightmap")
+    # map.create_terrain_masks
+    create_geographical_regions(file_dir, region_trees)
+    print("Made geographical regions")
