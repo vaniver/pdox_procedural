@@ -437,7 +437,7 @@ def create_data(config):
     terr_from_cube.update({k:BaseTerrain.ocean for k in sea_cubes})
     height_from_cube = {k: 16 for k in sea_cubes}
     height_from_cube.update({k: 20 for k in land_cubes})
-    return continents, pid_from_cube, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid
+    return continents, pid_from_cube, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, impassable
 
 
 
@@ -461,7 +461,7 @@ if __name__ == "__main__":
     config["max_x"] = config.get("max_x", config.get("box_width", 10)*(config["n_x"]*3-3))
     config["max_y"] = config.get("max_y", config.get("box_height", 17)*(config["n_y"]*2-2))
 
-    continents, pid_from_cube, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid = create_data(config)
+    continents, pid_from_cube, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, impassable = create_data(config)
     rgb_from_pid = create_colors(pid_from_cube)
     if "CK3" in config["MOD_OUTPUTS"]:
         alt_ck3.create_mod(
@@ -475,6 +475,7 @@ if __name__ == "__main__":
             pid_from_title=pid_from_title,
             name_from_pid=name_from_pid,
             region_trees=region_trees,
+            impassable=impassable,
         )
 
     # rgb_from_ijk = {cub.tuple():(random.randint(0,64), random.randint(0,64), random.randint(0,64)) for cub in valid_cubes(config["n_x"],config["n_y"])}

@@ -320,6 +320,17 @@ def strip_base_files(file_dir, src_dir, subpaths):
                 outf.write(file_buffer)
 
 
+def create_default_map(file_dir, impassable, sea_min, sea_max):
+    """Writes out default.map."""
+    os.makedirs(os.path.join(file_dir, "map_data"), exist_ok=True)
+    with open(os.path.join(file_dir, "map_data", "default.map"), 'w', encoding='utf-8') as outf:
+        outf.write("""definitions = "definition.csv"\nprovinces = "provinces.png"\n#positions = "positions.txt"\nrivers = "rivers.png"\n#terrain_definition = "terrain.txt"\ntopology = "heightmap.heightmap"\n#tree_definition = "trees.bmp"\ncontinent = "continent.txt"\nadjacencies = "adjacencies.csv"\n#climate = "climate.txt"\nisland_region = "island_region.txt"\nseasons = "seasons.txt"\n\n""")
+        outf.write("sea_zones = RANGE { "+str(sea_min)+" "+str(sea_max)+" }\n\n")
+        for impid in impassable:
+            outf.write("impassable_mountains = LIST { "+str(impid)+" }\n")
+        outf.write("\n")
+
+
 def create_dot_mod(file_dir, mod_name, mod_disp_name):
     """Creates the basic mod structure.
     -common
@@ -330,7 +341,6 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     --travel
     ---point_of_interest_types
     -events
-    --TODO: catch em' all
     -history
     --characters
     --cultures
@@ -359,7 +369,7 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
         f.write(shared)
 
 
-def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, pid_from_title, name_from_pid, region_trees):
+def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, pid_from_title, name_from_pid, region_trees, impassable):
     """Creates the CK3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
@@ -374,11 +384,13 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     # make history
     # Make map
     map = CK3Map(file_dir,config["max_x"], config["max_y"], config["n_x"], config["n_y"])
-    print("Made map")
     map.create_provinces(rgb_from_pid,pid_from_cube, name_from_pid)
-    print("Made provinces")
     map.create_heightmap(height_from_cube=height_from_cube)
-    print("Made heightmap")
     # map.create_terrain_masks
     create_geographical_regions(file_dir, region_trees)
-    print("Made geographical regions")
+    if len(impassable) > 0:
+        sea_min = max(impassable) + 1
+    else:
+        sea_min = max(terr_from_pid.values()) + 1  # This is because we never added the sea pids to it.
+    sea_max = max(pid_from_cube.values())
+    create_default_map(file_dir, impassable, sea_min, sea_max)
