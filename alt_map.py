@@ -1,14 +1,14 @@
 # This file is for map-rendering code / file-IO that's game-independent.
-import os
 import PIL.Image
 
-from cube import Cube
+from cube import Cube, Edge, Vertex
 
-def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, mode='RGB', default="black", n_x=235, n_y=72, palette_loc=None):
-    """Draw a hex map with size (max_x,max_y) with colors from rgb_from_ijk.
+def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, rgb_from_vertex={}, mode='RGB', default="black", n_x=235, n_y=72, palette_loc=None):
+    """Draw a hex map with size (max_x,max_y) with colors from rgb_from_ijk. mode determines the image type, and also the correct format for rgb (which should be shared by everything).
     There will be n_x hexes horizontally and n_y hexes vertically. 
     n_x will be assumed odd and n_y is assumed even (to have split hexes in all corners).
-    rgb_from_edge should be a dictionary from (cube,cube) tuples to (rgb, thickness) tuples."""
+    rgb_from_edge should be a dictionary from edge to (rgb, thickness) tuples; also, please don't use edges near the map edge.
+    rgb_from_vertex should be a dictionary from vertex to rgb."""
     # We have three different positions to track:
     #  - i,j,k of the hex
     #  - hor, ver of the hex: (0,0) to (n_x,n_y), where hor=x and ver=z-y
@@ -22,13 +22,12 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, mode='RGB', def
     box_width = max_x // (n_x * 3 - 3)   # TODO: make this divide exactly?
     # We want the edges between hexes to be always uniform. (Later we'll have an option to save this hex-by-hex.)
     # This is more awkward than trusting the triangle function but what are you gonna do
-    river_border = [x*box_height//box_width for x in range(box_width)]
+    river_border = [x*box_height//box_width for x in range(box_width)] + [box_height]
     img = PIL.Image.new(mode, (max_x, max_y), default)
     if palette_loc is not None:
         with open(palette_loc, "r") as f:
             img.putpalette([int(s) for s in f.read().split(',')])
     pix = img.load()
-    # try:
     for hor in range(n_x):
         # Calculate starting position
         hor2 = hor//2
@@ -112,10 +111,37 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, mode='RGB', def
                     pix[start_x + box_width + x,start_y + y] = rgb
             # Move to the next one
             current = current.add(Cube(0,-1,1)) # Move down
-    for (k1, k2), (rgb, thickness) in rgb_from_edge.items():
-        if k1.sub(k2).mag() != 1:
-            continue
-        raise NotImplementedError
+    for edge, (rgb, thickness) in rgb_from_edge.items():
+        # The edges that get painted are the south (0), southeast (1), and northeast edges (2).
+        # This currently doesn't check that the edges are actually on-map, which it probably should? These are not supposed to be populated near the edge.
+        hor = edge.cube.x
+        ver = - edge.cube.y - hor // 2 - hor % 2
+        start_x = (3 * hor - 2) * box_width
+        start_y = (2 * ver - 1 + (hor % 2)) * box_height
+        y_down = thickness // 2
+        y_up = thickness - y_down
+        # TODO: Make it so edges never try to paint the same pixels?
+        # TODO: Try to ensure no four-corners situations. Normally caused by painting rot=2 before rot=1, so maybe we should order by rot?
+        if edge.rot == 0:
+            # If thickness == 1 this should just be the southernmost pixels of the hex.
+            for x in range(start_x + box_width, start_x + box_width * 3 + 1):  # The +1 is because the right-most pixel is generally actually painted by the triangles; but with an impassable mountain / major river, we want to block the connection.
+                for y in range(start_y + box_height * 2 - y_down - 1, start_y + box_height * 2 + y_up - 1):
+                    pix[x, y] = rgb
+        elif edge.rot == 1:
+            for x in range(box_width):
+                for y in range(start_y + max(box_height - 1, box_height * 2 - river_border[x + 1] - y_up), start_y + box_height * 2 - river_border[x] + y_down):  # up and down are flipped to better match the borders. Note also there can be a four-corners situation here, so box_height-1.
+                    pix[start_x + box_width * 3 + x, y] = rgb
+        elif edge.rot == 2:
+            for x in range(box_width):
+                for y in range(start_y + river_border[x] - y_down, start_y + min(box_height,river_border[x + 1] + y_up)):
+                    pix[start_x + box_width * 3 + x, y] = rgb
+    for vertex, rgb in rgb_from_vertex.items():
+        # The vertices that get painted are the west (-1), center (0), and eastern vertices (1).
+        hor = vertex.cube.x
+        ver = - vertex.cube.y - hor // 2 - hor % 2
+        start_x = (3 * hor - 2) * box_width
+        start_y = (2 * ver - 1 + (hor % 2)) * box_height - 1  # This is to line it up with the southernmost edge instead of the northernmost edge.
+        pix[start_x + (1 + vertex.rot) * 2 * box_width, start_y + box_height] = rgb
     return img
 
 def closest_xy(fr, to, box_height, box_width, shrinkage=2):

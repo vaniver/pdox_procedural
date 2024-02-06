@@ -3,10 +3,10 @@ import os
 import random
 import yaml
 
-from alt_map import create_hex_map, valid_cubes
+from alt_map import valid_cubes
 from area import Area
 from chunk_split import check_contiguous, find_contiguous, split_chunk, SplitChunkMaxIterationExceeded
-from cube import Cube
+from cube import *
 from terrain import BaseTerrain
 from voronoi import growing_voronoi, voronoi
 
@@ -404,7 +404,7 @@ def arrange_inner_sea(continents, sea_center, angles=[2,4,0]):
     assert len(continents) == 3
     moved_continents = []
     longest_dim = 0
-    offs = [Cube(0,0,0),Cube(1,-1,0),Cube(-1,0,1)]  # These are hardcoded for the 1945 seed.
+    offs = [Cube(0,0,0),Cube(0,0,0),Cube(-1,0,1)]  # These are hardcoded for the 1945 seed.
     for ind,continent in enumerate(continents):
         ac = Area(ind, continent)  # Area has unordered membership, which is why we have to construct the dict again later. Continent should probably be a Tile (old code w/ ordered membership).
         off1 = ac.calc_average()
@@ -469,6 +469,7 @@ def create_data(config):
     non_land = sorted(find_contiguous(set(valid_cubes(config["n_x"], config["n_y"])) - land_cubes), key=len)
     sea_cubes = set(non_land.pop(-1))  # The largest non-land chunk is the ocean.
     impassable = []
+    height_from_cube = {}
     for iind, nlg in enumerate(non_land):
         # TODO: do something sensible with terrain assignments.
         impassable.append(last_pid)
@@ -478,6 +479,7 @@ def create_data(config):
             pid_from_cube[nlc] = last_pid
             terr_from_cube[nlc] = BaseTerrain.mountains
             terr_from_pid[last_pid] = BaseTerrain.mountains
+            height_from_cube[nlc] = 30
         last_pid += 1
     sid_from_cube = assign_sea_zones(sea_cubes, config)
     pid_from_cube.update({k:v+last_pid for k,v in sid_from_cube.items()})
@@ -487,9 +489,12 @@ def create_data(config):
         pid_from_title[f"s_{sid}"] = pid
         name_from_pid[pid] = f"s_{sid}"
     terr_from_cube.update({k:BaseTerrain.ocean for k in sea_cubes})
-    height_from_cube = {k: 16 for k in sea_cubes}
+    height_from_cube.update({k: 16 for k in sea_cubes})
     height_from_cube.update({k: 20 for k in land_cubes})
-    return continents, pid_from_cube, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, impassable
+    # Create rivers
+    river_edges = {Edge(Cube(3,-2,-1),0): (4,1)}
+    river_vertices = {Vertex(Cube(2,-2,0),1): 0}
+    return continents, pid_from_cube, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, impassable, river_edges, river_vertices
 
 
 
@@ -513,7 +518,7 @@ if __name__ == "__main__":
     config["max_x"] = config.get("max_x", config.get("box_width", 10)*(config["n_x"]*3-3))
     config["max_y"] = config.get("max_y", config.get("box_height", 17)*(config["n_y"]*2-2))
 
-    continents, pid_from_cube, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, impassable = create_data(config)
+    continents, pid_from_cube, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, impassable, river_edges, river_vertices = create_data(config)
     cultures, religions = assemble_culrels(region_trees=region_trees)  # Not obvious this should be here instead of just derived later?
     rgb_from_pid = create_colors(pid_from_cube)
     if "CK3" in config["MOD_OUTPUTS"]:
@@ -531,6 +536,8 @@ if __name__ == "__main__":
             cultures=cultures,
             religions=religions,
             impassable=impassable,
+            river_edges=river_edges,
+            river_vertices=river_vertices,
         )
 
     # rgb_from_ijk = {cub.tuple():(random.randint(0,64), random.randint(0,64), random.randint(0,64)) for cub in valid_cubes(config["n_x"],config["n_y"])}

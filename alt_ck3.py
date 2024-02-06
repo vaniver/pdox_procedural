@@ -78,7 +78,7 @@ class CK3Map:
 
 
     def create_heightmap(self, height_from_cube):
-        """Placeholder that just uses land/sea to generate a simple heightmap."""
+        """Uses height_from_cube to generate a simple heightmap."""
         rgb_from_ijk = {k.tuple(): v for k,v in height_from_cube.items()}
         img = create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, mode='L', default="white", n_x=self.n_x, n_y=self.n_y)
         img.save(os.path.join(self.file_dir, "map_data", "heightmap.png"))
@@ -94,9 +94,10 @@ class CK3Map:
         """Creates all the terrain masks; just fills each cube."""
         raise NotImplementedError
     
-    def create_rivers(self):
-        """Determine which rivers are major rivers and create rivers.png"""
-        raise NotImplementedError
+    def create_rivers(self, river_background, river_edges, river_vertices, palette_loc="data/river_palette.txt"):
+        """Create rivers.png"""
+        img = create_hex_map(rgb_from_ijk=river_background, rgb_from_edge=river_edges, rgb_from_vertex=river_vertices, max_x=self.max_x, max_y=self.max_y, mode='P', palette_loc=palette_loc, default="white", n_x=self.n_x, n_y=self.n_y)
+        img.save(os.path.join(self.file_dir, "map_data", "rivers.png"))
 
 def create_terrain_file(file_dir, terr_from_pid):
     """Writes out common/province_terrain."""
@@ -472,7 +473,6 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
             # Somehow grab the appropriate region_tree
             if region.startswith("c") or region.startswith("b"):  # This is sort of a hack; I should figure out a better way to point to centers and borders.
                 region = "d" + region[1:]
-            print(region)
             region_tree_search = [y for y in [x.find_by_title(region) for x in region_trees] if y is not None]  # This feels super dumb
             if len(region_tree_search) == 0:  # This is a special title.
                 with open(os.path.join(file_dir, "history", "titles", region+".txt"),'w') as outf:
@@ -533,9 +533,6 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
     with open(os.path.join(file_dir, "common", "dynasty_houses", "00_dynasty_houses.txt"),'w') as outf:
         outf.write("\n")
 
-
-
-    
 
 def strip_base_files(file_dir, src_dir, subpaths):
     """There's a bunch of base game files that are necessary but contain _some_ hardcoded references to provinces.
@@ -649,7 +646,7 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
         f.write(shared)
 
 
-def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, pid_from_title, name_from_pid, region_trees, cultures, religions, impassable):
+def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, pid_from_title, name_from_pid, region_trees, cultures, religions, impassable, river_edges, river_vertices):
     """Creates the CK3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
@@ -663,10 +660,13 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     create_terrain_file(file_dir=file_dir, terr_from_pid=terr_from_pid)
     # make history
     create_history(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], config=config, region_trees=region_trees, cultures=cultures, pid_from_title=pid_from_title)
+    # Determine major rivers and impassable mountain boundaries (done here b/c it affects provinces also)
     # Make map
     map = CK3Map(file_dir,config["max_x"], config["max_y"], config["n_x"], config["n_y"])
     map.create_provinces(rgb_from_pid,pid_from_cube, name_from_pid)
     map.create_heightmap(height_from_cube=height_from_cube)
+    river_background = {k.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_cube.items()}
+    map.create_rivers(river_background, river_edges, river_vertices)
     # map.create_terrain_masks
     create_geographical_regions(file_dir, region_trees)
     if len(impassable) > 0:
