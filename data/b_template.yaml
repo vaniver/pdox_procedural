@@ -1,0 +1,60 @@
+baronies:
+  0: castle_holding
+  1: church_holding
+  4: castle_holding
+  6: city_holding
+  8: castle_holding
+  9: church_holding
+  12: castle_holding
+  14: city_holding
+  16: castle_holding
+  17: church_holding
+  20: castle_holding
+  22: city_holding
+chars:
+  minor1:
+    bd: 9YY.M.D
+    cid: 0
+    dynasty: 0
+  minor2:
+    bd: 9YY.M.D
+    cid: 1
+    dynasty: 1
+  minor3:
+    bd: 9YY.M.D
+    cid: 2
+    dynasty: 2
+  minor4:
+    bd: 9YY.M.D
+    cid: 3
+    dynasty: 3
+  minor5:
+    bd: 9YY.M.D
+    cid: 4
+    dynasty: 4
+  minor6:
+    bd: 9YY.M.D
+    cid: 5
+    dynasty: 5
+dynasties:
+  c_0: 0
+  c_1: 1
+  c_2: 2
+  c_3: 3
+  c_4: 4
+  c_5: 5
+titles:
+  c_0:
+    99Y.1.1: 0
+  c_1:
+    99Y.1.1: 1
+  c_2:
+    99Y.1.1: 2
+  c_3:
+    99Y.1.1: 3
+  c_4:
+    99Y.1.1: 4
+  c_5:
+    99Y.1.1: 5
+  d_0:
+    development_level: 5

@@ -1,0 +1,54 @@
+baronies:
+  0: castle_holding
+  1: church_holding
+  2: city_holding
+  3: castle_holding
+  4: church_holding
+  5: city_holding
+  7: castle_holding
+  8: church_holding
+  9: city_holding
+  12: castle_holding
+  13: church_holding
+  14: city_holding
+  17: castle_holding
+  18: church_holding
+  19: city_holding
+chars:
+  main:
+    bd: 970.M.D
+    cid: 0
+    dynasty: 0
+    stats_dict:
+      diplomacy: 4
+      intrigue: 4
+      learning: 4
+      martial: 4
+      stewardship: 4
+    trait_list:
+    - education_martial_4
+    - intellect_good_1
+  minor1:
+    bd: 96Y.M.D
+    cid: 1
+    dynasty: 1
+  minor2:
+    bd: 97Y.M.D
+    cid: 2
+    dynasty: 2
+dynasties:
+  c_2: 1
+  c_3: 2
+  d_0: 0
+titles:
+  c_0:
+    987.1.1: 0
+  c_1:
+    987.1.1: 0
+  c_2:
+    98Y.1.1: 1
+  c_3:
+    99Y.1.1: 2
+  d_0:
+    987.1.1: 0
+    development_level: 8

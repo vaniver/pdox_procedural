@@ -82,7 +82,42 @@ class RegionTree:
         if len(self.children) > 0 and isinstance(self.children[0], RegionTree):
             return self.children[0].capital()
         return ""
+    
+    def culrels(self):
+        if self.title[0] == "c":
+            return [(self.culture, self.religion)]
+        else:
+            culrel = [(self.culture, self.religion)]
+            for child in self.children:
+                culrel.extend(child.culrels())
+            return culrel
         
+    def culrelmap(self):
+        if self.title[0] == "c":
+            if self.culture is not None:
+                return {self.title: (self.culture, self.religion)}
+            else:
+                return {}
+        else:
+            culrelmap = {}
+            if self.culture is not None:
+                culrelmap[self.title] = (self.culture, self.religion)
+            for child in self.children:
+                culrelmap.update(child.culrelmap())
+            return culrelmap
+        
+    def find_by_title(self, title):
+        """Given a title, return the region_tree corresponding to that title (either self or a child, or a more remote descendant.)"""
+        if self.title == title:
+            return self
+        if self.title[0] == "c":
+            return None
+        for child in self.children:
+            f =  child.find_by_title(title)
+            if f is not None:
+                return f
+        return None
+
     @classmethod
     def from_csv(cls, filename):
         with open(filename) as inf:
@@ -108,6 +143,21 @@ class RegionTree:
                     result = current[depth]
                     break
         return result
+
+
+def assemble_culrels(region_trees):
+    """Create lists of cultures and religions that are present in region_trees, which is a list of RegionTrees."""
+    cultures = set()
+    religions = set()
+    for region_tree in region_trees:
+        culrel = region_tree.culrels()
+        cultures.update([x[0] for x in culrel])
+        religions.update([x[1] for x in culrel])
+    if None in cultures:
+        cultures.remove(None)
+    if None in religions:
+        religions.remove(None)
+    return cultures, religions
 
 
 def create_chunks(weight_from_cube, num_centers):
@@ -286,11 +336,13 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
         num_k = len(kingdoms)
         num_c = num_k - 2
         num_b = num_k * 2 - 3
-        assert len(empires) >= 1
-        assert len(centers) >= num_c
-        assert len(borders) >= num_b
+        assert len(empires) == 1
+        assert len(centers) == num_c
+        assert len(borders) == num_b  # Changed this from >= to == so that we can use CONTINENT_LISTS elsewhere to determine which characters to spawn. If we want to randomize them, we'll have to do it in making the config.
         region_tree = RegionTree.from_csv(os.path.join("data", empires[0])+".csv")
-        random.shuffle(borders)  # We might want to put in more borders and get more variance, but I don't think we want that for the others.
+        random.shuffle(kingdoms)
+        random.shuffle(centers)
+        random.shuffle(borders)
         for title in centers[:num_c] + borders[:num_b]:
             region_tree.children[0].children.append(RegionTree.from_csv(os.path.join("data", title)+".csv")) # The empires come with an interstitial kingdom to add all of these duchies to.
         for title in kingdoms:
@@ -462,6 +514,7 @@ if __name__ == "__main__":
     config["max_y"] = config.get("max_y", config.get("box_height", 17)*(config["n_y"]*2-2))
 
     continents, pid_from_cube, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, impassable = create_data(config)
+    cultures, religions = assemble_culrels(region_trees=region_trees)  # Not obvious this should be here instead of just derived later?
     rgb_from_pid = create_colors(pid_from_cube)
     if "CK3" in config["MOD_OUTPUTS"]:
         alt_ck3.create_mod(
@@ -475,6 +528,8 @@ if __name__ == "__main__":
             pid_from_title=pid_from_title,
             name_from_pid=name_from_pid,
             region_trees=region_trees,
+            cultures=cultures,
+            religions=religions,
             impassable=impassable,
         )
 

@@ -1,0 +1,234 @@
+baronies:
+  0: castle_holding
+  1: church_holding
+  2: city_holding
+  6: castle_holding
+  7: church_holding
+  8: city_holding
+  10: castle_holding
+  11: church_holding
+  12: city_holding
+  14: castle_holding
+  15: church_holding
+  16: city_holding
+  18: castle_holding
+  19: church_holding
+  20: city_holding
+  22: castle_holding
+  23: church_holding
+  24: city_holding
+  26: castle_holding
+  27: church_holding
+  28: city_holding
+  30: castle_holding
+  31: church_holding
+  32: city_holding
+  33: castle_holding
+  34: church_holding
+  35: city_holding
+  36: castle_holding
+  37: church_holding
+  38: city_holding
+  40: castle_holding
+  41: church_holding
+  42: city_holding
+  44: castle_holding
+  45: church_holding
+  46: city_holding
+  47: castle_holding
+  48: church_holding
+  49: city_holding
+  50: castle_holding
+  51: church_holding
+  52: city_holding
+  54: castle_holding
+  55: church_holding
+  56: city_holding
+  58: castle_holding
+  59: church_holding
+  60: city_holding
+chars:
+  minor1:
+    bd: 96Y.M.D
+    cid: 21
+    dynasty: 4
+    father: 20
+  minor1_father:
+    bd: 94Y.M.D
+    cid: 20
+    dd: 990.1.1
+    dynasty: 4
+  minor2:
+    bd: 97Y.M.D
+    cid: 30
+    dynasty: 3
+  minor3:
+    bd: 97Y.M.D
+    cid: 35
+    dynasty: 4
+  minor4:
+    bd: 97Y.M.D
+    cid: 40
+    dynasty: 5
+  minor5:
+    bd: 97Y.M.D
+    cid: 45
+    dynasty: 6
+  minor6:
+    bd: 97Y.M.D
+    cid: 50
+    dynasty: 7
+  minor7:
+    bd: 97Y.M.D
+    cid: 55
+    dynasty: 8
+  minor8:
+    bd: 97Y.M.D
+    cid: 60
+    dynasty: 9
+  minor9:
+    bd: 97Y.M.D
+    cid: 65
+    dynasty: 10
+  player:
+    bd: 980.M.D
+    cid: 2
+    dynasty: 0
+    father: 0
+    mother: 1
+    stats_dict:
+      diplomacy: 5
+      intrigue: 5
+      learning: 5
+      martial: 5
+      stewardship: 5
+    trait_list:
+    - education_martial_4
+    - ambitious
+    - blademaster_1
+  player_brother:
+    bd: 982.M.D
+    cid: 3
+    dynasty: 0
+    father: 0
+    mother: 1
+    stats_dict:
+      diplomacy: 3
+      intrigue: 3
+      learning: 3
+      martial: 3
+      stewardship: 3
+    trait_list:
+    - education_stewardship_3
+    - content
+  player_father:
+    bd: 940.M.D
+    cid: 0
+    dd: 999.12.31
+    dynasty: 0
+    spouse_date: 975.1.1
+    spouse_id: 1
+  player_mother:
+    bd: 948.M.D
+    cid: 1
+    female: true
+    spouse_date: 975.1.1
+    spouse_id: 0
+    stats_dict:
+      intrigue: 6
+    trait_list:
+    - education_intrigue_3
+  player_sister:
+    bd: 983.M.D
+    cid: 4
+    dynasty: 0
+    father: 0
+    female: true
+    mother: 1
+    stats_dict:
+      diplomacy: 3
+      intrigue: 3
+      learning: 3
+      martial: 3
+      stewardship: 3
+    trait_list:
+    - education_diplomacy_3
+    - gregarious
+  rival:
+    bd: 96Y.M.D
+    cid: 10
+    dynasty: 1
+    spouse_date: 985.1.1
+    spouse_id: 22
+    trait_list:
+    - physique_good_1
+    - shrewd
+  rival_wife:
+    bd: 96Y.M.D
+    cid: 22
+    dynasty: 4
+    father: 20
+    female: true
+    spouse_date: 985.1.1
+    spouse_id: 10
+dynasties:
+  c_10: 7
+  c_13: 8
+  c_14: 9
+  c_15: 10
+  c_3: 3
+  c_4: 4
+  c_7: 2
+  c_8: 5
+  c_9: 6
+  d_0: 0
+  d_1: 1
+titles:
+  c_0:
+    1000.1.1: 2
+    980.1.1: 0
+  c_1:
+    1000.1.1: 2
+    980.1.1: 0
+  c_10:
+    985.1.1: 50
+  c_11:
+    985.1.1: 45
+  c_12:
+    985.1.1: 50
+  c_13:
+    985.1.1: 55
+  c_14:
+    985.1.1: 60
+  c_15:
+    985.1.1: 65
+  c_2:
+    1000.1.1: 2
+    980.1.1: 0
+  c_3:
+    98Y.1.1: 30
+  c_4:
+    98Y.1.1: 35
+  c_5:
+    985.1.1: 10
+  c_6:
+    990.1.1: 10
+  c_7:
+    990.1.1: 21
+    990.1.2: d_1
+  c_8:
+    990.1.1: 40
+    990.1.2: d_1
+  c_9:
+    985.1.1: 45
+  d_0:
+    1000.1.1: 2
+    980.1.1: 0
+    development_level: 7
+  d_1:
+    985.1.1: 10
+    development_level: 7
+  d_2: {}
+  d_3: {}
+  k_0:
+    development_level: 6
