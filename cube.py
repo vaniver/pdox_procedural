@@ -207,3 +207,158 @@ class Cube:
             self.z = -self.z
         else:
             raise ValueError('Need a 0 el. x,y,z: '+','.join((str(valid_dir.x),str(valid_dir.y),str(valid_dir.z))))
+        
+class Edge:
+    def __init__(self, cube, rot, dir=None):
+        """Edge is a cube and a rotation: 0, for the flat southern edge; 1, for the southeastern edge; 2, for the northeastern edge.
+        The optional dir is +1 for counter-clockwise and -1 for clockwise."""
+        self.cube = cube
+        assert rot in [0,1,2]
+        self.rot = rot
+        self.dir = dir
+
+    def adj_edges(self):
+        """Returns the list of four adjacent edges.
+        If the edge is directional, the from edge pair will be first and the to edge pair will be second."""
+        if self.dir is None:
+            if self.rot == 0:
+                return [
+                    Edge(self.cube.add(Cube(-1, 0, 1)), 2),
+                    Edge(self.cube.add(Cube(-1, 0, 1)), 1),
+                    Edge(self.cube.add(Cube(0, -1, 1)), 2),
+                    Edge(self.cube, 1),
+                    ]
+            elif self.rot == 1:
+                return [
+                    Edge(self.cube, 0),
+                    Edge(self.cube.add(Cube(0, -1, 1)), 2),
+                    Edge(self.cube, 2),
+                    Edge(self.cube.add(Cube(1, 0, -1)), 0),
+                    ]
+            else:  # self.rot == 2
+                return [
+                    Edge(self.cube, 1),
+                    Edge(self.cube.add(Cube(1, 0, -1)), 0),
+                    Edge(self.cube.add(Cube(0, 1, -1)), 0),
+                    Edge(self.cube.add(Cube(0, 1, -1)), 1),
+                    ]
+        elif self.dir == 1:
+            if self.rot == 0:
+                return [
+                    Edge(self.cube.add(Cube(-1, 0, 1)), 2,-1),
+                    Edge(self.cube.add(Cube(-1, 0, 1)), 1, 1),
+                    Edge(self.cube.add(Cube(0, -1, 1)), 2, -1),
+                    Edge(self.cube, 1, 1),
+                    ]
+            elif self.rot == 1:
+                return [
+                    Edge(self.cube, 0, 1),
+                    Edge(self.cube.add(Cube(0, -1, 1)), 2, -1),
+                    Edge(self.cube, 2, 1),
+                    Edge(self.cube.add(Cube(1, 0, -1)), 0, -1),
+                    ]
+            else:  # self.rot == 2
+                return [
+                    Edge(self.cube, 1, 1),
+                    Edge(self.cube.add(Cube(1, 0, -1)), 0, -1),
+                    Edge(self.cube.add(Cube(0, 1, -1)), 0, -1),
+                    Edge(self.cube.add(Cube(0, 1, -1)), 1, 1),
+                    ]
+        else:  # self.dir == -1
+            if self.rot == 0:
+                return [
+                    Edge(self.cube.add(Cube(0, -1, 1)), 2, 1),
+                    Edge(self.cube, 1, -1),
+                    Edge(self.cube.add(Cube(-1, 0, 1)), 2, 1),
+                    Edge(self.cube.add(Cube(-1, 0, 1)), 1, -1),
+                    ]
+            elif self.rot == 1:
+                return [
+                    Edge(self.cube, 2, -1),
+                    Edge(self.cube.add(Cube(1, 0, -1)), 0, 1),
+                    Edge(self.cube, 0, -1),
+                    Edge(self.cube.add(Cube(0, -1, 1)), 2, 1),
+                    ]
+            else:  # self.rot == 2
+                return [
+                    Edge(self.cube.add(Cube(0, 1, -1)), 0, 1),
+                    Edge(self.cube.add(Cube(0, 1, -1)), 1, -1),
+                    Edge(self.cube, 1, -1),
+                    Edge(self.cube.add(Cube(1, 0, -1)), 0, 1),
+                    ]
+
+    @classmethod
+    def from_pair(cls, k1, k2, dir=None):
+        """Given an adjacent pair of cubes, return the (normalized) edge between them.
+        The optional dir is +1 for counter-clockwise and -1 for clockwise."""
+        diff = k1.sub(k2)
+        assert diff.mag() == 1, (k1, k2)
+        if diff.x == 1:
+            if diff.y == 0:
+                return cls(k2, 2, dir=dir)
+            else:
+                return cls(k2, 1, dir=dir)
+        elif diff.x == 0:
+            if diff.y == -1:
+                return cls(k2, 0, dir=dir)
+            else:
+                return cls(k1, 0, dir=dir)
+        else:
+            if diff.y == 0:
+                return cls(k1, 2, dir=dir)
+            else:
+                return cls(k1, 1, dir=dir)
+
+
+class Vertex:
+    def __init__(self, cube, rot=0):
+        """Vertex is a cube and a rotation: +1 or -1 to correspond to +x or -x, and 0 corresponds to the center of the cube."""
+        self.cube = cube
+        assert rot in [-1,0,1]
+        self.rot = rot
+
+    def adj_vertices(self):
+        """Returns the six vertices adjacent to this vertex."""
+        if self.rot == 0:
+            return [
+                Vertex(self.cube,-1),
+                Vertex(self.cube.add(Cube(-1,1,0)),1),
+                Vertex(self.cube.add(Cube(1,0,-1)),-1),
+                Vertex(self.cube,1),
+                Vertex(self.cube.add(Cube(1,-1,0)),-1),
+                Vertex(self.cube.add(Cube(-1,0,1)),1),
+                ]
+        elif self.rot == -1:
+            return [
+                Vertex(self.cube.add(Cube(-2,1,1)),1),
+                Vertex(self.cube.add(Cube(-1,1,0)),0),
+                Vertex(self.cube.add(Cube(-1,1,0)),1),
+                Vertex(self.cube,0),
+                Vertex(self.cube.add(Cube(-1,0,1)),1),
+                Vertex(self.cube.add(Cube(-1,0,1)),0),
+                ]
+        else:  # self.rot == 1
+            return [
+                Vertex(self.cube,0),
+                Vertex(self.cube.add(Cube(1,0,-1)),-1),
+                Vertex(self.cube.add(Cube(1,0,-1)),0),
+                Vertex(self.cube.add(Cube(2,-1,-1)),-1),
+                Vertex(self.cube.add(Cube(1,-1,0)),0),
+                Vertex(self.cube.add(Cube(1,-1,0)),-1),
+                ]
+
+    @classmethod
+    def from_trio(cls, k1, k2, k3):
+        """Given three adjacent cubes, return the (normalized) vertex they share."""
+        #This is either a left-pointing triangle or a right-pointing triangle.
+        if k1.x == k2.x:
+            return cls(k3, 1 if k3.x < k1.x else -1)
+        if k1.x == k3.x:
+            return cls(k2, 1 if k2.x < k1.x else -1)
+        elif k2.x == k3.x:
+            return cls(k1, 1 if k1.x < k2.x else -1)
+        else:
+            raise ValueError((k1,k2,k3,))
+
+
+
