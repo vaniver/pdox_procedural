@@ -2,7 +2,7 @@ import os
 import random
 import yaml
 
-from alt_map import *
+from map import *
 from terrain import *
 
 USED_MASKS = {

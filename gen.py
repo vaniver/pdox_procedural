@@ -3,14 +3,14 @@ import os
 import random
 import yaml
 
-from alt_map import valid_cubes
+from map import valid_cubes
 from area import Area
 from chunk_split import check_contiguous, find_contiguous, split_chunk, SplitChunkMaxIterationExceeded
 from cube import *
 from terrain import BaseTerrain
 from voronoi import growing_voronoi, voronoi
 
-import alt_ck3
+import ck3
 
 
 # CENTER_SIZE_LIST = [7,5,5,5]
@@ -533,7 +533,7 @@ if __name__ == "__main__":
     cultures, religions = assemble_culrels(region_trees=region_trees)  # Not obvious this should be here instead of just derived later?
     rgb_from_pid = create_colors(pid_from_cube)
     if "CK3" in config["MOD_OUTPUTS"]:
-        alt_ck3.create_mod(
+        ck3.create_mod(
             file_dir=config["MOD_OUTPUTS"]["CK3"],
             config=config,
             pid_from_cube=pid_from_cube,
