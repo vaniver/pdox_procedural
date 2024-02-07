@@ -3,6 +3,14 @@ import PIL.Image
 
 from cube import Cube, Edge, Vertex
 
+def box_from_max(max_x, max_y, n_x, n_y):
+    """Compute the box height and box_width."""
+    box_height = max_y // (n_y * 2 - 2)  # TODO: make this divide exactly?
+    # There are n_x+1 thin boxes (n_x-1 plus 2 on the edges) and n_x-2 double boxes, so 3n_x-3 total.
+    box_width = max_x // (n_x * 3 - 3)   # TODO: make this divide exactly?
+    return box_height, box_width
+
+
 def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, rgb_from_vertex={}, mode='RGB', default="black", n_x=235, n_y=72, palette_loc=None):
     """Draw a hex map with size (max_x,max_y) with colors from rgb_from_ijk. mode determines the image type, and also the correct format for rgb (which should be shared by everything).
     There will be n_x hexes horizontally and n_y hexes vertically. 
@@ -17,9 +25,7 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, rgb_from_vertex
     # Calculate hex size
     # There are 2n_y-2 vertical boxes.
     assert n_x % 2 == 1
-    box_height = max_y // (n_y * 2 - 2)  # TODO: make this divide exactly?
-    # There are n_x+1 thin boxes (n_x-1 plus 2 on the edges) and n_x-2 double boxes, so 3n_x-3 total.
-    box_width = max_x // (n_x * 3 - 3)   # TODO: make this divide exactly?
+    box_height, box_width = box_from_max(max_x, max_y, n_x, n_y)
     # We want the edges between hexes to be always uniform. (Later we'll have an option to save this hex-by-hex.)
     # This is more awkward than trusting the triangle function but what are you gonna do
     river_border = [x*box_height//box_width for x in range(box_width)] + [box_height]

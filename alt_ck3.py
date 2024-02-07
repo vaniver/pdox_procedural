@@ -82,13 +82,13 @@ class CK3Map:
         rgb_from_ijk = {k.tuple(): v for k,v in height_from_cube.items()}
         img = create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, mode='L', default="white", n_x=self.n_x, n_y=self.n_y)
         img.save(os.path.join(self.file_dir, "map_data", "heightmap.png"))
-        with open(os.path.join(self.file_dir, "map_data", 'heightmap.heightmap'), 'w') as f:
-            f.write("heightmap_file=\"map_data/packed_heightmap.png\"\n")
-            f.write("indirection_file=\"map_data/indirection_heightmap.png\"\n")
-            f.write(f"original_heightmap_size={{ {self.max_x} {self.max_y} }}\n")
-            f.write("tile_size=33\n")
-            f.write("should_wrap_x=no\n")
-            f.write("level_offsets={ { 0 0 }{ 0 0 }{ 0 0 }{ 0 0 }{ 0 7 }}\n")
+        with open(os.path.join(self.file_dir, "map_data", 'heightmap.heightmap'), 'w') as outf:
+            outf.write("heightmap_file=\"map_data/packed_heightmap.png\"\n")
+            outf.write("indirection_file=\"map_data/indirection_heightmap.png\"\n")
+            outf.write(f"original_heightmap_size={{ {self.max_x} {self.max_y} }}\n")
+            outf.write("tile_size=33\n")
+            outf.write("should_wrap_x=no\n")
+            outf.write("level_offsets={ { 0 0 }{ 0 0 }{ 0 0 }{ 0 0 }{ 0 7 }}\n")
 
     def create_terrain_masks(self, terr_from_cube):
         """Creates all the terrain masks; just fills each cube."""
@@ -98,6 +98,32 @@ class CK3Map:
         """Create rivers.png"""
         img = create_hex_map(rgb_from_ijk=river_background, rgb_from_edge=river_edges, rgb_from_vertex=river_vertices, max_x=self.max_x, max_y=self.max_y, mode='P', palette_loc=palette_loc, default="white", n_x=self.n_x, n_y=self.n_y)
         img.save(os.path.join(self.file_dir, "map_data", "rivers.png"))
+
+    def create_positions(self, name_from_pid, pid_from_cube):
+        """Create positions.txt"""
+        box_height, box_width = box_from_max(self.max_x, self.max_y, self.n_x, self.n_y)
+        ox = box_width // 3
+        oy = box_height // 3
+        with open(os.path.join(self.file_dir, "map_data", "positions.txt"), 'w') as outf:
+            for pid, name in name_from_pid.items():
+                cube = [k for k,v in pid_from_cube.items() if v == pid]
+                if len(cube) == 0:
+                    print(pid, name)
+                    continue
+                elif len(cube) == 1:
+                    cube = cube[0]
+                else:
+                    cube = random.sample(cube, k=1)[0]
+                hor = cube.x
+                ver = -cube.y - hor // 2 - hor % 2
+                x = 3 * hor  * box_width
+                y = (2 * ver + (hor % 2)) * box_height
+                # TODO: Handle the edges better.
+                position = " ".join([str(s) for s in [x + ox, y, x, y,  max(0,x - ox), y, x, y + oy, x, max(0,y - oy)]])
+                rotation = " ".join([str(s) for s in [0] * 5])
+                height = " ".join([str(s) for s in [0, 0, 0, 20, 0]])
+                outf.write(f"#{name}\n\t{pid}=\n\t{{\n\t\tposition=\n\t\t{{\n{position} }}\n\t\trotation=\n\t\t{{\n{rotation} }}\n\t\theight=\n\t\t{{\n{height} }}\n\t}}\n")
+
 
 def create_terrain_file(file_dir, terr_from_pid):
     """Writes out common/province_terrain."""
@@ -667,6 +693,7 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     map.create_heightmap(height_from_cube=height_from_cube)
     river_background = {k.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_cube.items()}
     map.create_rivers(river_background, river_edges, river_vertices)
+    map.create_positions(name_from_pid, pid_from_cube)
     # map.create_terrain_masks
     create_geographical_regions(file_dir, region_trees)
     if len(impassable) > 0:
