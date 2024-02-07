@@ -73,6 +73,17 @@ class RegionTree:
     def some_ck3_titles(self, filter):
         """Returns all ck3 titles that start with filter."""
         return [x for x in self.all_ck3_titles() if x.startswith(filter)]
+
+    def all_holy_sites(self):
+        """Returns all holy sites."""
+        if self.holy_site is None:
+            holy_site_list = []
+        else:
+            holy_site_list = [self.holy_site]
+        for child in self.children:
+            if isinstance(child,RegionTree):
+                holy_site_list.extend(child.all_holy_sites())
+        return holy_site_list
     
     def capital(self):
         if self.capital_title is not None:
@@ -133,7 +144,7 @@ class RegionTree:
                 title = lsplit[0]
                 color = tuple([x.strip() for x in lsplit[1:4]]) if len(lsplit) > 3 else ("0","0","0")
                 culture, religion, rough = lsplit[4:7] if len(lsplit) > 6 else [None, None, "forest"]
-                holy_site = lsplit[7] if len(lsplit) > 7 else None
+                holy_site = lsplit[7].strip() if len(lsplit) > 7 else None
                 current[depth] = cls(title=title, color=color, culture=culture, religion=religion, rough=rough, holy_site=holy_site)
             while len(current) > 0:
                 depth = max(current.keys())

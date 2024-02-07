@@ -28,6 +28,7 @@ CONTINENT_LISTS:
   - b_silesia
   - b_bohemia
   - b_amdo
+RELIGION_DIR: "data"
 GUARANTEED_INNOS:
 - tribal
 - innovation_chronicle_writing

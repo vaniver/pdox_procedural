@@ -634,6 +634,55 @@ def create_default_map(file_dir, impassable, sea_min, sea_max):
         outf.write("\n")
 
 
+def create_religion(file_dir, base_dir, religions, holy_sites, custom_dir=None):
+    """Create common/religion/holy_sites and common/religion/religions."""
+    os.makedirs(os.path.join(file_dir, "common", "religion", "religions"), exist_ok=True)
+    os.makedirs(os.path.join(file_dir, "common", "religion", "holy_sites"), exist_ok=True)
+    # For each of the religions, we're going to make it so they have all the holy sites.
+    religion_locs = [base_dir]
+    if custom_dir is not None and os.path.exists(os.path.join(custom_dir, "common","religion","religions")):
+        religion_locs.append(custom_dir)  # custom_dir goes second so it will overwrite base files.
+    for dir in religion_locs:
+        for religion_filename in os.listdir(os.path.join(dir, "common", "religion", "religions")):
+            with open(os.path.join(dir, "common", "religion", "religions", religion_filename), 'r', encoding='utf-8') as inf:
+                with open(os.path.join(file_dir, "common", "religion", "religions", religion_filename), 'w', encoding='utf-8') as outf:
+                    holy_site_section = True
+                    for line in inf.readlines():
+                        if "holy_site" in line:
+                            if holy_site_section:
+                                holy_site_section = False
+                                for holy_site in holy_sites:
+                                    outf.write(f"\t\t\tholy_site = {holy_site}\n")
+                        else:
+                            if "}" in line: # We have finished that section and will maybe need to dump all the holy sites again.
+                                holy_site_section = True
+                            outf.write(line)
+    with open(os.path.join(file_dir, "common", "religion", "holy_sites", "00_holy_sites.txt"), 'w', encoding='utf-8') as outf:
+        holy_site_locs = [os.path.join(base_dir, "common", "religion", "holy_sites", "00_holy_sites.txt")]
+        if custom_dir is not None and os.path.exists(os.path.join(custom_dir, "common","religion","holy_sites")):
+            holy_site_locs.insert(0, os.path.join(custom_dir, "common", "religion", "holy_sites", "00_holy_sites.txt"))
+        for inf_loc in holy_site_locs:
+            with open(inf_loc, 'r', encoding='utf-8') as inf:
+                brackets = 0
+                copying = False
+                for line in inf.readlines():
+                    if brackets == 0 and "{" in line:
+                        name = line.split("=")[0].strip()
+                        if name in holy_sites:
+                            copying = True
+                            holy_sites.remove(name)  # This is so if it's taken from the custom one, we don't also take it from the base one.
+                    brackets += line.count("{")
+                    if copying:
+                        outf.write(line)
+                    brackets -= line.count("}")
+                    if brackets == 0 and "}" in line and copying:
+                        outf.write("\n")
+                        copying = False
+        for holy_site in holy_sites:
+            print(holy_site)  # These are the ones that didn't get found.
+
+
+
 def create_dot_mod(file_dir, mod_name, mod_disp_name):
     """Creates the basic mod structure.
     -common
@@ -678,14 +727,18 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
     # make common
     all_titles = []
+    holy_sites = []
     for region_tree in region_trees:
         all_titles.extend(region_tree.all_ck3_titles())
+        holy_sites.extend(region_tree.all_holy_sites())
     print(f"there are {len(all_titles)} titles.")
     create_coa(file_dir, base_dir=os.path.join(config["BASE_CK3_DIR"], "common", "coat_of_arms", "coat_of_arms"), custom_dir=config.get("COA_DIR", None), title_list=all_titles)
     create_landed_titles(file_dir, pid_from_title, region_trees)  # TODO: add special_titles
     create_terrain_file(file_dir=file_dir, terr_from_pid=terr_from_pid)
     # make history
     create_history(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], config=config, region_trees=region_trees, cultures=cultures, pid_from_title=pid_from_title)
+    # make religions
+    create_religion(file_dir, config["BASE_CK3_DIR"], religions, holy_sites, custom_dir=config.get("RELIGION_DIR", None))
     # Determine major rivers and impassable mountain boundaries (done here b/c it affects provinces also)
     # Make map
     map = CK3Map(file_dir,config["max_x"], config["max_y"], config["n_x"], config["n_y"])
