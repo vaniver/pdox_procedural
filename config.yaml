@@ -1,7 +1,7 @@
 MOD_NAME: testmod
 MOD_DISPLAY_NAME: testing_worldgen
 MOD_OUTPUTS:
-- CK3
+  CK3: "C:\\Users\\vaniv\\Documents\\Paradox Interactive\\Crusader Kings III\\mod"
 BASE_CK3_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Crusader Kings III\\game"
 CONTINENT_LISTS:
 - - e_islam

@@ -460,7 +460,7 @@ def create_data(config):
     pid_from_title = {}
     land_cubes = set()
     sea_cubes = set()
-    last_pid = 0
+    last_pid = 1 # They 1-index instead of 0-indexing.
     terr_from_cube = {}
     name_from_title = {}  # TODO: Import this from localization or w/e
     name_from_pid = {}
@@ -469,8 +469,8 @@ def create_data(config):
         for pid, cube in enumerate(continent):
             pid_from_cube[cube] = pid + last_pid
             title = names[pid]
-            name_from_pid[pid] = name_from_title.get(title,title)
-            pid_from_title[title] = pid
+            name_from_pid[pid + last_pid] = name_from_title.get(title,title)
+            pid_from_title[title] = pid + last_pid
         land_cubes = land_cubes.union(continent)
         last_pid += len(continent)
         terr_from_cube.update(assign_terrain_continent({v:k for k,v in pid_from_cube.items() if k in continent}, terr_templates[cind]))
@@ -534,7 +534,7 @@ if __name__ == "__main__":
     rgb_from_pid = create_colors(pid_from_cube)
     if "CK3" in config["MOD_OUTPUTS"]:
         alt_ck3.create_mod(
-            file_dir=config.get("MOD_DIR", "mod"),
+            file_dir=config["MOD_OUTPUTS"]["CK3"],
             config=config,
             pid_from_cube=pid_from_cube,
             terr_from_cube=terr_from_cube,
@@ -549,21 +549,5 @@ if __name__ == "__main__":
             impassable=impassable,
             river_edges=river_edges,
             river_vertices=river_vertices,
+            straits=[],  # TODO: calculate straits
         )
-
-    # rgb_from_ijk = {cub.tuple():(random.randint(0,64), random.randint(0,64), random.randint(0,64)) for cub in valid_cubes(config["n_x"],config["n_y"])}
-    # max_x = config.get("box_width", 10)*(config["n_x"]*3-3)
-    # max_y = config.get("box_height", 17)*(config["n_y"]*2-2)
-    # for cind, cont in enumerate(continents):
-    #     for pid, k in enumerate(cont):
-    #         color_tuple = (62*(cind+1),min(255,pid),0)
-    #         rgb_from_ijk[k.tuple()] = color_tuple[cind:] + color_tuple[:cind]
-    # img = create_hex_map(rgb_from_ijk, max_x,max_y,n_x=config["n_x"],n_y=config["n_y"])
-    # img.show()
-    # img.save("continent_test.png")
-    # with open("rgb_from_ijk.yaml", 'w') as outf:
-    #     outf.write(yaml.dump(rgb_from_ijk))
-    # with open("terr_from_cube.yaml", 'w') as outf:
-    #     outf.write(yaml.dump(terr_from_cube))
-    # with open("height_from_cube.yaml", 'w') as outf:
-    #     outf.write(yaml.dump(height_from_cube))

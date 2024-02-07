@@ -1,3 +1,6 @@
 data/common/decisions
 data/events
 mod
+*.png
+*.ipynb
+*.pyc
