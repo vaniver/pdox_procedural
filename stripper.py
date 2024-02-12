@@ -1,6 +1,6 @@
 import os
 
-def strip_base_files(file_dir, src_dir, subpaths):
+def strip_base_files(file_dir, src_dir, subpaths, to_remove, to_keep, subsection):
     """There's a bunch of base game files that are necessary but contain _some_ hardcoded references to provinces.
     Rather than having to manually remove them, let's try to do it automatically.
     
@@ -29,10 +29,10 @@ def strip_base_files(file_dir, src_dir, subpaths):
             mod_buffer = ""
             for line in inf:
                 brackets += line.count("{")
-                if brackets > 0 and ("province:" in line or "title:" in line or "character:" in line):
+                if brackets > 0 and (any([tr in line for tr in to_remove])) and (not(any([tk in line for tk in to_keep]))):
                     valid = False
                     file_stripped = True
-                if brackets > 0 and valid and "modifier = {" in line:
+                if brackets > 0 and valid and subsection in line:
                     mod = True
                     mod_brackets = brackets - 1  # This is when it closes
                 if mod:

@@ -11,6 +11,7 @@ from terrain import BaseTerrain
 from voronoi import growing_voronoi, voronoi
 
 import ck3
+import v3
 
 
 # CENTER_SIZE_LIST = [7,5,5,5]
@@ -550,4 +551,15 @@ if __name__ == "__main__":
             river_edges=river_edges,
             river_vertices=river_vertices,
             straits=[],  # TODO: calculate straits
+        )
+    if "V3" in config["MOD_OUTPUTS"]:
+        v3.create_mod(
+            file_dir=config["MOD_OUTPUTS"]["CK3"],
+            config=config,
+            pid_from_cube=pid_from_cube,
+            terr_from_cube=terr_from_cube,
+            rgb_from_pid=rgb_from_pid,
+            height_from_cube=height_from_cube,
+            river_edges=river_edges,
+            river_vertices=river_vertices,
         )

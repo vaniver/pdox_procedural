@@ -677,8 +677,12 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     sea_max = max(pid_from_cube.values())
     create_default_map(file_dir, impassable, sea_min, sea_max)
     create_climate(file_dir=file_dir)
-    strip_base_files(file_dir, config["BASE_CK3_DIR"], [
+    strip_base_files(file_dir, config["BASE_CK3_DIR"], subpaths=[
         "common/decisions",
         "common/travel",
         "events"
-    ])
+    ],
+    to_remove=["province:", "title:", "character:"],
+    to_keep = [],
+    subsection="modifier = {",
+    )
