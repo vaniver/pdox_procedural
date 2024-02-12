@@ -3,6 +3,7 @@ import random
 import yaml
 
 from map import *
+from stripper import strip_base_files
 from terrain import *
 
 USED_MASKS = {
@@ -15,10 +16,6 @@ USED_MASKS = {
     BaseTerrain.marsh: "wetlands_02",
     BaseTerrain.jungle: "forest_jungle_01",
 }
-
-# PROVINCES constants
-IMPASSABLE = (0, 0, 255)
-
 
 class CK3Map:
     def __init__(self, file_dir, max_x, max_y, n_x, n_y):
@@ -43,7 +40,6 @@ class CK3Map:
                 name = name_from_pid[pid]
                 r,g,b = rgb_from_pid[pid]
                 outf.write(";".join([str(x) for x in [pid,r,g,b,name,"x"]])+"\n")
-
 
     def create_heightmap(self, height_from_cube):
         """Uses height_from_cube to generate a simple heightmap."""
@@ -561,67 +557,7 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
         outf.write("\n")
 
 
-def strip_base_files(file_dir, src_dir, subpaths):
-    """There's a bunch of base game files that are necessary but contain _some_ hardcoded references to provinces.
-    Rather than having to manually remove them, let's try to do it automatically.
-    
-    Currently known to work with the following subpaths:
-    - 
-    and suspected to work with:
-    - common/travel/point_of_interest_types/travel_point_of_interest_types.txt  # TODO: add poi_grand_city for the central cities.
-    """
-    expanded_subpaths = []
-    while len(subpaths) > 0:
-        subpath = subpaths.pop()
-        if os.path.isdir(os.path.join(src_dir, subpath)):
-            subpaths.extend([os.path.join(src_dir, subpath, more) for more in os.listdir(os.path.join(src_dir, subpath))])
-        else:
-            expanded_subpaths.append(subpath)
 
-    for subpath in expanded_subpaths:
-        file_stripped = False
-        file_buffer = ""
-        with open(os.path.join(src_dir, subpath), encoding='utf-8') as inf:
-            valid = True
-            brackets = 0
-            mod_brackets = 0
-            mod = False
-            buffer = ""
-            mod_buffer = ""
-            for line in inf:
-                brackets += line.count("{")
-                if brackets > 0 and ("province:" in line or "title:" in line or "character:" in line):
-                    valid = False
-                    file_stripped = True
-                if brackets > 0 and valid and "modifier = {" in line:
-                    mod = True
-                    mod_brackets = brackets - 1  # This is when it closes
-                if mod:
-                    mod_buffer += line
-                elif valid:
-                    buffer += line
-                brackets -= line.count("}")
-                if mod and brackets == mod_brackets:
-                    if valid:
-                        buffer += mod_buffer
-                        mod_buffer = ""
-                    else:
-                        valid = True
-                        mod_buffer = ""
-                    mod = False
-                if brackets == 0:
-                    if valid and mod:
-                        print(f"There's an issue with parsing {subpath}")
-                    elif valid:
-                        file_buffer = file_buffer + buffer
-                    buffer = ""
-                    valid = True
-        if file_stripped:  # We did a replacement, so need to write out buffer.
-            relpath = os.path.relpath(subpath,src_dir)
-            print(relpath)
-            os.makedirs(os.path.join(file_dir, os.path.dirname(relpath)), exist_ok=True)
-            with open(os.path.join(file_dir, relpath), 'w', encoding='utf-8') as outf:
-                outf.write(file_buffer)
 
 
 def create_default_map(file_dir, impassable, sea_min, sea_max):
@@ -685,25 +621,7 @@ def create_religion(file_dir, base_dir, religions, holy_sites, custom_dir=None):
 
 
 def create_dot_mod(file_dir, mod_name, mod_disp_name):
-    """Creates the basic mod structure.
-    -common
-    --decisions
-    --landed_titles
-    --province_terrain
-    --religion
-    --travel
-    ---point_of_interest_types
-    -events
-    -history
-    --characters
-    --cultures
-    --province_mapping
-    --provinces
-    --titles
-    --wars
-    -map_data
-    --geographical_regions
-"""
+    """Creates the basic mod structure and metadata file."""
     shared = "version = \"0.0.1\"\n"
     shared += "tags = {\n\t\"Total Conversion\"\n}\n"
     shared += "name = \"{}\"\n".format(mod_disp_name)
@@ -727,7 +645,6 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     """Creates the CK3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
-    print(file_dir)
     # make common
     all_titles = []
     holy_sites = []
@@ -744,13 +661,13 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     create_religion(file_dir, config["BASE_CK3_DIR"], religions, holy_sites, custom_dir=config.get("RELIGION_DIR", None))
     # Determine major rivers and impassable mountain boundaries (done here b/c it affects provinces also)
     # Make map
-    map = CK3Map(file_dir,config["max_x"], config["max_y"], config["n_x"], config["n_y"])
-    map.create_provinces(rgb_from_pid,pid_from_cube, name_from_pid)
-    map.create_heightmap(height_from_cube=height_from_cube)
+    ck3map = CK3Map(file_dir, max_x=config["max_x"], max_y=config["max_y"], n_x=config["n_x"], n_y=config["n_y"])
+    ck3map.create_provinces(rgb_from_pid,pid_from_cube, name_from_pid)
+    ck3map.create_heightmap(height_from_cube=height_from_cube)
     river_background = {k.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_cube.items()}
-    map.create_rivers(river_background, river_edges, river_vertices)
-    map.create_positions(name_from_pid, pid_from_cube)
-    map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], terr_from_cube=terr_from_cube)
+    ck3map.create_rivers(river_background, river_edges, river_vertices)
+    ck3map.create_positions(name_from_pid, pid_from_cube)
+    ck3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], terr_from_cube=terr_from_cube)
     create_adjacencies(file_dir=file_dir, straits=straits, pid_from_cube=pid_from_cube, name_from_pid=name_from_pid, closest_xy=lambda fr, to: closest_xy(fr, to, map.box_height, map.box_width))
     create_geographical_regions(file_dir, region_trees)
     if len(impassable) > 0:

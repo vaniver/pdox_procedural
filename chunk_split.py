@@ -2,7 +2,6 @@
 import random
 
 from cube import Cube
-from doodle import Doodler
 
 
 class SplitChunkMaxIterationExceeded(Exception):
@@ -104,24 +103,3 @@ def split_chunk(chunk, sizes, max_iter=1000, rng=None):
         if result != None:
             return result
     raise SplitChunkMaxIterationExceeded("Ran out of iterations trying to split chunk")
-
-
-def show_splits(chunk, splits):
-    """ Draw a partially split chunk """
-    assert len(splits) <= 3, f"only 3 colors supported for now"
-    colors = (255, 0, 0), (0, 255, 0), (0, 0, 255)
-    cubes = {c: (255, 255, 255) for c in chunk}
-    for color, split in zip(colors, splits):
-        for c in split:
-            cubes[c] = color
-    Doodler(cubes, size=(200,200)).show()
-
-
-if __name__ == "__main__":
-    for seed in range(10):
-        chunk = make_chunk(12, seed=seed)
-        try:
-            splits = split_chunk(chunk, [4, 4, 4], rng=random.Random(seed))
-            show_splits(chunk, splits)
-        except SplitChunkMaxIterationExceeded:
-            Doodler({c: (255, 255, 255) for c in chunk}, size=(200,200)).show()

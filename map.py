@@ -3,6 +3,10 @@ import PIL.Image
 
 from cube import Cube, Edge, Vertex
 
+# rivers values
+LAND_COLOR = 255
+SEA_COLOR = 254
+
 def box_from_max(max_x, max_y, n_x, n_y):
     """Compute the box height and box_width."""
     box_height = max_y // (n_y * 2 - 2)  # TODO: make this divide exactly?
@@ -190,6 +194,10 @@ def closest_xy(fr, to, box_height, box_width, shrinkage=2):
             return (start_x - box_width + shrinkage, start_y - box_height + shrinkage)
 
 
+def get_palette(base_loc):
+    """Pulls out the palette from an image"""
+    return PIL.Image.open(base_loc).palette
+
 def valid_cubes(n_x=235, n_y=72):
     """Construct the list of on-map cube positions."""
     assert n_x % 2 == 1
@@ -206,8 +214,3 @@ def valid_cubes(n_x=235, n_y=72):
             cube_list.append(current)
             current = current.add(Cube(0,-1,1)) # Move down
     return cube_list
-
-
-def add_rivers(img, river_from_trio):
-    """Given a map,"""
-    pass
