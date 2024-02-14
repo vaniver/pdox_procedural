@@ -13,15 +13,6 @@ from voronoi import area_voronoi, iterative_voronoi, growing_voronoi, voronoi
 import ck3
 import v3
 
-
-# CENTER_SIZE_LIST = [7,5,5,5]
-# CENTER_SIZE = sum(CENTER_SIZE_LIST)
-# KINGDOM_SIZE_LIST = [[6,4,4,4,4], [4,4,3,3], [4,4,3,3], [4,4,3]]
-# KINGDOM_DUCHY_LIST = [sum(x) for x in KINGDOM_SIZE_LIST]
-# KINGDOM_SIZE = sum(KINGDOM_DUCHY_LIST)
-# BORDER_SIZE_LIST = [4,4,4,4,4,4]
-# BORDER_SIZE = sum(BORDER_SIZE_LIST)
-
 class CreationError(Exception):
     pass
 
@@ -543,6 +534,7 @@ def create_data(config):
     for sid, srid in srid_from_sid.items():
         rid_from_pid[sid+last_pid] = srid+last_rid
         name_from_rid[srid+last_rid] = "s_" + str(srid+last_rid)
+        terr_from_pid[sid+last_pid] = BaseTerrain.ocean
     last_pid += max(sid_from_cube.values())
     last_rid += max(srid_from_sid.values())
     terr_from_cube.update({k:BaseTerrain.ocean for k in sea_cubes})
@@ -633,6 +625,7 @@ if __name__ == "__main__":
             pid_from_cube=pid_from_cube,
             rid_from_pid=rid_from_pid,
             terr_from_cube=terr_from_cube,
+            terr_from_pid=terr_from_pid,
             rgb_from_pid=rgb_from_pid,
             height_from_cube=height_from_cube,
             river_edges=river_edges,

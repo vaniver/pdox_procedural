@@ -19,6 +19,18 @@ USED_MASKS = {
     BaseTerrain.jungle: "woodlands_03",
 }
 
+V3Terrain_Name_from_BaseTerrain = {
+    BaseTerrain.plains: "plains",
+    BaseTerrain.farmlands: "plains",
+    BaseTerrain.hills: "hills",
+    BaseTerrain.mountains: "mountain",
+    BaseTerrain.forest: "forest",
+    BaseTerrain.desert: "desert",
+    BaseTerrain.marsh: "wetland",
+    BaseTerrain.jungle: "jungle",
+    BaseTerrain.ocean: "ocean",
+}
+
 VALID_LOCS = ["city", "port", "farm", "mine", "wood"]  # These are the locations that are in a specific province in each state.
 
 class V3Map:
@@ -84,6 +96,14 @@ def create_blanks(file_dir):
             outf.write("\n")
 
 
+def create_terrain_file(file_dir, terr_from_pid, rgb_from_pid):
+    """Writes out common/province_terrain."""
+    # Masks were historically wrapped into create_heightmap, and should maybe be again.
+    os.makedirs(os.path.join(file_dir, "map_data"), exist_ok=True)
+    with open(os.path.join(file_dir, "map_data", "province_terrain.txt"), 'w') as outf:
+        for pid, terr in terr_from_pid.items():
+            outf.write(f"{hex_rgb(*rgb_from_pid[pid])}=\"{V3Terrain_Name_from_BaseTerrain[terr]}\"\n")
+
 def create_dot_mod(file_dir, mod_name, mod_disp_name):
     """Creates the basic mod structure and metadata file."""
     file_dir = os.path.join(file_dir, mod_name)
@@ -138,7 +158,7 @@ def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_fr
                 outf.write("}\n\n")
 
 
-def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, rgb_from_pid, height_from_cube, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid):
+def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid):
     """Creates the V3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
@@ -150,6 +170,7 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, rg
     river_background = {k.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_cube.items()}
     v3map.create_rivers(river_background, river_edges, river_vertices, base_loc=os.path.join(config["BASE_V3_DIR"], "map_data", "rivers.png"))
     v3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_V3_DIR"], terr_from_cube=terr_from_cube)
+    create_terrain_file(file_dir, terr_from_pid=terr_from_pid, rgb_from_pid=rgb_from_pid)
     traits_from_rid = {}
     arable_from_rid = {r: (10, ["bg_wheat_farms", "bg_livestock_ranches"]) for r in locs_from_rid.keys()}
     capped_from_rid = {r: {"bg_lead_mining": 10, "bg_iron_mining": 10, "bg_logging": 10, "bg_coal_mining": 10} for r in locs_from_rid.keys()}
