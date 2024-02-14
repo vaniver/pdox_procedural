@@ -15,7 +15,7 @@ def box_from_max(max_x, max_y, n_x, n_y):
     return box_height, box_width
 
 
-def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, rgb_from_vertex={}, mode='RGB', default="black", n_x=235, n_y=72, palette_loc=None):
+def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, rgb_from_vertex={}, mode='RGB', default="black", n_x=235, n_y=72, palette=None):
     """Draw a hex map with size (max_x,max_y) with colors from rgb_from_ijk. mode determines the image type, and also the correct format for rgb (which should be shared by everything).
     There will be n_x hexes horizontally and n_y hexes vertically. 
     n_x will be assumed odd and n_y is assumed even (to have split hexes in all corners).
@@ -34,9 +34,8 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, rgb_from_vertex
     # This is more awkward than trusting the triangle function but what are you gonna do
     river_border = [x*box_height//box_width for x in range(box_width)] + [box_height]
     img = PIL.Image.new(mode, (max_x, max_y), default)
-    if palette_loc is not None:
-        with open(palette_loc, "r") as f:
-            img.putpalette([int(s) for s in f.read().split(',')])
+    if palette is not None:
+        img.putpalette(palette)
     pix = img.load()
     for hor in range(n_x):
         # Calculate starting position

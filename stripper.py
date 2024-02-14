@@ -32,7 +32,7 @@ def strip_base_files(file_dir, src_dir, subpaths, to_remove, to_keep, subsection
                 if brackets > 0 and (any([tr in line for tr in to_remove])) and (not(any([tk in line for tk in to_keep]))):
                     valid = False
                     file_stripped = True
-                if brackets > 0 and valid and subsection in line:
+                if subsection is not None and brackets > 0 and valid and any([ss in line for ss in subsection]):
                     mod = True
                     mod_brackets = brackets - 1  # This is when it closes
                 if mod:

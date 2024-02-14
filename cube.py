@@ -138,6 +138,23 @@ class Cube:
                 Cube(self.x+1,self.y+1,self.z-2), Cube(self.x-1,self.y-1,self.z+2),
                 Cube(self.x+2,self.y-1,self.z-1), Cube(self.x-2,self.y+1,self.z+1)}
 
+    def valid_straits(self, land_cubes, sea_cubes):
+        buffer = []
+        for rot in range(6):
+            a = Cube(1,-1, 0).rotate_right(rot)
+            b = Cube(1, 0,-1).rotate_right(rot)
+            ka = self.add(a)
+            if ka not in sea_cubes:
+                continue
+            kb = self.add(b)
+            if kb not in sea_cubes:
+                continue
+            kab = ka.add(b)
+            if kab not in land_cubes:
+                continue
+            buffer.append((kab, ka, kb))
+        return buffer
+
     def foursome(self, other):
         '''Given another hex (that a strait neighbor), return the two trios to find the closest vertices.'''
         # Note that the pair included in each trio should be equivalent to:

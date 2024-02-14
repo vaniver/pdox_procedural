@@ -331,7 +331,6 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
 
 def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65, num_centers=40):
     """Create len(config["CONTINENT_LISTS"]) continents with the appropriate number of kingdoms.
-    Extra center or border regions will be dropped.
     Uses the standard triangle-border system, which requires 3 to 5 kingdoms per continent."""
     continents = []
     terr_templates = []
@@ -379,10 +378,18 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
     return continents, terr_templates, region_trees
 
 
-def assign_sea_zones(sea_cubes, config):
-    # TODO: Find some guaranteed center spots, like the continental strait points.
-    centers = random.sample(list(sea_cubes),config.get("SEA_ZONES", 80))
+def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[]):
+    """Given the set of cubes sea_cubes, the overall config and optional centers (for regions or provinces), determine the sea regions and sea provinces."""
+    # Determine if any of the proposed centers are close to each other, and drop the spare(s) if so. 
+    sea_centers = []
+    for ind, k in enumerate(province_centers):
+        if not any([ok.sub(k).mag() <= 2 for ok in province_centers[ind:]]):  # Should this 2 be configurable?
+            sea_centers.append(k)
+    centers = random.sample(list(sea_cubes),max(0, config.get("SEA_PROVINCES", 80) - len(province_centers))) + sea_centers
     _, pid_from_cube, _ = voronoi(centers, {k:1 for k in sea_cubes})
+    # TODO: Group the provinces together into regions.
+    # Simplest is just doing another voronoi and computing average membership per province, but I think that could wreck adjacency of regions.
+    # Also possible is doing the regions first, and then splitting each region up into provinces?
     return pid_from_cube
 
 
@@ -458,42 +465,64 @@ def create_data(config):
     m_y = -(config["n_y"]+config["n_x"]//2)//2
     continents = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
     pid_from_cube = {}
+    rid_from_pid = {}
     pid_from_title = {}
     land_cubes = set()
     sea_cubes = set()
-    last_pid = 1 # They 1-index instead of 0-indexing.
+    last_pid = 1  # They 1-index instead of 0-indexing.
+    last_rid = 1  # pid is province_id; rid is region_id. (Maybe I should call it area_id instead?)
     terr_from_cube = {}
     name_from_title = {}  # TODO: Import this from localization or w/e
     name_from_pid = {}
+    name_from_rid = {}
     for cind, continent in enumerate(continents):
-        names = region_trees[cind].some_ck3_titles("b")
+        ck3_titles = region_trees[cind].all_ck3_titles()
+        region_caps = {ck3_titles[ind+2]: t for ind, t in enumerate(ck3_titles) if t[0] == "d"}
+        names = [x for x in ck3_titles if x[0] == "b"]
         for pid, cube in enumerate(continent):
             pid_from_cube[cube] = pid + last_pid
+            rid_from_pid[pid + last_pid] = last_rid
             title = names[pid]
+            if title in region_caps:
+                name_from_rid[last_rid] = name_from_title.get(region_caps[title],region_caps[title])
+                last_rid += 1
             name_from_pid[pid + last_pid] = name_from_title.get(title,title)
             pid_from_title[title] = pid + last_pid
         land_cubes = land_cubes.union(continent)
         last_pid += len(continent)
         terr_from_cube.update(assign_terrain_continent({v:k for k,v in pid_from_cube.items() if k in continent}, terr_templates[cind]))
-    # At this point, pid_from_cube should be a 1-1 mapping.
+    # At this point, pid_from_cube should be a 1-1 mapping (because we haven't done the larger regions).
     terr_from_pid = {v:terr_from_cube[k] for k,v in pid_from_cube.items() if k in terr_from_cube}
     # Split out wastelands / mountains / lakes
     non_land = sorted(find_contiguous(set(valid_cubes(config["n_x"], config["n_y"])) - land_cubes), key=len)
     sea_cubes = set(non_land.pop(-1))  # The largest non-land chunk is the ocean.
     impassable = []
+    impassable_rids = []
     height_from_cube = {}
     for iind, nlg in enumerate(non_land):
         # TODO: do something sensible with terrain assignments.
         impassable.append(last_pid)
+        impassable_rids.append(last_rid)
         pid_from_title[f"i_{str(iind)}"] = last_pid
         name_from_pid[last_pid] = f"i_{str(iind)}"
+        name_from_rid[last_rid] = f"i_{str(iind)}"
         for nlc in nlg:
             pid_from_cube[nlc] = last_pid
             terr_from_cube[nlc] = BaseTerrain.mountains
             terr_from_pid[last_pid] = BaseTerrain.mountains
             height_from_cube[nlc] = 30
+        rid_from_pid[last_pid] = last_rid
         last_pid += 1
-    sid_from_cube = assign_sea_zones(sea_cubes, config)
+        last_rid += 1
+    # Determine straits
+    straits = []
+    sea_centers = []
+    for k in land_cubes:
+        for other_land, sea_1, sea_2 in k.valid_straits(land_cubes, sea_cubes):
+            straits.append((k, other_land, sea_1, sea_2))
+            sea_centers.append(sea_1)
+
+    sid_from_cube = assign_sea_zones(sea_cubes, config, sea_centers)  # TODO: this should have a two-tiered return, so the sea provinces can be split into sea zones.
     pid_from_cube.update({k:v+last_pid for k,v in sid_from_cube.items()})
     for k, sid in sid_from_cube.items():
         pid = sid+last_pid
@@ -501,12 +530,42 @@ def create_data(config):
         pid_from_title[f"s_{sid}"] = pid
         name_from_pid[pid] = f"s_{sid}"
     terr_from_cube.update({k:BaseTerrain.ocean for k in sea_cubes})
+    # Finish up straits
+    straits = [(k, ok, pid_from_cube[x1]) for (k, ok, x1, x2) in straits]
+    # Assign region points
+    coast_from_cube = {}
+    coast_from_rid = {}  # This is not quite what I want.
+    for cube in land_cubes:
+        sids = [pid_from_cube[nbr] for nbr in cube.neighbors() if nbr in sea_cubes]
+        if len(sids) > 0:
+            coast_from_cube[cube] = min(sids)
+    locs_from_rid = {}
+    for rid in range(1,last_rid):
+        if rid in impassable_rids:
+            continue
+        pid_from_loc = {}
+        title = name_from_rid[rid]
+        pids = [pid for pid, rr in rid_from_pid.items() if rr==rid]
+        cubes = [cube for cube, pid in pid_from_cube.items() if pid in pids]
+        coastal_cubes = [cube for cube in cubes if cube in coast_from_cube]
+        pid_from_loc["city"] = min(pids)
+        if len(coastal_cubes) > 0:
+            port_cube = random.sample(coastal_cubes, k=1)[0]
+            pid_from_loc["port"] = pid_from_cube[port_cube]
+            coast_from_rid[rid] = coast_from_cube[port_cube]
+        # TODO: farm, mine, wood dependent on trade goods
+        pid_from_loc["farm"] = pid_from_cube[random.sample(cubes, k=1)[0]]
+        pid_from_loc["mine"] = pid_from_cube[random.sample(cubes, k=1)[0]]
+        pid_from_loc["wood"] = pid_from_cube[random.sample(cubes, k=1)[0]]
+        locs_from_rid[rid] = pid_from_loc
+
+    # Make heightmap
     height_from_cube.update({k: 16 for k in sea_cubes})
     height_from_cube.update({k: 20 for k in land_cubes})
     # Create rivers
     river_edges = {Edge(Cube(3,-2,-1),0): (4,1)}
     river_vertices = {Vertex(Cube(2,-2,0),1): 0}
-    return continents, pid_from_cube, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, impassable, river_edges, river_vertices
+    return continents, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid,
 
 
 
@@ -530,7 +589,7 @@ if __name__ == "__main__":
     config["max_x"] = config.get("max_x", config.get("box_width", 10)*(config["n_x"]*3-3))
     config["max_y"] = config.get("max_y", config.get("box_height", 17)*(config["n_y"]*2-2))
 
-    continents, pid_from_cube, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, impassable, river_edges, river_vertices = create_data(config)
+    continents, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, = create_data(config)
     cultures, religions = assemble_culrels(region_trees=region_trees)  # Not obvious this should be here instead of just derived later?
     rgb_from_pid = create_colors(pid_from_cube)
     if "CK3" in config["MOD_OUTPUTS"]:
@@ -550,16 +609,20 @@ if __name__ == "__main__":
             impassable=impassable,
             river_edges=river_edges,
             river_vertices=river_vertices,
-            straits=[],  # TODO: calculate straits
+            straits=straits,
         )
     if "V3" in config["MOD_OUTPUTS"]:
         v3.create_mod(
-            file_dir=config["MOD_OUTPUTS"]["CK3"],
+            file_dir=config["MOD_OUTPUTS"]["V3"],
             config=config,
             pid_from_cube=pid_from_cube,
+            rid_from_pid=rid_from_pid,
             terr_from_cube=terr_from_cube,
             rgb_from_pid=rgb_from_pid,
             height_from_cube=height_from_cube,
             river_edges=river_edges,
             river_vertices=river_vertices,
+            locs_from_rid=locs_from_rid,
+            coast_from_rid=coast_from_rid,
+            name_from_rid=name_from_rid,
         )

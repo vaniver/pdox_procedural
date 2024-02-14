@@ -19,6 +19,8 @@ USED_MASKS = {
     BaseTerrain.jungle: "woodlands_03",
 }
 
+VALID_LOCS = ["city", "port", "farm", "mine", "wood"]  # These are the locations that are in a specific province in each state.
+
 class V3Map:
     def __init__(self, file_dir, max_x, max_y, n_x, n_y):
         """Creates a map of size max_x * max_y, which is n_x hexes wide and n_y hexes tall."""
@@ -76,6 +78,7 @@ def create_blanks(file_dir):
         ["gfx", "map", "city_data", "american_mining_oilrig.txt"],  # These should perhaps be fine if we use the vanilla regions / cultures
         ["gfx", "map", "city_data", "wild_west_farm.txt"],  # These should perhaps be fine if we use the vanilla regions / cultures
     ]:
+        os.makedirs(os.path.join(file_dir,*file_path[:-1]), exist_ok=True)
         with open(os.path.join(file_dir, *file_path), 'w') as outf:
             outf.write("\n")
 
@@ -84,7 +87,7 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     """Creates the basic mod structure and metadata file."""
     file_dir = os.path.join(file_dir, mod_name)
     os.makedirs(os.path.join(file_dir,".metadata"), exist_ok=True)
-    with open(os.path.join(file_dir, "metadata", "metadata.json"),'w') as outf:
+    with open(os.path.join(file_dir, ".metadata", "metadata.json"),'w') as outf:
         outf.write("{\n\t\"name\" : "+mod_disp_name+"\",\n\t\"id\" : \"\"\n\t\"version\" : \"\"\n\t\"supported_game_version\" : \"\",\n\t\"short_description\" : \"\",\n\t\"tags\" : [],\n\t\"relationships\" : [],\n\t\"game_custom_data\" : {\t\t\"multiplayer_synchronized\" : true\n\t},\n\t\"replace_paths\": [\n")
         outf.write("\n".join(x for x in [                
                     "common/country_definitions",
@@ -100,7 +103,35 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     return file_dir
 
 
-def create_mod(file_dir, config, pid_from_cube, terr_from_cube, rgb_from_pid, height_from_cube, river_edges, river_vertices):
+def hex_rgb(r, g, b):
+    """Create a v3-style hex string from a r,g,b tuple. (Use *rgb to split the tuple.)"""
+    hr, hg, hb = hex(r), hex(g), hex(b)
+    return "x" + (hr[2:] + hg[2:] + hb[2:]).upper()  # This much string manipulation is probably slow compared to doing the hexification myself? :/
+
+
+def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_from_rid, locs_from_rid, arable_from_rid, capped_from_rid, coast_from_rid):
+    """Creates state_region files, as well as relevant history files."""
+    os.makedirs(os.path.join(file_dir,"map_data","state_regions"), exist_ok=True)
+    with open(os.path.join(file_dir,"map_data","state_regions", "00_state_regions.txt"), 'w', encoding='utf-8') as outf:
+        for rid, rname in name_from_rid.items():
+            outf.write(f"{rname} = {{\n\tid = {rid}\n\tsubsistence_building = \"building_subsistence_farms\"\n\tprovinces = {{ ")
+            outf.write(" ".join(["\""+hex_rgb(*rgb_from_pid[pid])+"\"" for pid, rrid in rid_from_pid.items() if rid==rrid]))
+            outf.write("}\n")
+            if rid in traits_from_rid:
+                outf.write("\ttraits = { " + " ".join(["\""+trait+"\"" for trait in traits_from_rid[rid]]) + " }\n")
+            if rid in locs_from_rid:
+                for loc, pid in locs_from_rid[rid].items():
+                    if loc in VALID_LOCS:
+                        outf.write(f"\t{loc} = \"{hex_rgb(*rgb_from_pid[pid])}\"\n")
+                arable_land, arable_types = arable_from_rid[rid]
+                outf.write("\n\tarable_land = "+str(arable_land) +"\n\tarable_resources = { "+" ".join(["\""+atype+"\"" for atype in arable_types]) + " }\n\tcapped_reources = {\n")
+                outf.write("\n".join(["\t\t" + ctype + " = " + str(camount) for ctype, camount in capped_from_rid[rid].items()]) + "\t}\n")
+                if "port" in locs_from_rid[rid]:
+                    outf.write("\tnaval_exit_id = " + str(coast_from_rid[rid]) + "\n")
+            outf.write("}\n\n")
+
+
+def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, rgb_from_pid, height_from_cube, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid):
     """Creates the V3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
@@ -110,10 +141,31 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, rgb_from_pid, he
     v3map.create_provinces(rgb_from_cube=rgb_from_cube)
     v3map.create_heightmap(height_from_cube=height_from_cube)
     river_background = {k.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_cube.items()}
-    v3map.create_rivers(river_background, river_edges, river_vertices)
+    v3map.create_rivers(river_background, river_edges, river_vertices, base_loc=os.path.join(config["BASE_V3_DIR"], "map_data", "rivers.png"))
+    traits_from_rid = {}
+    arable_from_rid = {r: (10, ["bg_wheat_farms", "bg_livestock_ranches"]) for r in locs_from_rid.keys()}
+    capped_from_rid = {r: {"bg_lead_mining": 10, "bg_iron_mining": 10, "bg_logging": 10, "bg_coal_mining": 10} for r in locs_from_rid.keys()}
+    create_states(
+        file_dir=file_dir,
+        rid_from_pid=rid_from_pid,
+        rgb_from_pid=rgb_from_pid,
+        name_from_rid=name_from_rid,
+        traits_from_rid=traits_from_rid,
+        locs_from_rid=locs_from_rid,
+        arable_from_rid=arable_from_rid,
+        capped_from_rid=capped_from_rid,
+        coast_from_rid=coast_from_rid,
+    )
 
-    strip_base_files(file_dir, config["BASE_V3_DIR"], [
-        "common/decisions",
-        "common/travel",
-        "events"
-    ])
+    strip_base_files(
+        file_dir=file_dir,
+        src_dir=config["BASE_V3_DIR"],
+        subpaths=[
+            "common/decisions",
+            "events"
+        ],
+        to_remove=["c:"],  # Possibly this should be the list of historical tags instead?
+        to_keep=[],
+        subsection=["triggered_desc = {", "option = {"],
+    )
+    create_blanks(file_dir=file_dir)

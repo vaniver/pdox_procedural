@@ -69,9 +69,9 @@ class CK3Map:
                 rgb_from_cube = {k.tuple(): 128 for k,v in terr_from_cube.items() if v == terrain}
                 create_hex_map(rgb_from_ijk=rgb_from_cube, max_x=self.max_x, max_y=self.max_y, mode='L', default="black").save(os.path.join(file_dir, "gfx", "map", "terrain", mask))
     
-    def create_rivers(self, river_background, river_edges, river_vertices, palette_loc="data/river_palette.txt"):
+    def create_rivers(self, river_background, river_edges, river_vertices, base_loc):
         """Create rivers.png"""
-        img = create_hex_map(rgb_from_ijk=river_background, rgb_from_edge=river_edges, rgb_from_vertex=river_vertices, max_x=self.max_x, max_y=self.max_y, mode='P', palette_loc=palette_loc, default="white", n_x=self.n_x, n_y=self.n_y)
+        img = create_hex_map(rgb_from_ijk=river_background, rgb_from_edge=river_edges, rgb_from_vertex=river_vertices, max_x=self.max_x, max_y=self.max_y, mode='P', palette=get_palette(base_loc), default="white", n_x=self.n_x, n_y=self.n_y)
         img.save(os.path.join(self.file_dir, "map_data", "rivers.png"))
 
     def create_positions(self, name_from_pid, pid_from_cube):
@@ -665,7 +665,7 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     ck3map.create_provinces(rgb_from_pid,pid_from_cube, name_from_pid)
     ck3map.create_heightmap(height_from_cube=height_from_cube)
     river_background = {k.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_cube.items()}
-    ck3map.create_rivers(river_background, river_edges, river_vertices)
+    ck3map.create_rivers(river_background, river_edges, river_vertices, base_loc=os.path.join(config["BASE_CK3_DIR"], "map_data", "rivers.png"))
     ck3map.create_positions(name_from_pid, pid_from_cube)
     ck3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], terr_from_cube=terr_from_cube)
     create_adjacencies(file_dir=file_dir, straits=straits, pid_from_cube=pid_from_cube, name_from_pid=name_from_pid, closest_xy=lambda fr, to: closest_xy(fr, to, map.box_height, map.box_width))
@@ -684,5 +684,5 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     ],
     to_remove=["province:", "title:", "character:"],
     to_keep = [],
-    subsection="modifier = {",
+    subsection=["modifier = {"],
     )
