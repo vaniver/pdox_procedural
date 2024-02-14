@@ -8,7 +8,7 @@ from area import Area
 from chunk_split import check_contiguous, find_contiguous, split_chunk, SplitChunkMaxIterationExceeded
 from cube import *
 from terrain import BaseTerrain
-from voronoi import growing_voronoi, voronoi
+from voronoi import area_voronoi, iterative_voronoi, growing_voronoi, voronoi
 
 import ck3
 import v3
@@ -286,6 +286,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
     # Split the kingdoms into duchies
     adj_size_list = [x for x in config["KINGDOM_DUCHY_LIST"]]
     adj_size_list[0] -= 6
+    sea_centers = []
     for kind in range(num_b,num_b+num_k):  # 3 border duchies - 3 kingdoms
         kingdom = [k for k,v in group_from_cube.items() if v==kind]
         # In order to be a capital, it needs to have 5 neighbors in the region and 1 neighbor not allocated.
@@ -317,6 +318,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
                         raise CreationError
         if not to_be_continued:
             cube_from_pid.extend(this_capital)
+            sea_centers.append([x for x in this_capital[0].neighbors() if x not in this_capital][0])
             terr_templates.append(config["KINGDOM_TERRAIN_TEMPLATE"])
             for dind, duchy in enumerate(ksplit):
                 start_ind = 1 if dind == 0 else 0  # We don't need to split out the capital county for the capital duchy; it's already done for us.
@@ -326,7 +328,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
                     raise CreationError
                 for county in dsplit:
                     cube_from_pid.extend(county)
-    return cube_from_pid, terr_templates
+    return cube_from_pid, terr_templates, sea_centers
     
 
 def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65, num_centers=40):
@@ -360,14 +362,16 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
             region_tree.children.append(RegionTree.from_csv(os.path.join("data", title)+".csv"))
         region_trees.append(region_tree)
         candidates = compute_func(chunks, cids, num_k)
+        all_sea_centers = []
         while len(continents) <= cind:
             ind += 1
             print(ind)
             subweights = {k:v for k,v in weight_from_cube.items() if any([k in chunks[cid].members for cid in candidates[ind][0]])}
             try:
-                continent, terr_template = create_triangular_continent(subweights, chunks, candidates[ind], config)
+                continent, terr_template, sea_centers = create_triangular_continent(subweights, chunks, candidates[ind], config)
                 continents.append(continent)
                 terr_templates.append(terr_template)
+                all_sea_centers.extend(sea_centers)
             except CreationError:
                 print("Creation error")
                 if ind == len(candidates):
@@ -375,22 +379,28 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
                     centers, chunks, cids = create_chunks(subweights, num_centers)
                     candidates = compute_func(chunks, cids, num_k)
                     ind = -1
-    return continents, terr_templates, region_trees
+    return continents, terr_templates, region_trees, all_sea_centers
 
 
-def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[]):
+def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], min_province_distance=2):
     """Given the set of cubes sea_cubes, the overall config and optional centers (for regions or provinces), determine the sea regions and sea provinces."""
     # Determine if any of the proposed centers are close to each other, and drop the spare(s) if so. 
-    sea_centers = []
+    sea_province_centers = []
+    rid_from_pid = {}
     for ind, k in enumerate(province_centers):
-        if not any([ok.sub(k).mag() <= 2 for ok in province_centers[ind:]]):  # Should this 2 be configurable?
-            sea_centers.append(k)
-    centers = random.sample(list(sea_cubes),max(0, config.get("SEA_PROVINCES", 80) - len(province_centers))) + sea_centers
-    _, pid_from_cube, _ = voronoi(centers, {k:1 for k in sea_cubes})
-    # TODO: Group the provinces together into regions.
-    # Simplest is just doing another voronoi and computing average membership per province, but I think that could wreck adjacency of regions.
-    # Also possible is doing the regions first, and then splitting each region up into provinces?
-    return pid_from_cube
+        if not any([ok.sub(k).mag() <= min_province_distance for ok in province_centers[ind:]]):  # Should this 2 be configurable?
+            sea_province_centers.append(k)
+    v_centers = random.sample(list(sea_cubes),max(0, config.get("SEA_PROVINCES", 80) - len(sea_province_centers))) + sea_province_centers
+    v_centers, pid_from_cube, _ = voronoi(v_centers, {k:1 for k in sea_cubes})  # TODO: This really ought to be better.
+    # Group the provinces together into regions.
+    pids = sorted(set(pid_from_cube.values()))
+    pid_centers = sorted(set([pid_from_cube[rc] for rc in region_centers]))
+    extra_regions = config.get("SEA_REGIONS", 20) - len(pid_centers)
+    if extra_regions > 0:
+        pid_centers.extend(random.sample([x for x in pids if x not in pid_centers], k=extra_regions))
+    # Now that we have a bunch of centers, we need to allocate all of the regions.
+    rid_from_pid = area_voronoi(pid_from_cube, pid_centers)    
+    return pid_from_cube, rid_from_pid
 
 
 def assign_terrain_subregion(region, template, rough="forest"):
@@ -417,11 +427,12 @@ def assign_terrain_continent(cube_from_pid, templates):
     return terr_from_cube
 
 
-def arrange_inner_sea(continents, sea_center, angles=[2,4,0]):
+def arrange_inner_sea(continents, inner_sea_center, angles=[2,4,0]):
     """Given three continents, arrange them to have straits around a central inner sea.
     Also computes wastelands."""
     assert len(continents) == 3
     moved_continents = []
+    sea_region_centers = [inner_sea_center]
     longest_dim = 0
     offs = [Cube(0,0,0),Cube(0,0,0),Cube(-1,0,1)]  # These are hardcoded for the 1945 seed.
     for ind,continent in enumerate(continents):
@@ -432,9 +443,10 @@ def arrange_inner_sea(continents, sea_center, angles=[2,4,0]):
         ac.calc_bounding_hex()
         longest_dim = max(longest_dim, ac.max_x-ac.min_x, ac.max_y-ac.min_y, ac.max_z-ac.min_z)
         off2, rot = ac.best_corner(angles[ind])
-        moved_continents.append([k.sub(off1).rotate_right(rot+3).sub(off2).add(sea_center).add(offs[ind]) for k in continent])
+        moved_continents.append([k.sub(off1).rotate_right(rot+3).sub(off2).add(inner_sea_center).add(offs[ind]) for k in continent])
     # TODO: Iteratively move them closer to each other until the strait situation is good.
-    return moved_continents
+    # TODO: Add the strait mouths to sea_region_centers.
+    return moved_continents, sea_region_centers
 
 def arrange_mediterranean(continents):
     """Given two continents, arrange them to have straits around a central inner sea. Because of how bounding boxes work, might have to be north/south? :/"""
@@ -460,17 +472,17 @@ def create_data(config):
     """The main function that calls all the other functions in order. 
     The resulting data structure should be enough to make the mod for any particular game."""
     random.seed(config.get("seed", 1945))
-    continents, terr_templates, region_trees = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", 40))
+    continents, terr_templates, region_trees, sea_centers = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", 40))
     m_x = config["n_x"]//2
     m_y = -(config["n_y"]+config["n_x"]//2)//2
-    continents = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
+    continents, sea_region_centers = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
     pid_from_cube = {}
     rid_from_pid = {}
     pid_from_title = {}
     land_cubes = set()
     sea_cubes = set()
     last_pid = 1  # They 1-index instead of 0-indexing.
-    last_rid = 1  # pid is province_id; rid is region_id. (Maybe I should call it area_id instead?)
+    last_rid = 0  # pid is province_id; rid is region_id. Starts at 0 because we increment at each capital.
     terr_from_cube = {}
     name_from_title = {}  # TODO: Import this from localization or w/e
     name_from_pid = {}
@@ -480,12 +492,12 @@ def create_data(config):
         region_caps = {ck3_titles[ind+2]: t for ind, t in enumerate(ck3_titles) if t[0] == "d"}
         names = [x for x in ck3_titles if x[0] == "b"]
         for pid, cube in enumerate(continent):
-            pid_from_cube[cube] = pid + last_pid
-            rid_from_pid[pid + last_pid] = last_rid
             title = names[pid]
             if title in region_caps:
-                name_from_rid[last_rid] = name_from_title.get(region_caps[title],region_caps[title])
                 last_rid += 1
+                name_from_rid[last_rid] = name_from_title.get(region_caps[title],region_caps[title])
+            pid_from_cube[cube] = pid + last_pid
+            rid_from_pid[pid + last_pid] = last_rid
             name_from_pid[pid + last_pid] = name_from_title.get(title,title)
             pid_from_title[title] = pid + last_pid
         land_cubes = land_cubes.union(continent)
@@ -516,19 +528,22 @@ def create_data(config):
         last_rid += 1
     # Determine straits
     straits = []
-    sea_centers = []
     for k in land_cubes:
         for other_land, sea_1, sea_2 in k.valid_straits(land_cubes, sea_cubes):
             straits.append((k, other_land, sea_1, sea_2))
             sea_centers.append(sea_1)
-
-    sid_from_cube = assign_sea_zones(sea_cubes, config, sea_centers)  # TODO: this should have a two-tiered return, so the sea provinces can be split into sea zones.
+    sid_from_cube, srid_from_sid = assign_sea_zones(sea_cubes, config, province_centers=sea_centers, region_centers=sea_region_centers)
     pid_from_cube.update({k:v+last_pid for k,v in sid_from_cube.items()})
     for k, sid in sid_from_cube.items():
         pid = sid+last_pid
         pid_from_cube[k] = pid
         pid_from_title[f"s_{sid}"] = pid
         name_from_pid[pid] = f"s_{sid}"
+    for sid, srid in srid_from_sid.items():
+        rid_from_pid[sid+last_pid] = srid+last_rid
+        name_from_rid[srid+last_rid] = "s_" + str(srid+last_rid)
+    last_pid += max(sid_from_cube.values())
+    last_rid += max(srid_from_sid.values())
     terr_from_cube.update({k:BaseTerrain.ocean for k in sea_cubes})
     # Finish up straits
     straits = [(k, ok, pid_from_cube[x1]) for (k, ok, x1, x2) in straits]

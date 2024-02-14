@@ -113,22 +113,28 @@ def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_fr
     """Creates state_region files, as well as relevant history files."""
     os.makedirs(os.path.join(file_dir,"map_data","state_regions"), exist_ok=True)
     with open(os.path.join(file_dir,"map_data","state_regions", "00_state_regions.txt"), 'w', encoding='utf-8') as outf:
-        for rid, rname in name_from_rid.items():
-            outf.write(f"{rname} = {{\n\tid = {rid}\n\tsubsistence_building = \"building_subsistence_farms\"\n\tprovinces = {{ ")
-            outf.write(" ".join(["\""+hex_rgb(*rgb_from_pid[pid])+"\"" for pid, rrid in rid_from_pid.items() if rid==rrid]))
-            outf.write("}\n")
-            if rid in traits_from_rid:
-                outf.write("\ttraits = { " + " ".join(["\""+trait+"\"" for trait in traits_from_rid[rid]]) + " }\n")
-            if rid in locs_from_rid:
-                for loc, pid in locs_from_rid[rid].items():
-                    if loc in VALID_LOCS:
-                        outf.write(f"\t{loc} = \"{hex_rgb(*rgb_from_pid[pid])}\"\n")
-                arable_land, arable_types = arable_from_rid[rid]
-                outf.write("\n\tarable_land = "+str(arable_land) +"\n\tarable_resources = { "+" ".join(["\""+atype+"\"" for atype in arable_types]) + " }\n\tcapped_reources = {\n")
-                outf.write("\n".join(["\t\t" + ctype + " = " + str(camount) for ctype, camount in capped_from_rid[rid].items()]) + "\t}\n")
-                if "port" in locs_from_rid[rid]:
-                    outf.write("\tnaval_exit_id = " + str(coast_from_rid[rid]) + "\n")
-            outf.write("}\n\n")
+        with open(os.path.join(file_dir,"map_data","state_regions", "99_seas.txt"), 'w', encoding='utf-8') as soutf:
+            for rid, rname in name_from_rid.items():
+                if rname[0] == "i":  # We don't care about the impassable regions. Might need to fix this later.
+                    continue
+                buffer = f"{rname} = {{\n\tid = {rid}\n\tprovinces = {{ "
+                buffer += " ".join(["\""+hex_rgb(*rgb_from_pid[pid])+"\"" for pid, rrid in rid_from_pid.items() if rid==rrid]) + "}\n"
+                if rname[0] == "s":  # sea regions
+                    soutf.write(buffer + "}\n\n")
+                    continue
+                outf.write(buffer + "\tsubsistence_building = \"building_subsistence_farms\"\n")
+                if rid in traits_from_rid:
+                    outf.write("\ttraits = { " + " ".join(["\""+trait+"\"" for trait in traits_from_rid[rid]]) + " }\n")
+                if rid in locs_from_rid:
+                    for loc, pid in locs_from_rid[rid].items():
+                        if loc in VALID_LOCS:
+                            outf.write(f"\t{loc} = \"{hex_rgb(*rgb_from_pid[pid])}\"\n")
+                    arable_land, arable_types = arable_from_rid[rid]
+                    outf.write("\n\tarable_land = "+str(arable_land) +"\n\tarable_resources = { "+" ".join(["\""+atype+"\"" for atype in arable_types]) + " }\n\tcapped_reources = {\n")
+                    outf.write("\n".join(["\t\t" + ctype + " = " + str(camount) for ctype, camount in capped_from_rid[rid].items()]) + "\t}\n")
+                    if "port" in locs_from_rid[rid]:
+                        outf.write("\tnaval_exit_id = " + str(coast_from_rid[rid]) + "\n")
+                outf.write("}\n\n")
 
 
 def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, rgb_from_pid, height_from_cube, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid):

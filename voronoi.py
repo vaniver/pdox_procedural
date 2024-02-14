@@ -1,5 +1,6 @@
 import random
 
+from area import Area
 from cube import Cube
 
 def simple_voronoi(centers, weights_from_cube):
@@ -152,3 +153,35 @@ def iterative_voronoi(num_centers, weight_from_cube, min_size, max_iters=5):
             means[ind].add_in_place(cub)
         print(sum([min_size <= sizes[ind] for ind in range(num_centers)]))
     return centers, guess, distmap
+
+
+def area_voronoi(area_from_cube, centers):
+    """Given a dictionary area_from_cube which maps from cubes to area ids, and a list of centers (indices of the areas list), return a dictionary from area index to center index."""
+    rid_from_aid = {}
+    areas = []
+    aids = sorted(set(area_from_cube.values()))
+    for aid in aids:
+        areas.append(Area(aid, [k for k,v in area_from_cube.items() if v == aid]))
+        areas[-1].calc_edges(area_from_cube)
+    distmap = {aid:{} for aid in aids}  # Each area will have a distance to other centers.
+    for cind, center in enumerate(centers):
+        if center in rid_from_aid: # We're going to silently remove duplicate centers instead of being loud about it. Maybe a mistake?
+            continue
+        rid_from_aid[center] = cind
+        distmap[center][cind] = 0
+        to_explore = set([center])
+        while len(to_explore) > 0:
+            next_area = to_explore.pop()
+            base_dist = distmap[next_area][cind] + 1.
+            for other, other_len in areas[next_area].self_edges.items():
+                other_dist = base_dist + 1. / len(other_len)
+                if len(distmap[other]) == 0 or min(distmap[other].values()) > other_dist:
+                    distmap[other][cind] = other_dist
+                    to_explore.add(other)
+                else:
+                    continue
+    for aid in aids:
+        dists = distmap.get(aid,{0:0})
+        rid_from_aid[aid] = min(dists, key=dists.get)
+    return rid_from_aid
+    
