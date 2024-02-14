@@ -423,7 +423,8 @@ def assign_terrain_continent(cube_from_pid, templates):
     for template in templates:
         max_pid = min_pid + sum(template.values())
         region = {k:v for k,v in cube_from_pid.items() if min_pid <= k < max_pid}
-        terr_from_cube.update(assign_terrain_subregion(region, template))
+        terr_from_cube.update(assign_terrain_subregion(region, template))  # TODO: Correctly use rough
+        min_pid = max_pid
     return terr_from_cube
 
 
@@ -598,7 +599,6 @@ if __name__ == "__main__":
                 else:
                     buffer[sumk] = sum(v)
     config.update(buffer)
-    random.seed(config.get("seed", 1945))
     config["n_x"] = config.get("n_x", 129)
     config["n_y"] = config.get("n_y", 65)
     config["max_x"] = config.get("max_x", config.get("box_width", 10)*(config["n_x"]*3-3))

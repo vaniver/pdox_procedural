@@ -37,89 +37,81 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, rgb_from_vertex
     if palette is not None:
         img.putpalette(palette)
     pix = img.load()
-    for hor in range(n_x):
-        # Calculate starting position
-        hor2 = hor//2
-        if hor % 2 == 1:
-            current = Cube(hor, -hor2-1, -hor2+0)
-            max_ver = n_y-1
-        else:
-            current = Cube(hor, -hor2, -hor2)
-            max_ver = n_y
+    for ijk, rgb in rgb_from_ijk.items():
+        hor = ijk[0]
+        if hor >= n_x:
+            print(ijk, rgb, "out of bounds!")
+        ver = - ijk[1] - hor // 2 - hor % 2
+        if ver >= n_y - hor % 2:
+            print(ijk, rgb, "out of bounds!")
         start_x = (3 * hor - 2) * box_width
-        for ver in range(max_ver):
-            rgb = rgb_from_ijk.get(current.tuple(), None)
-            if rgb is None:
-                continue
-            start_y = (2 * ver - 1 + (hor % 2)) * box_height
-            # Compute what we actually need to paint for this:            
-            if hor == 0:
-                center_wrange = range(box_width, box_width*2)
-                if ver == 0: # top left
-                    for x in range(box_width):
-                        for y in range(box_height, box_height * 2 - river_border[x]):
-                            pix[start_x+box_width*3+x, start_y+y] = rgb
-                    center_vrange = range(box_height, box_height*2)
-                elif ver == n_y - 1: # bottom left
-                    for x in range(box_width):
-                        for y in range(river_border[x], box_height):
-                            pix[start_x+box_width*3+x, start_y+y] = rgb
-                    center_vrange = range(box_height)
-                else: # left edge
-                    for x in range(box_width):
-                        for y in range(river_border[x], box_height * 2 - river_border[x]):
-                            pix[start_x+box_width*3+x, start_y+y] = rgb
-                    center_vrange = range(box_height*2)
-            elif hor == n_x - 1:
-                center_wrange = range(box_width)
-                if ver == 0: # top right                    
-                    for x in range(box_width):
-                        for y in range(box_height, box_height + river_border[x]):
-                            pix[start_x+x, start_y+y] = rgb
-                    center_vrange = range(box_height, box_height*2)
-                elif ver == n_y - 1: # bottom right
-                    for x in range(box_width):
-                        for y in range(box_height - river_border[x], box_height):
-                            pix[start_x+x, start_y+y] = rgb
-                    center_vrange = range(box_height)
-                else: # right edge
-                    for x in range(box_width):
-                        for y in range(box_height - river_border[x], box_height + river_border[x]):
-                            pix[start_x+x, start_y+y] = rgb
-                    center_vrange = range(box_height*2)
-            elif hor % 2 == 0 and ver == 0:
+        start_y = (2 * ver - 1 + (hor % 2)) * box_height
+        # Compute what we actually need to paint for this:            
+        if hor == 0:
+            center_wrange = range(box_width, box_width*2)
+            if ver == 0: # top left
+                for x in range(box_width):
+                    for y in range(box_height, box_height * 2 - river_border[x]):
+                        pix[start_x+box_width*3+x, start_y+y] = rgb
+                center_vrange = range(box_height, box_height*2)
+            elif ver == n_y - 1: # bottom left
+                for x in range(box_width):
+                    for y in range(river_border[x], box_height):
+                        pix[start_x+box_width*3+x, start_y+y] = rgb
+                center_vrange = range(box_height)
+            else: # left edge
+                for x in range(box_width):
+                    for y in range(river_border[x], box_height * 2 - river_border[x]):
+                        pix[start_x+box_width*3+x, start_y+y] = rgb
+                center_vrange = range(box_height*2)
+        elif hor == n_x - 1:
+            center_wrange = range(box_width)
+            if ver == 0: # top right                    
                 for x in range(box_width):
                     for y in range(box_height, box_height + river_border[x]):
                         pix[start_x+x, start_y+y] = rgb
-                for x in range(box_width):
-                    for y in(range(box_height, box_height * 2 - river_border[x])):
-                        pix[start_x+box_width*3+x, start_y+y] = rgb
-                center_wrange = range(box_width*2)
                 center_vrange = range(box_height, box_height*2)
-            elif hor % 2 == 0 and ver == max_ver - 1:
+            elif ver == n_y - 1: # bottom right
                 for x in range(box_width):
                     for y in range(box_height - river_border[x], box_height):
                         pix[start_x+x, start_y+y] = rgb
-                for x in range(box_width):
-                    for y in(range(river_border[x], box_height)):
-                        pix[start_x+box_width*3+x, start_y+y] = rgb
-                center_wrange = range(box_width*2)
                 center_vrange = range(box_height)
-            else:
+            else: # right edge
                 for x in range(box_width):
                     for y in range(box_height - river_border[x], box_height + river_border[x]):
                         pix[start_x+x, start_y+y] = rgb
-                for x in range(box_width):
-                    for y in(range(river_border[x], box_height * 2 - river_border[x])):
-                        pix[start_x+box_width*3+x, start_y+y] = rgb
-                center_wrange = range(box_width*2)
                 center_vrange = range(box_height*2)
-            #Paint the center boxes. This could be a drawn rectangle but w/e
-            for x in center_wrange:
-                for y in center_vrange:
-                    pix[start_x + box_width + x,start_y + y] = rgb
-            # Move to the next one
-            current = current.add(Cube(0,-1,1)) # Move down
+        elif hor % 2 == 0 and ver == 0:
+            for x in range(box_width):
+                for y in range(box_height, box_height + river_border[x]):
+                    pix[start_x+x, start_y+y] = rgb
+            for x in range(box_width):
+                for y in(range(box_height, box_height * 2 - river_border[x])):
+                    pix[start_x+box_width*3+x, start_y+y] = rgb
+            center_wrange = range(box_width*2)
+            center_vrange = range(box_height, box_height*2)
+        elif hor % 2 == 0 and ver == n_y - 1:
+            for x in range(box_width):
+                for y in range(box_height - river_border[x], box_height):
+                    pix[start_x+x, start_y+y] = rgb
+            for x in range(box_width):
+                for y in(range(river_border[x], box_height)):
+                    pix[start_x+box_width*3+x, start_y+y] = rgb
+            center_wrange = range(box_width*2)
+            center_vrange = range(box_height)
+        else:
+            for x in range(box_width):
+                for y in range(box_height - river_border[x], box_height + river_border[x]):
+                    pix[start_x+x, start_y+y] = rgb
+            for x in range(box_width):
+                for y in(range(river_border[x], box_height * 2 - river_border[x])):
+                    pix[start_x+box_width*3+x, start_y+y] = rgb
+            center_wrange = range(box_width*2)
+            center_vrange = range(box_height*2)
+        #Paint the center boxes. This could be a drawn rectangle but w/e
+        for x in center_wrange:
+            for y in center_vrange:
+                pix[start_x + box_width + x,start_y + y] = rgb
     for edge, (rgb, thickness) in rgb_from_edge.items():
         # The edges that get painted are the south (0), southeast (1), and northeast edges (2).
         # This currently doesn't check that the edges are actually on-map, which it probably should? These are not supposed to be populated near the edge.
@@ -130,7 +122,6 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, rgb_from_vertex
         y_down = thickness // 2
         y_up = thickness - y_down
         # TODO: Make it so edges never try to paint the same pixels?
-        # TODO: Try to ensure no four-corners situations. Normally caused by painting rot=2 before rot=1, so maybe we should order by rot?
         if edge.rot == 0:
             # If thickness == 1 this should just be the southernmost pixels of the hex.
             for x in range(start_x + box_width, start_x + box_width * 3 + 1):  # The +1 is because the right-most pixel is generally actually painted by the triangles; but with an impassable mountain / major river, we want to block the connection.

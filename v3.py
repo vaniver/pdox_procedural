@@ -60,11 +60,12 @@ class V3Map:
                 continue
             mask_name = mask[5:-4]  # begins with mask_ and ends with .png
             if mask_name not in USED_MASKS.values():
-                create_hex_map(rgb_from_ijk={}, max_x=self.max_x, max_y=self.max_y, mode='L', default="black").save(os.path.join(file_dir, "gfx", "map", "terrain", mask))
+                create_hex_map(rgb_from_ijk={}, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(file_dir, "gfx", "map", "terrain", mask))
             else:
                 terrain = [k for k,v in USED_MASKS.items() if v == mask_name][0]
-                rgb_from_cube = {k.tuple(): 128 for k,v in terr_from_cube.items() if v == terrain}
-                create_hex_map(rgb_from_ijk=rgb_from_cube, max_x=self.max_x, max_y=self.max_y, mode='L', default="black").save(os.path.join(file_dir, "gfx", "map", "terrain", mask))
+                rgb_from_ijk = {k.tuple(): 128 for k,v in terr_from_cube.items() if v == terrain}
+                img = create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black")
+                img.save(os.path.join(file_dir, "gfx", "map", "terrain", mask))
     
     def create_rivers(self, river_background, river_edges, river_vertices, base_loc):
         """Create rivers.png"""
@@ -88,8 +89,8 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     file_dir = os.path.join(file_dir, mod_name)
     os.makedirs(os.path.join(file_dir,".metadata"), exist_ok=True)
     with open(os.path.join(file_dir, ".metadata", "metadata.json"),'w') as outf:
-        outf.write("{\n\t\"name\" : "+mod_disp_name+"\",\n\t\"id\" : \"\"\n\t\"version\" : \"\"\n\t\"supported_game_version\" : \"\",\n\t\"short_description\" : \"\",\n\t\"tags\" : [],\n\t\"relationships\" : [],\n\t\"game_custom_data\" : {\t\t\"multiplayer_synchronized\" : true\n\t},\n\t\"replace_paths\": [\n")
-        outf.write("\n".join(x for x in [                
+        outf.write("{\n\t\"name\" : \""+mod_disp_name+"\",\n\t\"id\" : \"\",\n\t\"version\" : \"0.0\",\n\t\"supported_game_version\" : \"1.5.13\",\n\t\"short_description\" : \"\",\n\t\"tags\" : [\n\t\t\"Total Conversion\"\n\t],\n\t\"relationships\" : [],\n\t\"game_custom_data\" : {\n\t\t\"multiplayer_synchronized\" : true,\n\t\t\"replace_paths\": [\n")
+        outf.write(",\n".join("\t\t\t\"" + x + "\"" for x in [                
                     "common/country_definitions",
                     "common/history/buildings",
                     "common/history/characters",
@@ -99,14 +100,14 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
                     "content_source/map_objects/masks",
                     "map_data/state_regions",
                 ]))
-        outf.write("\n\t]\n}\n")
+        outf.write("\n\t\t]\n\t}\n}\n")
     return file_dir
 
 
+HEX_LIST = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F"]
 def hex_rgb(r, g, b):
     """Create a v3-style hex string from a r,g,b tuple. (Use *rgb to split the tuple.)"""
-    hr, hg, hb = hex(r), hex(g), hex(b)
-    return "x" + (hr[2:] + hg[2:] + hb[2:]).upper()  # This much string manipulation is probably slow compared to doing the hexification myself? :/
+    return "x" + HEX_LIST[r // 16] + HEX_LIST[r % 16] + HEX_LIST[g // 16] + HEX_LIST[g % 16] + HEX_LIST[b // 16] + HEX_LIST[b % 16]
 
 
 def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_from_rid, locs_from_rid, arable_from_rid, capped_from_rid, coast_from_rid):
@@ -130,7 +131,7 @@ def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_fr
                         if loc in VALID_LOCS:
                             outf.write(f"\t{loc} = \"{hex_rgb(*rgb_from_pid[pid])}\"\n")
                     arable_land, arable_types = arable_from_rid[rid]
-                    outf.write("\n\tarable_land = "+str(arable_land) +"\n\tarable_resources = { "+" ".join(["\""+atype+"\"" for atype in arable_types]) + " }\n\tcapped_reources = {\n")
+                    outf.write("\n\tarable_land = "+str(arable_land) +"\n\tarable_resources = { "+" ".join(["\""+atype+"\"" for atype in arable_types]) + " }\n\tcapped_resources = {\n")
                     outf.write("\n".join(["\t\t" + ctype + " = " + str(camount) for ctype, camount in capped_from_rid[rid].items()]) + "\t}\n")
                     if "port" in locs_from_rid[rid]:
                         outf.write("\tnaval_exit_id = " + str(coast_from_rid[rid]) + "\n")
@@ -148,6 +149,7 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, rg
     v3map.create_heightmap(height_from_cube=height_from_cube)
     river_background = {k.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_cube.items()}
     v3map.create_rivers(river_background, river_edges, river_vertices, base_loc=os.path.join(config["BASE_V3_DIR"], "map_data", "rivers.png"))
+    v3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_V3_DIR"], terr_from_cube=terr_from_cube)
     traits_from_rid = {}
     arable_from_rid = {r: (10, ["bg_wheat_farms", "bg_livestock_ranches"]) for r in locs_from_rid.keys()}
     capped_from_rid = {r: {"bg_lead_mining": 10, "bg_iron_mining": 10, "bg_logging": 10, "bg_coal_mining": 10} for r in locs_from_rid.keys()}
