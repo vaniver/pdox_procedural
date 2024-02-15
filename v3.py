@@ -111,7 +111,10 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     with open(os.path.join(file_dir, ".metadata", "metadata.json"),'w') as outf:
         outf.write("{\n\t\"name\" : \""+mod_disp_name+"\",\n\t\"id\" : \"\",\n\t\"version\" : \"0.0\",\n\t\"supported_game_version\" : \"1.5.13\",\n\t\"short_description\" : \"\",\n\t\"tags\" : [\n\t\t\"Total Conversion\"\n\t],\n\t\"relationships\" : [],\n\t\"game_custom_data\" : {\n\t\t\"multiplayer_synchronized\" : true,\n\t\t\"replace_paths\": [\n")
         outf.write(",\n".join("\t\t\t\"" + x + "\"" for x in [                
+                    "common/canals",
+                    "common/country_creation",
                     "common/country_definitions",
+                    "common/country_formation",
                     "common/history/buildings",
                     "common/history/characters",
                     "common/history/countries",
@@ -158,10 +161,25 @@ def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_fr
                 outf.write("}\n\n")
 
 
-def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid):
+def create_countries(file_dir, base_dir, region_trees):
+    """Creates common/country_definitions files, as well as relevant history files."""
+    os.makedirs(os.path.join(file_dir,"common","country_definitions"), exist_ok=True)
+    with open(os.path.join(os.path.join(file_dir, "common", "country_definitions", "00_countries.txt")), 'w', encoding='utf-8') as outf:
+        for region_tree in region_trees:
+            for region in region_tree.children:
+                if region.title[0] == "k":
+                    r,g,b = region.color
+                    outf.write(region.title[2:5].upper() + f" = {{\n\tcolor = {{ {r} {g} {b} }}\n\tcountry_type = recognized\n\ttier = kingdom\n\tcultures = {{ {region.culture} }}\n\tcapital = {region.children[0].title}\n}}\n\n") # TODO: Fix tags.
+    with open(os.path.join(os.path.join(base_dir, "common", "country_definitions", "99_dynamic.txt")), 'r', encoding='utf-8') as inf:
+        with open(os.path.join(os.path.join(file_dir, "common", "country_definitions", "99_dynamic.txt")), 'w', encoding='utf-8') as outf:
+            for line in inf.readlines():
+                outf.write(line)
+
+def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid, region_trees):
     """Creates the V3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
+    create_blanks(file_dir=file_dir)  # This is here so if we do make the files later, we won't overwrite them.
     rgb_from_cube = {k:rgb_from_pid[pid] for k, pid in pid_from_cube.items()}
     # Maps
     v3map = V3Map(file_dir=file_dir, max_x=config["max_x"], max_y=config["max_y"], n_x=config["n_x"], n_y=config["n_y"])
@@ -185,7 +203,7 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
         capped_from_rid=capped_from_rid,
         coast_from_rid=coast_from_rid,
     )
-
+    create_countries(file_dir=file_dir, base_dir=config["BASE_V3_DIR"], region_trees=region_trees)
     strip_base_files(
         file_dir=file_dir,
         src_dir=config["BASE_V3_DIR"],
@@ -197,4 +215,3 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
         to_keep=[],
         subsection=["triggered_desc = {", "option = {"],
     )
-    create_blanks(file_dir=file_dir)

@@ -633,4 +633,5 @@ if __name__ == "__main__":
             locs_from_rid=locs_from_rid,
             coast_from_rid=coast_from_rid,
             name_from_rid=name_from_rid,
+            region_trees=region_trees
         )
