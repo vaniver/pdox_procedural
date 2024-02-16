@@ -1,0 +1,23 @@
+This project procedurally generates maps for the four main historical Paradox games: Crusader Kings III, Europa Universalis IV, Victoria 3, and Hearts of Iron IV.
+
+Current status is:
+* CK3: doesn't CTD
+* EU4: Not started
+* V3: CTD
+* HOI4: Not started
+
+The core procedures are in `gen.py`, with configuration details set in `config.yaml` and `/data`. In order to get it to work, you'll need to change the output location, at least, and then run `python3 gen.py`.
+
+**CONFIGURATION**
+
+The top of the config file contains basic customization: the name of the mod and where it should be output. The program will only output mods that are in the `MOD_OUTPUT` dictionary to the location used as a key.
+After that is the base install files. A bunch of files are read from the base game and then modified (to strip out historical events, for example), and this should be more robust to game updates than having pre-made files.
+
+`CONTINENT_LISTS` is used to determine which countries to include on the map, and how to arrange them. The countries need to have appropriate csv files in `data`.
+
+The remaining configs are used to shape the construction procedure.
+
+**TITLE FORMAT**
+
+TODO: Fill this out
+
