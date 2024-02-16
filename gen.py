@@ -31,13 +31,14 @@ class RegionTree:
     The overall divisions of the world are not a tree, but landed_titles and related things are.
     At the county level, children (the baronies) is just a list of strings instead of a list of RegionTrees.
     """
-    def __init__(self, title=None, culture=None, religion=None, rough="forest", holy_site=None, color=("0","0","0"), capital_title=None, children = []):
+    def __init__(self, title=None, tag=None, culture=None, religion=None, rough="forest", holy_site=None, color=("0","0","0"), capital_title=None, children = []):
         self.capital_title = capital_title
         self.culture = culture
         self.religion = religion
         self.rough = rough
         self.holy_site = holy_site
         self.title = title
+        self.tag = tag
         self.color = color
         if len(children) > 0:
             self.children = children
@@ -65,6 +66,26 @@ class RegionTree:
     def some_ck3_titles(self, filter):
         """Returns all ck3 titles that start with filter."""
         return [x for x in self.all_ck3_titles() if x.startswith(filter)]
+    
+    def all_region_trees(self):
+        rt_list = [self]
+        for child in self.children:
+            if isinstance(child,RegionTree):
+                rt_list.extend(child.all_region_trees())
+        return rt_list
+    
+    def all_tag_pids(self, last_tag=""):
+        """Returns a list tag mappings defined by this region_tree.
+        Will have a blank string for any untagged provinces."""
+        if self.tag is not None:
+            last_tag = self.tag
+        tag_list = []
+        for child in self.children:
+            if isinstance(child,RegionTree):
+                tag_list.extend(child.all_tag_pids(last_tag=last_tag))
+            else:
+                tag_list.append(last_tag)
+        return tag_list
 
     def all_holy_sites(self):
         """Returns all holy sites."""
@@ -135,9 +156,9 @@ class RegionTree:
                     current[depth-1].children.append(current.pop(depth))
                 title = lsplit[0]
                 color = tuple([x.strip() for x in lsplit[1:4]]) if len(lsplit) > 3 else ("0","0","0")
-                culture, religion, rough = lsplit[4:7] if len(lsplit) > 6 else [None, None, "forest"]
-                holy_site = lsplit[7].strip() if len(lsplit) > 7 else None
-                current[depth] = cls(title=title, color=color, culture=culture, religion=religion, rough=rough, holy_site=holy_site)
+                tag, culture, religion, rough = lsplit[4:8] if len(lsplit) > 7 else [None, None, None, "forest"]
+                holy_site = lsplit[8].strip() if len(lsplit) > 8 else None
+                current[depth] = cls(title=title, color=color, tag=tag, culture=culture, religion=religion, rough=rough, holy_site=holy_site)
             while len(current) > 0:
                 depth = max(current.keys())
                 if depth-1 in current:
@@ -470,28 +491,37 @@ def create_data(config):
     continents, sea_region_centers = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
     pid_from_cube = {}
     rid_from_pid = {}
+    cid_from_pid = {}  # This is mostly useful for EU4, whose lowest level is the cid, not the pid.
     pid_from_title = {}
+    tag_from_pid = {}
     land_cubes = set()
     sea_cubes = set()
-    last_pid = 1  # They 1-index instead of 0-indexing.
-    last_rid = 0  # pid is province_id; rid is region_id. Starts at 0 because we increment at each capital.
+    last_pid = 1  # province_id. They 1-index instead of 0-indexing.
+    last_cid = 0  # county_id. Starts at 0 because we increment at each capital, which happens first.
+    last_rid = 0  # region_id. Starts at 0 because we increment at each capital, which happens first.
     terr_from_cube = {}
     name_from_title = {}  # TODO: Import this from localization or w/e
     name_from_pid = {}
+    name_from_cid = {}
     name_from_rid = {}
     for cind, continent in enumerate(continents):
         ck3_titles = region_trees[cind].all_ck3_titles()
         region_caps = {ck3_titles[ind+2]: t for ind, t in enumerate(ck3_titles) if t[0] == "d"}
+        county_caps = {ck3_titles[ind+1]: t for ind, t in enumerate(ck3_titles) if t[0] == "c"}
         names = [x for x in ck3_titles if x[0] == "b"]
         for pid, cube in enumerate(continent):
             title = names[pid]
             if title in region_caps:
                 last_rid += 1
                 name_from_rid[last_rid] = name_from_title.get(region_caps[title],region_caps[title])
+            if title in county_caps:
+                last_cid += 1
+                name_from_cid[last_cid] = name_from_title.get(county_caps[title],county_caps[title])
             pid_from_cube[cube] = pid + last_pid
             rid_from_pid[pid + last_pid] = last_rid
             name_from_pid[pid + last_pid] = name_from_title.get(title,title)
             pid_from_title[title] = pid + last_pid
+        tag_from_pid.update({pid + last_pid: tag for pid, tag in enumerate(region_trees[cind].all_tag_pids())})
         land_cubes = land_cubes.union(continent)
         last_pid += len(continent)
         terr_from_cube.update(assign_terrain_continent({v:k for k,v in pid_from_cube.items() if k in continent}, terr_templates[cind]))
@@ -573,7 +603,7 @@ def create_data(config):
     # Create rivers
     river_edges = {Edge(Cube(3,-2,-1),0): (4,1)}
     river_vertices = {Vertex(Cube(2,-2,0),1): 0}
-    return continents, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid,
+    return continents, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, tag_from_pid
 
 
 
@@ -596,7 +626,7 @@ if __name__ == "__main__":
     config["max_x"] = config.get("max_x", config.get("box_width", 10)*(config["n_x"]*3-3))
     config["max_y"] = config.get("max_y", config.get("box_height", 17)*(config["n_y"]*2-2))
 
-    continents, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, = create_data(config)
+    continents, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, height_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, tag_from_pid = create_data(config)
     cultures, religions = assemble_culrels(region_trees=region_trees)  # Not obvious this should be here instead of just derived later?
     rgb_from_pid = create_colors(pid_from_cube)
     if "CK3" in config["MOD_OUTPUTS"]:
@@ -633,5 +663,6 @@ if __name__ == "__main__":
             locs_from_rid=locs_from_rid,
             coast_from_rid=coast_from_rid,
             name_from_rid=name_from_rid,
-            region_trees=region_trees
+            region_trees=region_trees,
+            tag_from_pid=tag_from_pid,
         )

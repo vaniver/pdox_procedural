@@ -63,26 +63,40 @@ class V3Map:
             outf.write("max_compress_level=4\n")
             outf.write("empty_tile_offset={ 201 76 }\n")
 
-    def create_terrain_masks(self, file_dir, base_dir, terr_from_cube):
+    def create_terrain_masks(self, base_dir, terr_from_cube):
         """Creates all the terrain masks; just fills each cube.
         terr_from_cube is a map from cube to BaseTerrain."""
-        os.makedirs(os.path.join(file_dir, "gfx", "map", "terrain"), exist_ok=True)
+        os.makedirs(os.path.join(self.file_dir, "gfx", "map", "terrain"), exist_ok=True)
         for mask in os.listdir(os.path.join(base_dir, "gfx", "map", "terrain")):
             if not mask.startswith("mask"):
                 continue
             mask_name = mask[5:-4]  # begins with mask_ and ends with .png
             if mask_name not in USED_MASKS.values():
-                create_hex_map(rgb_from_ijk={}, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(file_dir, "gfx", "map", "terrain", mask))
+                create_hex_map(rgb_from_ijk={}, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(self.file_dir, "gfx", "map", "terrain", mask))
             else:
                 terrain = [k for k,v in USED_MASKS.items() if v == mask_name][0]
                 rgb_from_ijk = {k.tuple(): 128 for k,v in terr_from_cube.items() if v == terrain}
                 img = create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black")
-                img.save(os.path.join(file_dir, "gfx", "map", "terrain", mask))
+                img.save(os.path.join(self.file_dir, "gfx", "map", "terrain", mask))
     
     def create_rivers(self, river_background, river_edges, river_vertices, base_loc):
         """Create rivers.png"""
         img = create_hex_map(rgb_from_ijk=river_background, rgb_from_edge=river_edges, rgb_from_vertex=river_vertices, max_x=self.max_x, max_y=self.max_y, mode='P', palette=get_palette(base_loc), default="white", n_x=self.n_x, n_y=self.n_y)
         img.save(os.path.join(self.file_dir, "map_data", "rivers.png"))
+
+    def update_defines(self, base_dir):
+        """Copies common/defines/00_defines.txt but replaces WORLD_EXTENTS_X and Z."""
+        os.makedirs(os.path.join(self.file_dir, "common", "defines"), exist_ok=True)
+        with open(os.path.join(base_dir, "common", "defines", "00_defines.txt"), 'r', encoding='utf-8') as inf:
+            with open(os.path.join(self.file_dir, "common", "defines", "00_defines.txt"), 'w', encoding='utf-8') as outf:
+                for line in inf.readlines():
+                    if line.startswith("\tWORLD_EXTENTS_X"):
+                        outf.write(line.split("=")[0] + f"= {self.max_x}\n")
+                    elif line.startswith("\tWORLD_EXTENTS_Y"):
+                        outf.write(line.split("=")[0] + f"= {self.max_y}\n")
+                    else:
+                        outf.write(line)
+        # TODO: Confirm that I don't need to update 00_graphics.txt, mostly CAMERA_START.
 
 
 def create_blanks(file_dir):
@@ -118,8 +132,16 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
                     "common/history/buildings",
                     "common/history/characters",
                     "common/history/countries",
+                    "common/history/diplomacy",
                     "common/history/diplomatic_plays",
+                    "common/history/governments",
+                    "common/history/interests",
+                    "common/history/military_deployments",
+                    "common/history/military_formations",
                     "common/history/pops",
+                    "common/history/population",
+                    "common/history/production_methods",
+                    "common/history/trade_routes",
                     "content_source/map_objects/masks",
                     "map_data/state_regions",
                 ]))
@@ -133,7 +155,7 @@ def hex_rgb(r, g, b):
     return "x" + HEX_LIST[r // 16] + HEX_LIST[r % 16] + HEX_LIST[g // 16] + HEX_LIST[g % 16] + HEX_LIST[b // 16] + HEX_LIST[b % 16]
 
 
-def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_from_rid, locs_from_rid, arable_from_rid, capped_from_rid, coast_from_rid):
+def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_from_rid, locs_from_rid, arable_from_rid, capped_from_rid, coast_from_rid, tag_from_pid, pop_from_rid, building_from_rid, homelands_from_rid={}, claims_from_rid={}):
     """Creates state_region files, as well as relevant history files."""
     os.makedirs(os.path.join(file_dir,"map_data","state_regions"), exist_ok=True)
     with open(os.path.join(file_dir,"map_data","state_regions", "00_state_regions.txt"), 'w', encoding='utf-8') as outf:
@@ -159,23 +181,98 @@ def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_fr
                     if "port" in locs_from_rid[rid]:
                         outf.write("\tnaval_exit_id = " + str(coast_from_rid[rid]) + "\n")
                 outf.write("}\n\n")
+    pids_from_rid = {}
+    for pid, rid in rid_from_pid.items():
+        if rid in pids_from_rid:
+            pids_from_rid[rid].append(pid)
+        else:
+            pids_from_rid[rid] = [pid]
+    os.makedirs(os.path.join(file_dir,"common","history", "states"), exist_ok=True)
+    with open(os.path.join(file_dir, "common", "history", "states", "00_states.txt"), 'w', encoding='utf-8') as outf:
+        outf.write("STATES = {\n")
+        for rid, rname in name_from_rid.items():
+            if rname[0] == "i" or rname[0] == "s":  # We don't care about the impassable regions or seas.
+                continue
+            outf.write(f"\ts:{rname} = {{\n")
+            tags = {}  # This seems awkward--maybe I should store this better elsewhere?
+            for pid in pids_from_rid[rid]:
+                tag = tag_from_pid[pid]
+                if tag in tags:
+                    tags[tag].append(pid)
+                else:
+                    tags[tag] = [pid]
+            for tag, pids in tags.items():
+                outf.write(f"\t\tcreate_state = {{\n\t\t\tcountry = c:{tag}\n\t\t\towned_provinces = {{ ")
+                outf.write(" ".join([hex_rgb(*rgb_from_pid[pid]) for pid in pids]))
+                outf.write("\t\t}\\n")
+            if rid in homelands_from_rid:
+                outf.write("\n"+"\n".join(["\t\tadd_homeland = cu:" + culture for culture in homelands_from_rid[rid]]) + "\n")
+            if rid in claims_from_rid:
+                outf.write("\n"+"\n".join(["\t\tadd_homeland = c:" + tag for tag in claims_from_rid[rid]]) + "\n")
+            outf.write("\t}\n")
+    os.makedirs(os.path.join(file_dir,"common","history", "pops"), exist_ok=True)
+    with open(os.path.join(file_dir, "common", "history", "pops", "00_world.txt"), 'w', encoding='utf-8') as outf:
+        outf.write("POPS = {\n")
+        for rid, pop_from_tag in pop_from_rid.items():
+            outf.write(f"\ts:{name_from_rid[rid]} = {{\n")
+            for tag, pops in pop_from_tag.items():
+                outf.write(f"\t\tregion_state:{tag} = {{\n")
+                for (size, culture, religion) in pops:
+                    buffer = ""
+                    if culture is not None:
+                        buffer += f"\t\t\t\tculture = {culture}\n"
+                    if religion is not None:
+                        buffer += f"\t\t\t\treligion = {religion}\n"
+                    outf.write(f"\t\t\tcreate_pop = {{\n{buffer}\t\t\t\tsize = {size}\n\t\t\t}}\n")
+                outf.write("\t\t}\n")
+            outf.write("\t}\n")
+        outf.write("}\n")
+    os.makedirs(os.path.join(file_dir,"common","history", "buildings"), exist_ok=True)
+    with open(os.path.join(file_dir, "common", "history", "buildings", "00_world.txt"), 'w', encoding='utf-8') as outf:
+        outf.write("BUILDINGS = {\n")
+        for rid, building_from_tag in building_from_rid.items():
+            outf.write(f"\ts:{name_from_rid[rid]} = {{\n")
+            for tag, buildings in building_from_tag.items():
+                outf.write(f"\t\tregion_state:{tag} = {{\n")
+                for (btype, level, reserves, pms) in buildings:
+                    outf.write(f"\t\t\tcreate_building = {{\n\t\t\t\tbuilding = \"{btype}\"\n\t\t\t\tlevel={level}\n\t\t\t\treserves={reserves}\n\t\t\t\tactivate_production_methods={{ " + " ".join(["\"" + pm + "\"" for pm in pms])  + " }\n\t\t\t}\n")
+                outf.write("\t\t}\n")
+            outf.write("\t}\n")
+        outf.write("}\n")
 
 
-def create_countries(file_dir, base_dir, region_trees):
+TIER_FROM_PREFIX = {
+    "e": "empire",
+    "k": "kingdom",
+    "d": "grand_principality",
+    "c": "principality",
+}
+
+def create_countries(file_dir, base_dir, region_trees, tech_from_tag, tax_from_tag, laws_from_tag, wealth_from_tag, literacy_from_tag):
     """Creates common/country_definitions files, as well as relevant history files."""
     os.makedirs(os.path.join(file_dir,"common","country_definitions"), exist_ok=True)
     with open(os.path.join(os.path.join(file_dir, "common", "country_definitions", "00_countries.txt")), 'w', encoding='utf-8') as outf:
         for region_tree in region_trees:
-            for region in region_tree.children:
-                if region.title[0] == "k":
+            for region in region_tree.all_region_trees():
+                if region.tag is not None:
                     r,g,b = region.color
-                    outf.write(region.title[2:5].upper() + f" = {{\n\tcolor = {{ {r} {g} {b} }}\n\tcountry_type = recognized\n\ttier = kingdom\n\tcultures = {{ {region.culture} }}\n\tcapital = {region.children[0].title}\n}}\n\n") # TODO: Fix tags.
+                    capital = region.title if region.title[0] == "d" else region.children[0].title  # TODO: we should have a capital_state in region_tree
+                    outf.write(region.tag + f" = {{\n\tcolor = {{ {r} {g} {b} }}\n\tcountry_type = recognized\n\ttier = {TIER_FROM_PREFIX[region.title[0]]}\n\tcultures = {{ {region.culture} }}\n\tcapital = {capital}\n}}\n\n")
     with open(os.path.join(os.path.join(base_dir, "common", "country_definitions", "99_dynamic.txt")), 'r', encoding='utf-8') as inf:
         with open(os.path.join(os.path.join(file_dir, "common", "country_definitions", "99_dynamic.txt")), 'w', encoding='utf-8') as outf:
             for line in inf.readlines():
                 outf.write(line)
+    os.makedirs(os.path.join(file_dir,"common","history","countries"), exist_ok=True)
+    for tag, tech in tech_from_tag.items():
+        with open(os.path.join(file_dir,"common","history","countries", f"{tag} - {tag}.txt"),'w', encoding='utf-8') as outf:  # Not actually obvious these need to be different files instead of one mongo file
+            outf.write(f"COUNTRIES = {{\n\tc:{tag} = {{\n\teffect_starting_technology_tier_{str(tech)}_tech = yes\n\t\tset_tax_level = {tax_from_tag[tag]}\n")
+            outf.write("\n".join(["\t\tactivate_law = law_type:" + law for law in laws_from_tag[tag]]) + "\n\t}\n}\n")
+    os.makedirs(os.path.join(file_dir,"common","history","population"), exist_ok=True)
+    for tag, wealth in wealth_from_tag.items():
+        with open(os.path.join(file_dir,"common","history","population", f"{tag} - {tag}.txt"),'w', encoding='utf-8') as outf:  # Not actually obvious these need to be different files instead of one mongo file
+            outf.write(f"POPULATION = {{\n\tc:{tag} = {{\n\t\teffect_starting_pop_wealth_{wealth} = yes\n\t\teffect_starting_pop_literacy_{literacy_from_tag[tag]} = yes\n\t}}\n}}\n")
 
-def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid, region_trees):
+def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid, region_trees, tag_from_pid):
     """Creates the V3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
@@ -187,11 +284,14 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
     v3map.create_heightmap(height_from_cube=height_from_cube)
     river_background = {k.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_cube.items()}
     v3map.create_rivers(river_background, river_edges, river_vertices, base_loc=os.path.join(config["BASE_V3_DIR"], "map_data", "rivers.png"))
-    v3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_V3_DIR"], terr_from_cube=terr_from_cube)
+    v3map.create_terrain_masks(base_dir=config["BASE_V3_DIR"], terr_from_cube=terr_from_cube)
     create_terrain_file(file_dir, terr_from_pid=terr_from_pid, rgb_from_pid=rgb_from_pid)
+    v3map.update_defines(base_dir=config["BASE_V3_DIR"])
     traits_from_rid = {}
     arable_from_rid = {r: (10, ["bg_wheat_farms", "bg_livestock_ranches"]) for r in locs_from_rid.keys()}
     capped_from_rid = {r: {"bg_lead_mining": 10, "bg_iron_mining": 10, "bg_logging": 10, "bg_coal_mining": 10} for r in locs_from_rid.keys()}
+    pop_from_rid = {rid_from_pid[pid]: {tag: [(500, "swedish", "catholic")]} for pid, tag in tag_from_pid.items()}
+    building_from_rid = {rid_from_pid[pid]: {tag: [("building_government_administration", "1", "1", ["pm_horizontal_drawer_cabinets"])]} for pid, tag in tag_from_pid.items()}
     create_states(
         file_dir=file_dir,
         rid_from_pid=rid_from_pid,
@@ -202,16 +302,51 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
         arable_from_rid=arable_from_rid,
         capped_from_rid=capped_from_rid,
         coast_from_rid=coast_from_rid,
+        tag_from_pid=tag_from_pid,
+        homelands_from_rid={},  # TODO: Allocate homelands.
+        claims_from_rid={},  # TODO: Claims--tho this is probably conversion-only.
+        pop_from_rid=pop_from_rid,
+        building_from_rid=building_from_rid,
     )
-    create_countries(file_dir=file_dir, base_dir=config["BASE_V3_DIR"], region_trees=region_trees)
+    tags = sorted(set(tag_from_pid.values()))
+    tech_from_tag = {tag: "1" for tag in tags}
+    tax_from_tag = {tag: "medium" for tag in tags}
+    laws_from_tag = {tag: [
+        "law_monarchy",
+        "law_autocracy",
+		"law_freedom_of_conscience",
+		"law_serfdom",
+		"law_hereditary_bureaucrats",
+		"law_national_supremacy",
+		"law_isolationism",
+		"law_local_police",
+		"law_no_schools",
+		"law_land_based_taxation",
+		"law_censorship",
+		"law_closed_borders",
+		"law_frontier_colonization",
+    ] for tag in tags}
+    wealth_from_tag = {tag:"high" for tag in tags}
+    literacy_from_tag = {tag:"high" for tag in tags}
+    create_countries(
+        file_dir=file_dir,
+        base_dir=config["BASE_V3_DIR"],
+        region_trees=region_trees,
+        tech_from_tag=tech_from_tag,
+        tax_from_tag=tax_from_tag,
+        laws_from_tag=laws_from_tag,
+        wealth_from_tag=wealth_from_tag,
+        literacy_from_tag=literacy_from_tag,
+        )
     strip_base_files(
         file_dir=file_dir,
         src_dir=config["BASE_V3_DIR"],
         subpaths=[
             "common/decisions",
-            "events"
+            "common/history/global",
+            "events",
         ],
-        to_remove=["c:"],  # Possibly this should be the list of historical tags instead?
+        to_remove=["c:","s:"],  # cu: ? Also this should maybe be the list of historical tags instead?
         to_keep=[],
         subsection=["triggered_desc = {", "option = {"],
     )
