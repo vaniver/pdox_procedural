@@ -26,6 +26,7 @@ class CK3Map:
         self.max_y = max_y
         self.n_x = n_x
         self.n_y = n_y
+        self.box_height, self.box_width = box_from_max(self.max_x, self.max_y, self.n_x, self.n_y)
 
     def create_provinces(self, rgb_from_pid, pid_from_cube, name_from_pid):
         """Creates provinces.png and definition.csv"""
@@ -76,9 +77,8 @@ class CK3Map:
 
     def create_positions(self, name_from_pid, pid_from_cube):
         """Create positions.txt"""
-        box_height, box_width = box_from_max(self.max_x, self.max_y, self.n_x, self.n_y)
-        ox = box_width // 3
-        oy = box_height // 3
+        ox = self.box_width // 3
+        oy = self.box_height // 3
         with open(os.path.join(self.file_dir, "map_data", "positions.txt"), 'w') as outf:
             for pid, name in name_from_pid.items():
                 cube = [k for k,v in pid_from_cube.items() if v == pid]
@@ -91,8 +91,8 @@ class CK3Map:
                     cube = random.sample(cube, k=1)[0]
                 hor = cube.x
                 ver = -cube.y - hor // 2 - hor % 2
-                x = 3 * hor  * box_width
-                y = (2 * ver + (hor % 2)) * box_height
+                x = 3 * hor  * self.box_width
+                y = (2 * ver + (hor % 2)) * self.box_height
                 # TODO: Handle the edges better.
                 position = " ".join([str(s) for s in [x + ox, y, x, y,  max(0,x - ox), y, x, y + oy, x, max(0,y - oy)]])
                 rotation = " ".join([str(s) for s in [0] * 5])
@@ -127,7 +127,7 @@ def create_adjacencies(file_dir, straits, pid_from_cube, name_from_pid, closest_
             else:
                 buffer.extend(closest_xy(fr,to))
                 buffer.extend(closest_xy(to, fr))
-            buffer.extend(name_from_pid[pid_from_cube[fr]] + "-" + name_from_pid[pid_from_cube[to]])
+            buffer.append(name_from_pid[pid_from_cube[fr]] + "-" + name_from_pid[pid_from_cube[to]])
             outf.write(";".join([str(x) for x in buffer])+"\n")
         outf.write("-1;-1;;-1;-1;-1;-1;-1;\n")
 
@@ -142,7 +142,7 @@ def create_climate(file_dir):
 def create_coa(file_dir, base_dir, custom_dir, title_list):
     """Populate common/coat_of_arms/coat_of_arms/01 and 90 with all the titles in title_list, drawing first from custom_dir and then from base_dir."""
     os.makedirs(os.path.join(file_dir, "common", "coat_of_arms", "coat_of_arms"), exist_ok=True)
-    with open(os.path.join(file_dir, "common", "coat_of_arms", "coat_of_arms","01_landed_titles.txt"),'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "common", "coat_of_arms", "coat_of_arms","01_landed_titles.txt"),'w', encoding='utf_8_sig') as outf:
         for src_dir in [custom_dir, base_dir]:
             if src_dir is None:
                 continue
@@ -188,7 +188,7 @@ def create_geographical_regions(file_dir, regions, all_material_types = None, no
         "steppe": "0 255 255"
     }
     os.makedirs(os.path.join(file_dir, "map_data", "geographical_regions"), exist_ok=True)
-    with open(os.path.join(file_dir, "map_data", "geographical_regions", "geographical_region.txt"),'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "map_data", "geographical_regions", "geographical_region.txt"),'w', encoding='utf_8_sig') as outf:
         all_regions = []
         for region in regions:
             region_title = "world_" + region.title.split("_")[1]
@@ -208,7 +208,7 @@ def create_geographical_regions(file_dir, regions, all_material_types = None, no
             outf.write("hunt_animal_"+animal+"_region = {\n\tregions = {\n\t\t"+all_regions+"\n\t}\n}\n")
         for animal in no_animal_types:
             outf.write("hunt_animal_"+animal+"_region = {\n\tregions = {\n\t\t\n\t}\n}\n")
-    with open(os.path.join(file_dir, "map_data", "island_region.txt"),'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "map_data", "island_region.txt"),'w', encoding='utf_8_sig') as outf:
         # TODO: figuring out islands will depend on chunking the land elsewhere. For this basic one, we're fine.
         outf.write("\n")
 
@@ -216,7 +216,7 @@ def create_geographical_regions(file_dir, regions, all_material_types = None, no
 def create_landed_titles(file_dir, pid_from_title, regions, special_titles=None):
     """Make common/landed_titles."""
     os.makedirs(os.path.join(file_dir, "common", "landed_titles"), exist_ok=True)
-    with open(os.path.join(file_dir, "common", "landed_titles","00_landed_titles.txt"), 'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "common", "landed_titles","00_landed_titles.txt"), 'w', encoding='utf_8_sig') as outf:
         # Write the special titles out
         if special_titles is not None:
             with open(special_titles) as inf:
@@ -353,7 +353,7 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
     for filename in os.listdir(culture_dir):
         if filename.startswith("_"):
             continue
-        with open(os.path.join(culture_dir,filename), 'r', encoding='utf-8') as inf:
+        with open(os.path.join(culture_dir,filename), 'r', encoding='utf_8_sig') as inf:
             keeping = False
             for line in inf.readlines():
                 if line[0] != "\t" and "=" in line and "{" in line:
@@ -367,7 +367,7 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
     for filename in os.listdir(name_dir):
         if filename.startswith("_"):
             continue
-        with open(os.path.join(name_dir,filename), 'r', encoding='utf-8') as inf:
+        with open(os.path.join(name_dir,filename), 'r', encoding='utf_8_sig') as inf:
             brackets = 0
             list_name = ""
             keeping = False
@@ -448,7 +448,7 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
     # Write out history/culture (mostly innovations)
     os.makedirs(os.path.join(file_dir, "history", "cultures"), exist_ok=True)
     for culture in cultures:  # This might be too few; I'm a little worried that we will somehow be missing a culture that will show up thru events or w/e. It's probably fine?
-        with open(os.path.join(file_dir, "history", "cultures", culture+".txt"), 'w', encoding='utf-8') as outf:
+        with open(os.path.join(file_dir, "history", "cultures", culture+".txt"), 'w', encoding='utf_8_sig') as outf:
             this_innos = []
             this_innos.extend(base_innos)
             for era_name, num in config["RANDOM_INNOS"].items():
@@ -481,14 +481,14 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
                 region = "d" + region[1:]
             region_tree_search = [y for y in [x.find_by_title(region) for x in region_trees] if y is not None]  # This feels super dumb
             if len(region_tree_search) == 0:  # This is a special title.
-                with open(os.path.join(file_dir, "history", "titles", region+".txt"),'w', encoding='utf-8') as outf:
+                with open(os.path.join(file_dir, "history", "titles", region+".txt"),'w', encoding='utf_8_sig') as outf:
                     outf.write(title_history(region, {}, {}, 0))
                 continue
             region_tree = region_tree_search[0]
             titles = region_tree.all_ck3_titles()
             culture = region_tree.culture  # This currently doesn't allow for different culture or religions for subregions, but we don't use that yet, so it's fine.
             religion = region_tree.religion
-            with open(os.path.join(file_dir, "history", "characters", region+".txt"), 'w', encoding='utf-8') as outf:
+            with open(os.path.join(file_dir, "history", "characters", region+".txt"), 'w', encoding='utf_8_sig') as outf:
                 for char in template["chars"].values():  # The key for each character is just for template legibility
                     others = {k: v + coffset if k in ['father', 'mother', 'spouse_id'] else v for k, v in char.items() if k not in ["cid", "dynasty"]}
                     cid = char["cid"] + coffset
@@ -535,25 +535,25 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
                         c_capital = False
                     prov_buf +="\tholding = " + template["baronies"].get(num["b"], "none") + "\n}\n"
                 num[title[0]] += 1
-            with open(os.path.join(file_dir, "history", "provinces", region+".txt"),'w', encoding='utf-8') as outf:
+            with open(os.path.join(file_dir, "history", "provinces", region+".txt"),'w', encoding='utf_8_sig') as outf:
                 outf.write(prov_buf)
             title_buf = ""
             for title, events in template["titles"].items():  # We have to do this a second time so that we can make the title map first.
                 if title[0] != "b":
                     title_buf += title_history(title_map[title], events, title_map, coffset)
-            with open(os.path.join(file_dir, "history", "titles", region+".txt"),'w', encoding='utf-8') as outf:
+            with open(os.path.join(file_dir, "history", "titles", region+".txt"),'w', encoding='utf_8_sig') as outf:
                 outf.write(title_buf)
             doffset += len(template["dynasties"]) + 1
             coffset += max([char["cid"] for char in template["chars"].values()]) + 1
-    with open(os.path.join(file_dir, "common", "bookmarks", "bookmarks", "00_bookmarks.txt"),'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "common", "bookmarks", "bookmarks", "00_bookmarks.txt"),'w', encoding='utf_8_sig') as outf:
         outf.write(bookmark_buffer)
-    with open(os.path.join(file_dir, "common", "bookmarks", "groups", "00_bookmark_groups.txt"),'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "common", "bookmarks", "groups", "00_bookmark_groups.txt"),'w', encoding='utf_8_sig') as outf:
         outf.write("bm_group_1000 = {\n\tdefault_start_date = 1000.1.1\n}\n")
-    with open(os.path.join(file_dir, "common", "dynasties", "00_dynasties.txt"),'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "common", "dynasties", "00_dynasties.txt"),'w', encoding='utf_8_sig') as outf:
         outf.write(dynasty_buffer)
-    with open(os.path.join(file_dir, "common", "dynasties", "01_players.txt"),'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "common", "dynasties", "01_players.txt"),'w', encoding='utf_8_sig') as outf:
         outf.write(player_buffer)
-    with open(os.path.join(file_dir, "common", "dynasty_houses", "00_dynasty_houses.txt"),'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "common", "dynasty_houses", "00_dynasty_houses.txt"),'w', encoding='utf_8_sig') as outf:
         outf.write("\n")
 
 
@@ -563,7 +563,7 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
 def create_default_map(file_dir, impassable, sea_min, sea_max):
     """Writes out default.map."""
     os.makedirs(os.path.join(file_dir, "map_data"), exist_ok=True)
-    with open(os.path.join(file_dir, "map_data", "default.map"), 'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "map_data", "default.map"), 'w', encoding='utf_8_sig') as outf:
         outf.write("""definitions = "definition.csv"\nprovinces = "provinces.png"\n#positions = "positions.txt"\nrivers = "rivers.png"\n#terrain_definition = "terrain.txt"\ntopology = "heightmap.heightmap"\n#tree_definition = "trees.bmp"\ncontinent = "continent.txt"\nadjacencies = "adjacencies.csv"\n#climate = "climate.txt"\nisland_region = "island_region.txt"\nseasons = "seasons.txt"\n\n""")
         outf.write("sea_zones = RANGE { "+str(sea_min)+" "+str(sea_max)+" }\n\n")
         for impid in impassable:
@@ -581,8 +581,8 @@ def create_religion(file_dir, base_dir, religions, holy_sites, custom_dir=None):
         religion_locs.append(custom_dir)  # custom_dir goes second so it will overwrite base files.
     for dir in religion_locs:
         for religion_filename in os.listdir(os.path.join(dir, "common", "religion", "religions")):
-            with open(os.path.join(dir, "common", "religion", "religions", religion_filename), 'r', encoding='utf-8') as inf:
-                with open(os.path.join(file_dir, "common", "religion", "religions", religion_filename), 'w', encoding='utf-8') as outf:
+            with open(os.path.join(dir, "common", "religion", "religions", religion_filename), 'r', encoding='utf_8_sig') as inf:
+                with open(os.path.join(file_dir, "common", "religion", "religions", religion_filename), 'w', encoding='utf_8_sig') as outf:
                     holy_site_section = True
                     for line in inf.readlines():
                         if "holy_site" in line:
@@ -594,12 +594,12 @@ def create_religion(file_dir, base_dir, religions, holy_sites, custom_dir=None):
                             if "}" in line: # We have finished that section and will maybe need to dump all the holy sites again.
                                 holy_site_section = True
                             outf.write(line)
-    with open(os.path.join(file_dir, "common", "religion", "holy_sites", "00_holy_sites.txt"), 'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "common", "religion", "holy_sites", "00_holy_sites.txt"), 'w', encoding='utf_8_sig') as outf:
         holy_site_locs = [os.path.join(base_dir, "common", "religion", "holy_sites", "00_holy_sites.txt")]
         if custom_dir is not None and os.path.exists(os.path.join(custom_dir, "common","religion","holy_sites")):
             holy_site_locs.insert(0, os.path.join(custom_dir, "common", "religion", "holy_sites", "00_holy_sites.txt"))
         for inf_loc in holy_site_locs:
-            with open(inf_loc, 'r', encoding='utf-8') as inf:
+            with open(inf_loc, 'r', encoding='utf_8_sig') as inf:
                 brackets = 0
                 copying = False
                 for line in inf.readlines():
@@ -668,7 +668,7 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     ck3map.create_rivers(river_background, river_edges, river_vertices, base_loc=os.path.join(config["BASE_CK3_DIR"], "map_data", "rivers.png"))
     ck3map.create_positions(name_from_pid, pid_from_cube)
     ck3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], terr_from_cube=terr_from_cube)
-    create_adjacencies(file_dir=file_dir, straits=straits, pid_from_cube=pid_from_cube, name_from_pid=name_from_pid, closest_xy=lambda fr, to: closest_xy(fr, to, map.box_height, map.box_width))
+    create_adjacencies(file_dir=file_dir, straits=straits, pid_from_cube=pid_from_cube, name_from_pid=name_from_pid, closest_xy=lambda fr, to: closest_xy(fr, to, ck3map.box_height, ck3map.box_width))
     create_geographical_regions(file_dir, region_trees)
     if len(impassable) > 0:
         sea_min = max(impassable) + 1

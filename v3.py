@@ -42,6 +42,7 @@ class V3Map:
         self.max_y = max_y
         self.n_x = n_x
         self.n_y = n_y
+        self.box_height, self.box_width = box_from_max(self.max_x, self.max_y, self.n_x, self.n_y)
 
     def create_provinces(self, rgb_from_cube):
         """Creates provinces.png and definition.csv"""
@@ -87,8 +88,8 @@ class V3Map:
     def update_defines(self, base_dir):
         """Copies common/defines/00_defines.txt but replaces WORLD_EXTENTS_X and Z."""
         os.makedirs(os.path.join(self.file_dir, "common", "defines"), exist_ok=True)
-        with open(os.path.join(base_dir, "common", "defines", "00_defines.txt"), 'r', encoding='utf-8') as inf:
-            with open(os.path.join(self.file_dir, "common", "defines", "00_defines.txt"), 'w', encoding='utf-8') as outf:
+        with open(os.path.join(base_dir, "common", "defines", "00_defines.txt"), 'r', encoding='utf_8_sig') as inf:
+            with open(os.path.join(self.file_dir, "common", "defines", "00_defines.txt"), 'w', encoding='utf_8_sig') as outf:
                 for line in inf.readlines():
                     if line.startswith("\tWORLD_EXTENTS_X"):
                         outf.write(line.split("=")[0] + f"= {self.max_x}\n")
@@ -149,7 +150,7 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     return file_dir
 
 
-HEX_LIST = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B", "C", "D", "E", "F"]
+HEX_LIST = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"]
 def hex_rgb(r, g, b):
     """Create a v3-style hex string from a r,g,b tuple. (Use *rgb to split the tuple.)"""
     return "x" + HEX_LIST[r // 16] + HEX_LIST[r % 16] + HEX_LIST[g // 16] + HEX_LIST[g % 16] + HEX_LIST[b // 16] + HEX_LIST[b % 16]
@@ -158,8 +159,8 @@ def hex_rgb(r, g, b):
 def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_from_rid, locs_from_rid, arable_from_rid, capped_from_rid, coast_from_rid, tag_from_pid, pop_from_rid, building_from_rid, homelands_from_rid={}, claims_from_rid={}):
     """Creates state_region files, as well as relevant history files."""
     os.makedirs(os.path.join(file_dir,"map_data","state_regions"), exist_ok=True)
-    with open(os.path.join(file_dir,"map_data","state_regions", "00_state_regions.txt"), 'w', encoding='utf-8') as outf:
-        with open(os.path.join(file_dir,"map_data","state_regions", "99_seas.txt"), 'w', encoding='utf-8') as soutf:
+    with open(os.path.join(file_dir,"map_data","state_regions", "00_state_regions.txt"), 'w', encoding='utf_8_sig') as outf:
+        with open(os.path.join(file_dir,"map_data","state_regions", "99_seas.txt"), 'w', encoding='utf_8_sig') as soutf:
             for rid, rname in name_from_rid.items():
                 if rname[0] == "i":  # We don't care about the impassable regions. Might need to fix this later.
                     continue
@@ -188,7 +189,7 @@ def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_fr
         else:
             pids_from_rid[rid] = [pid]
     os.makedirs(os.path.join(file_dir,"common","history", "states"), exist_ok=True)
-    with open(os.path.join(file_dir, "common", "history", "states", "00_states.txt"), 'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "common", "history", "states", "00_states.txt"), 'w', encoding='utf_8_sig') as outf:
         outf.write("STATES = {\n")
         for rid, rname in name_from_rid.items():
             if rname[0] == "i" or rname[0] == "s":  # We don't care about the impassable regions or seas.
@@ -204,14 +205,14 @@ def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_fr
             for tag, pids in tags.items():
                 outf.write(f"\t\tcreate_state = {{\n\t\t\tcountry = c:{tag}\n\t\t\towned_provinces = {{ ")
                 outf.write(" ".join([hex_rgb(*rgb_from_pid[pid]) for pid in pids]))
-                outf.write("\t\t}\\n")
+                outf.write("\t\t}\n")
             if rid in homelands_from_rid:
                 outf.write("\n"+"\n".join(["\t\tadd_homeland = cu:" + culture for culture in homelands_from_rid[rid]]) + "\n")
             if rid in claims_from_rid:
                 outf.write("\n"+"\n".join(["\t\tadd_homeland = c:" + tag for tag in claims_from_rid[rid]]) + "\n")
             outf.write("\t}\n")
     os.makedirs(os.path.join(file_dir,"common","history", "pops"), exist_ok=True)
-    with open(os.path.join(file_dir, "common", "history", "pops", "00_world.txt"), 'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "common", "history", "pops", "00_world.txt"), 'w', encoding='utf_8_sig') as outf:
         outf.write("POPS = {\n")
         for rid, pop_from_tag in pop_from_rid.items():
             outf.write(f"\ts:{name_from_rid[rid]} = {{\n")
@@ -228,7 +229,7 @@ def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_fr
             outf.write("\t}\n")
         outf.write("}\n")
     os.makedirs(os.path.join(file_dir,"common","history", "buildings"), exist_ok=True)
-    with open(os.path.join(file_dir, "common", "history", "buildings", "00_world.txt"), 'w', encoding='utf-8') as outf:
+    with open(os.path.join(file_dir, "common", "history", "buildings", "00_world.txt"), 'w', encoding='utf_8_sig') as outf:
         outf.write("BUILDINGS = {\n")
         for rid, building_from_tag in building_from_rid.items():
             outf.write(f"\ts:{name_from_rid[rid]} = {{\n")
@@ -251,28 +252,59 @@ TIER_FROM_PREFIX = {
 def create_countries(file_dir, base_dir, region_trees, tech_from_tag, tax_from_tag, laws_from_tag, wealth_from_tag, literacy_from_tag):
     """Creates common/country_definitions files, as well as relevant history files."""
     os.makedirs(os.path.join(file_dir,"common","country_definitions"), exist_ok=True)
-    with open(os.path.join(os.path.join(file_dir, "common", "country_definitions", "00_countries.txt")), 'w', encoding='utf-8') as outf:
+    with open(os.path.join(os.path.join(file_dir, "common", "country_definitions", "00_countries.txt")), 'w', encoding='utf_8_sig') as outf:
         for region_tree in region_trees:
             for region in region_tree.all_region_trees():
                 if region.tag is not None:
                     r,g,b = region.color
                     capital = region.title if region.title[0] == "d" else region.children[0].title  # TODO: we should have a capital_state in region_tree
                     outf.write(region.tag + f" = {{\n\tcolor = {{ {r} {g} {b} }}\n\tcountry_type = recognized\n\ttier = {TIER_FROM_PREFIX[region.title[0]]}\n\tcultures = {{ {region.culture} }}\n\tcapital = {capital}\n}}\n\n")
-    with open(os.path.join(os.path.join(base_dir, "common", "country_definitions", "99_dynamic.txt")), 'r', encoding='utf-8') as inf:
-        with open(os.path.join(os.path.join(file_dir, "common", "country_definitions", "99_dynamic.txt")), 'w', encoding='utf-8') as outf:
+    with open(os.path.join(os.path.join(base_dir, "common", "country_definitions", "99_dynamic.txt")), 'r', encoding='utf_8_sig') as inf:
+        with open(os.path.join(os.path.join(file_dir, "common", "country_definitions", "99_dynamic.txt")), 'w', encoding='utf_8_sig') as outf:
             for line in inf.readlines():
                 outf.write(line)
     os.makedirs(os.path.join(file_dir,"common","history","countries"), exist_ok=True)
     for tag, tech in tech_from_tag.items():
-        with open(os.path.join(file_dir,"common","history","countries", f"{tag} - {tag}.txt"),'w', encoding='utf-8') as outf:  # Not actually obvious these need to be different files instead of one mongo file
+        with open(os.path.join(file_dir,"common","history","countries", f"{tag} - {tag}.txt"),'w', encoding='utf_8_sig') as outf:  # Not actually obvious these need to be different files instead of one mongo file
             outf.write(f"COUNTRIES = {{\n\tc:{tag} = {{\n\teffect_starting_technology_tier_{str(tech)}_tech = yes\n\t\tset_tax_level = {tax_from_tag[tag]}\n")
             outf.write("\n".join(["\t\tactivate_law = law_type:" + law for law in laws_from_tag[tag]]) + "\n\t}\n}\n")
     os.makedirs(os.path.join(file_dir,"common","history","population"), exist_ok=True)
     for tag, wealth in wealth_from_tag.items():
-        with open(os.path.join(file_dir,"common","history","population", f"{tag} - {tag}.txt"),'w', encoding='utf-8') as outf:  # Not actually obvious these need to be different files instead of one mongo file
+        with open(os.path.join(file_dir,"common","history","population", f"{tag} - {tag}.txt"),'w', encoding='utf_8_sig') as outf:  # Not actually obvious these need to be different files instead of one mongo file
             outf.write(f"POPULATION = {{\n\tc:{tag} = {{\n\t\teffect_starting_pop_wealth_{wealth} = yes\n\t\teffect_starting_pop_literacy_{literacy_from_tag[tag]} = yes\n\t}}\n}}\n")
 
-def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid, region_trees, tag_from_pid):
+
+def create_adjacencies(file_dir, straits, rgb_from_pid, pid_from_cube, canals=[], closest_xy = None):
+    """straits is a list of (cube, cube, pid) tuples (from, to, pid of the water region it passes thru).
+    This function will create the adjacencies file (including some calculations about type and positioning)."""
+    os.makedirs(os.path.join(file_dir,"map_data"), exist_ok=True)
+    with open(os.path.join(file_dir,"map_data","adjacencies.csv"),'w', encoding='utf_8_sig') as outf:
+        outf.write("From;To;Type;Through;start_x;start_y;stop_x;stop_y;adjacency_rule_name;Comment")
+        for strait in straits:
+            fr, to = strait[0], strait[1]
+            buffer = [hex_rgb(*rgb_from_pid[pid_from_cube[fr]])]
+            buffer.append(hex_rgb(*rgb_from_pid[pid_from_cube[to]]))
+            buffer.append("sea")
+            buffer.append(hex_rgb(*rgb_from_pid[strait[-1]]) if strait[-1] > 0 else "-1")
+            if closest_xy is None:
+                buffer.extend([-1] * 4)
+            else:
+                buffer.extend(closest_xy(fr,to))
+                buffer.extend(closest_xy(to, fr))
+            buffer.append("")  # adjacency_rule_name, which they never use?
+            buffer.append("None")
+            outf.write("\n"+";".join([str(x) for x in buffer]))  # No newline at end of file
+        # TODO: Canals
+
+
+def create_default(file_dir, sea_rgbs, lake_rgbs = []):
+    """Create default.map"""
+    os.makedirs(os.path.join(file_dir,"map_data"), exist_ok=True)
+    with open(os.path.join(file_dir,"map_data","default.map"),'w', encoding='utf_8_sig') as outf:
+        outf.write("provinces = \"provinces.png\"\ntopology = \"heightmap.heightmap\"\nrivers = \"rivers.png\"\nadjacencies = \"adjacencies.csv\"\nwrap_x = yes\n\nsea_starts = {\n")
+        outf.write("\t\t" + " ".join(sea_rgbs) + "\n}\nlakes= {\n\t" + " ".join(lake_rgbs) + "\n}\n")
+
+def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid, region_trees, tag_from_pid, straits):
     """Creates the V3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
@@ -287,6 +319,9 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
     v3map.create_terrain_masks(base_dir=config["BASE_V3_DIR"], terr_from_cube=terr_from_cube)
     create_terrain_file(file_dir, terr_from_pid=terr_from_pid, rgb_from_pid=rgb_from_pid)
     v3map.update_defines(base_dir=config["BASE_V3_DIR"])
+    sea_rgbs = [hex_rgb(*rgb_from_pid[pid]) for pid in sorted(set(coast_from_rid.values()))]
+    create_default(file_dir=file_dir, sea_rgbs=sea_rgbs, lake_rgbs=[])
+    create_adjacencies(file_dir=file_dir, straits=straits, rgb_from_pid=rgb_from_pid, pid_from_cube=pid_from_cube, closest_xy=lambda fr, to: closest_xy(fr, to, v3map.box_height, v3map.box_width))
     traits_from_rid = {}
     arable_from_rid = {r: (10, ["bg_wheat_farms", "bg_livestock_ranches"]) for r in locs_from_rid.keys()}
     capped_from_rid = {r: {"bg_lead_mining": 10, "bg_iron_mining": 10, "bg_logging": 10, "bg_coal_mining": 10} for r in locs_from_rid.keys()}

@@ -665,4 +665,5 @@ if __name__ == "__main__":
             name_from_rid=name_from_rid,
             region_trees=region_trees,
             tag_from_pid=tag_from_pid,
+            straits=straits,
         )

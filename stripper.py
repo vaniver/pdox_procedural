@@ -20,7 +20,7 @@ def strip_base_files(file_dir, src_dir, subpaths, to_remove, to_keep, subsection
     for subpath in expanded_subpaths:
         file_stripped = False
         file_buffer = ""
-        with open(os.path.join(src_dir, subpath), encoding='utf-8') as inf:
+        with open(os.path.join(src_dir, subpath), encoding='utf_8_sig') as inf:
             valid = True
             brackets = 0
             mod_brackets = 0
@@ -59,5 +59,5 @@ def strip_base_files(file_dir, src_dir, subpaths, to_remove, to_keep, subsection
             relpath = os.path.relpath(subpath,src_dir)
             print(relpath)
             os.makedirs(os.path.join(file_dir, os.path.dirname(relpath)), exist_ok=True)
-            with open(os.path.join(file_dir, relpath), 'w', encoding='utf-8') as outf:
+            with open(os.path.join(file_dir, relpath), 'w', encoding='utf_8_sig') as outf:
                 outf.write(file_buffer)
