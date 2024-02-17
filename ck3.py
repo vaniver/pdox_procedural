@@ -98,6 +98,19 @@ class CK3Map:
                 height = " ".join([str(s) for s in [0, 0, 0, 20, 0]])
                 outf.write(f"#{name}\n\t{pid}=\n\t{{\n\t\tposition=\n\t\t{{\n{position} }}\n\t\trotation=\n\t\t{{\n{rotation} }}\n\t\theight=\n\t\t{{\n{height} }}\n\t}}\n")
 
+    def update_defines(self, base_dir):
+        """Copies common/defines/00_defines.txt but replaces WORLD_EXTENTS_X and Z."""
+        os.makedirs(os.path.join(self.file_dir, "common", "defines"), exist_ok=True)
+        with open(os.path.join(base_dir, "common", "defines", "00_defines.txt"), 'r', encoding='utf_8_sig') as inf:
+            with open(os.path.join(self.file_dir, "common", "defines", "00_defines.txt"), 'w', encoding='utf_8_sig') as outf:
+                for line in inf.readlines():
+                    if line.startswith("\tWORLD_EXTENTS_X"):
+                        outf.write(line.split("=")[0] + f"= {self.max_x}\n")
+                    elif line.startswith("\tWORLD_EXTENTS_Y"):
+                        outf.write(line.split("=")[0] + f"= {self.max_y}\n")
+                    else:
+                        outf.write(line)
+        # TODO: Confirm that I don't need to update 00_graphics.txt, mostly CAMERA_START.
 
 def create_terrain_file(file_dir, terr_from_pid):
     """Writes out common/province_terrain."""
@@ -669,6 +682,7 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     ck3map.create_rivers(river_background, river_edges, river_vertices, base_loc=os.path.join(config["BASE_CK3_DIR"], "map_data", "rivers.png"))
     ck3map.create_positions(name_from_pid, pid_from_cube)
     ck3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], terr_from_cube=terr_from_cube)
+    ck3map.update_defines(base_dir=config["BASE_CK3_DIR"])
     create_adjacencies(file_dir=file_dir, straits=straits, pid_from_cube=pid_from_cube, name_from_pid=name_from_pid, closest_xy=lambda fr, to: closest_xy(fr, to, ck3map.box_height, ck3map.box_width))
     create_geographical_regions(file_dir, region_trees)
     if len(impassable) > 0:

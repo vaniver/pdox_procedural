@@ -1,7 +1,9 @@
 This project procedurally generates maps for the four main historical Paradox games: Crusader Kings III, Europa Universalis IV, Victoria 3, and Hearts of Iron IV.
 
+To install requirements, use a command like `pip install -r requirements.txt`. 
+
 Current status is:
-* CK3: doesn't CTD
+* CK3: CTD
 * EU4: Not started
 * V3: CTD
 * HOI4: Not started
