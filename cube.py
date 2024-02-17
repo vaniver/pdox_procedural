@@ -304,6 +304,18 @@ class Edge:
                     Edge(self.cube.add(Cube(1, 0, -1)), 0, 1),
                     ]
 
+    def __str__(self):
+        return str(self.cube.x)+", "+str(self.cube.y)+", "+str(self.cube.z)+"; "+str(self.rot)+str(self.dir)
+
+    def __eq__(self, other):
+        if isinstance(other, Edge):
+            return self.cube == other.cube and self.rot == other.rot and ((self.dir is None and other.dir is None) or self.dir == other.dir)
+        else:
+            return False
+        
+    def __hash__(self):
+        return hash(tuple((self.cube.x, self.cube.y, self.cube.z, self.rot, self.dir)))
+    
     @classmethod
     def from_pair(cls, k1, k2, dir=None):
         """Given an adjacent pair of cubes, return the (normalized) edge between them.
@@ -363,6 +375,36 @@ class Vertex:
                 Vertex(self.cube.add(Cube(1,-1,0)),0),
                 Vertex(self.cube.add(Cube(1,-1,0)),-1),
                 ]
+
+    def down_pair(self):
+        """Returns the two vertices above this vertex in a triangle pointing down as a tuple."""
+        if self.rot == 0:
+            return (Vertex(self.cube.add(Cube(-1,1,0)),1), Vertex(self.cube.add(Cube(1,0,-1)),-1))
+        elif self.rot == -1:
+            return (Vertex(self.cube.add(Cube(-1,1,0)),0), Vertex(self.cube.add(Cube(-1,1,0)),1))
+        else:  # self.rot == 1
+            return (Vertex(self.cube.add(Cube(1,0,-1)),-1), Vertex(self.cube.add(Cube(1,0,-1)),0))
+    
+    def up_pair(self):
+        """Returns the two vertices below this vertex in a triangle pointing up as a tuple."""
+        if self.rot == 0:
+            return (Vertex(self.cube.add(Cube(-1,0,1)),1), Vertex(self.cube.add(Cube(1,-1,0)),-1))
+        elif self.rot == -1:
+            return (Vertex(self.cube.add(Cube(-1,0,1)),0), Vertex(self.cube.add(Cube(-1,0,1)),1))
+        else:  # self.rot == 1
+            return (Vertex(self.cube.add(Cube(1,-1,0)),-1), Vertex(self.cube.add(Cube(1,-1,0)),0))
+
+    def __str__(self):
+        return str(self.cube.x)+", "+str(self.cube.y)+", "+str(self.cube.z)+"; "+str(self.rot)
+
+    def __eq__(self, other):
+        if isinstance(other, Vertex):
+            return self.cube == other.cube and self.rot == other.rot
+        else:
+            return False
+        
+    def __hash__(self):
+        return hash(tuple((self.cube.x, self.cube.y, self.cube.z, self.rot)))
 
     @classmethod
     def from_trio(cls, k1, k2, k3):

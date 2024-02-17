@@ -42,10 +42,9 @@ class CK3Map:
                 r,g,b = rgb_from_pid[pid]
                 outf.write(";".join([str(x) for x in [pid,r,g,b,name,"x"]])+"\n")
 
-    def create_heightmap(self, height_from_cube):
+    def create_heightmap(self, height_from_vertex):
         """Uses height_from_cube to generate a simple heightmap."""
-        rgb_from_ijk = {k.tuple(): v for k,v in height_from_cube.items()}
-        img = create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, mode='L', default="white", n_x=self.n_x, n_y=self.n_y)
+        img = create_tri_map(height_from_vertex=height_from_vertex, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y)
         img.save(os.path.join(self.file_dir, "map_data", "heightmap.png"))
         with open(os.path.join(self.file_dir, "map_data", 'heightmap.heightmap'), 'w') as outf:
             outf.write("heightmap_file=\"map_data/packed_heightmap.png\"\n")
@@ -72,7 +71,7 @@ class CK3Map:
     
     def create_rivers(self, river_background, river_edges, river_vertices, base_loc):
         """Create rivers.png"""
-        img = create_hex_map(rgb_from_ijk=river_background, rgb_from_edge=river_edges, rgb_from_vertex=river_vertices, max_x=self.max_x, max_y=self.max_y, mode='P', palette=get_palette(base_loc), default="white", n_x=self.n_x, n_y=self.n_y)
+        img = create_hex_map(rgb_from_ijk=river_background, rgb_from_edge=river_edges, rgb_from_vertex=river_vertices, max_x=self.max_x, max_y=self.max_y, mode='P', palette=get_palette(base_loc), default=254, n_x=self.n_x, n_y=self.n_y)
         img.save(os.path.join(self.file_dir, "map_data", "rivers.png"))
 
     def create_positions(self, name_from_pid, pid_from_cube):
@@ -107,6 +106,8 @@ def create_terrain_file(file_dir, terr_from_pid):
     with open(os.path.join(file_dir, "common", "province_terrain", "00_province_terrain.txt"), 'w') as outf:
         outf.write("default_land=plains\ndefault_sea=sea\ndefault_coastal_sea=coastal_sea\n")
         for pid, terr in terr_from_pid.items():
+            if terr == BaseTerrain.ocean:
+                continue
             outf.write(f"{str(pid)}={CK3Terrain_from_BaseTerrain[terr].name}\n")  # Maybe should just replace this with a string dictionary?
 
 
@@ -641,7 +642,7 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     return os.path.join(file_dir, mod_name)
 
 
-def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, pid_from_title, name_from_pid, region_trees, cultures, religions, impassable, river_edges, river_vertices, straits):
+def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, pid_from_title, name_from_pid, region_trees, cultures, religions, impassable, river_edges, river_vertices, straits):
     """Creates the CK3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
@@ -663,8 +664,8 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     # Make map
     ck3map = CK3Map(file_dir, max_x=config["max_x"], max_y=config["max_y"], n_x=config["n_x"], n_y=config["n_y"])
     ck3map.create_provinces(rgb_from_pid,pid_from_cube, name_from_pid)
-    ck3map.create_heightmap(height_from_cube=height_from_cube)
-    river_background = {k.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_cube.items()}
+    ck3map.create_heightmap(height_from_vertex=height_from_vertex)
+    river_background = {k.cube.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_vertex.items() if k.rot==0}
     ck3map.create_rivers(river_background, river_edges, river_vertices, base_loc=os.path.join(config["BASE_CK3_DIR"], "map_data", "rivers.png"))
     ck3map.create_positions(name_from_pid, pid_from_cube)
     ck3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], terr_from_cube=terr_from_cube)

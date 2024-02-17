@@ -1,7 +1,7 @@
 MOD_NAME: testmod
 MOD_DISPLAY_NAME: testing_worldgen
 MOD_OUTPUTS:
-#  CK3: "C:\\Users\\vaniv\\Documents\\Paradox Interactive\\Crusader Kings III\\mod"
+  CK3: "C:\\Users\\vaniv\\Documents\\Paradox Interactive\\Crusader Kings III\\mod"
   V3: "C:\\Users\\vaniv\\Documents\\Paradox Interactive\\Victoria 3\\mod"
 BASE_CK3_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Crusader Kings III\\game"
 BASE_EU4_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Europa Universalis IV\\game"

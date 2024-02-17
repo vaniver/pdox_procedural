@@ -15,8 +15,20 @@ def box_from_max(max_x, max_y, n_x, n_y):
     return box_height, box_width
 
 
+def hor_ver_from_cube(cube, box_width, box_height):
+    hor = cube.x
+    ver = - cube.y - hor // 2 - hor % 2
+    return hor,ver
+
+def xy_from_cube(cube, box_width, box_height):
+    hor, ver = hor_ver_from_cube(cube, box_width=box_width, box_height=box_height)
+    start_x = (3 * hor - 2) * box_width
+    start_y = (2 * ver - 1 + (hor % 2)) * box_height
+    return start_x, start_y
+
+
 def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, rgb_from_vertex={}, mode='RGB', default="black", n_x=235, n_y=72, palette=None):
-    """Draw a hex map with size (max_x,max_y) with colors from rgb_from_ijk. mode determines the image type, and also the correct format for rgb (which should be shared by everything).
+    """Draw a hex map with size (max_x,max_y) with colors from rgb_from_ijk, rgb_from_vertex, and rgb_from_edge. mode determines the image type, and also the correct format for rgb (which should be shared by everything).
     There will be n_x hexes horizontally and n_y hexes vertically. 
     n_x will be assumed odd and n_y is assumed even (to have split hexes in all corners).
     rgb_from_edge should be a dictionary from edge to (rgb, thickness) tuples; also, please don't use edges near the map edge.
@@ -115,10 +127,7 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, rgb_from_vertex
     for edge, (rgb, thickness) in rgb_from_edge.items():
         # The edges that get painted are the south (0), southeast (1), and northeast edges (2).
         # This currently doesn't check that the edges are actually on-map, which it probably should? These are not supposed to be populated near the edge.
-        hor = edge.cube.x
-        ver = - edge.cube.y - hor // 2 - hor % 2
-        start_x = (3 * hor - 2) * box_width
-        start_y = (2 * ver - 1 + (hor % 2)) * box_height
+        start_x, start_y = xy_from_cube(edge.cube, box_width=box_width, box_height=box_height)
         y_down = thickness // 2
         y_up = thickness - y_down
         # TODO: Make it so edges never try to paint the same pixels?
@@ -137,12 +146,71 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, rgb_from_vertex
                     pix[start_x + box_width * 3 + x, y] = rgb
     for vertex, rgb in rgb_from_vertex.items():
         # The vertices that get painted are the west (-1), center (0), and eastern vertices (1).
-        hor = vertex.cube.x
-        ver = - vertex.cube.y - hor // 2 - hor % 2
-        start_x = (3 * hor - 2) * box_width
-        start_y = (2 * ver - 1 + (hor % 2)) * box_height - 1  # This is to line it up with the southernmost edge instead of the northernmost edge.
+        start_x, start_y = xy_from_cube(vertex.cube, box_width=box_width, box_height=box_height)
+        start_y -= 1  # This is to line it up with the southernmost edge instead of the northernmost edge.
         pix[start_x + (1 + vertex.rot) * 2 * box_width, start_y + box_height] = rgb
     return img
+
+def create_tri_map(height_from_vertex, max_x, max_y, mode='L', default="black", n_x=235, n_y=72, palette=None):
+    """Creates a map out of triangular patches, each defined by three adjacent vertices in height_from_vertex."""
+    assert n_x % 2 == 1
+    box_height, box_width = box_from_max(max_x, max_y, n_x, n_y)
+    river_border = [x*box_height//box_width for x in range(box_width)] + [box_height]
+    # It is the same triangle everywhere, so we can compute once the barycentric ratios for all the pixels in the triangle.
+    bary_up = {}
+    bary_down = {}
+    denom = (2. * box_width * box_height)
+    for x in range(2*box_width):
+        for y in range(river_border[-min(x,2*box_width-x)-1], box_height):
+            dy = (y - box_height + 1)
+            beta = (x*box_height + box_width*dy) / denom
+            gamma = 2*box_width*dy / -denom
+            alpha = 1-beta-gamma
+            bary_up[(x,y)] = (gamma,alpha,beta)
+    for x in range(2*box_width):
+        for y in range(river_border[min(x,2*box_width-x)]):
+            beta = (x*box_height - box_width*y) / denom
+            gamma = 2*box_width*y / denom
+            alpha = 1-beta-gamma
+            bary_down[(x,y)] = (gamma,alpha,beta)
+    img = PIL.Image.new(mode, (max_x, max_y), default)
+    if palette is not None:
+        img.putpalette(palette)
+    pix = img.load()
+    for vertex, z in height_from_vertex.items():
+        # There are two types of triangles: pointing-up and pointing-down.
+        # For each vertex, we check whether its two mates (up or down) exist, and if so, draw that triangle.
+        start_x, start_y = xy_from_cube(vertex.cube, box_width=box_width, box_height=box_height)
+        start_x += (2*vertex.rot - 1)*box_width  # Offset based on which is the center.
+        down_ok = True
+        l, r = vertex.down_pair()
+        if l in height_from_vertex:
+            zl = height_from_vertex[l]
+        else:
+            down_ok = False
+        if r in height_from_vertex:
+            zr = height_from_vertex[r]
+        else:
+            down_ok = False
+        if down_ok:
+            for (x,y), (a,b,c) in bary_down.items():
+                pix[start_x + x, start_y + y] = int(z * a + zl * b + zr * c)
+        up_ok = True  # Eh maybe I should loop this instead of just copy/pasting
+        l, r = vertex.up_pair()
+        if l in height_from_vertex:
+            zl = height_from_vertex[l]
+        else:
+            up_ok = False
+        if r in height_from_vertex:
+            zr = height_from_vertex[r]
+        else:
+            up_ok = False
+        if up_ok:
+            start_y += box_height
+            for (x,y), (a,b,c) in bary_up.items():
+                pix[start_x + x, start_y + y] = int(z * a + zl * b + zr * c)
+    return img        
+
 
 def closest_xy(fr, to, box_height, box_width, shrinkage=2):
     """Rather than the strict closest x,y position, this function returns either

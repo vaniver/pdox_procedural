@@ -15,7 +15,7 @@ LAND = 255
 
 BaseTerrain = Enum('BaseTerrain', 'plains farmlands hills mountains forest desert marsh jungle ocean')
 TERRAIN_HEIGHT = {
-    BaseTerrain.ocean: (0,0),
+    BaseTerrain.ocean: (0,1),
     BaseTerrain.farmlands: (0,1), BaseTerrain.plains: (0,1), BaseTerrain.marsh: (0,1), BaseTerrain.desert: (0,1),
     BaseTerrain.jungle: (1,3), BaseTerrain.forest: (1,3),
     BaseTerrain.hills: (1,5), 

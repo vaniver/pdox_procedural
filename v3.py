@@ -49,10 +49,9 @@ class V3Map:
         img = create_hex_map(rgb_from_ijk={k.tuple(): v for k,v in rgb_from_cube.items()}, max_x=self.max_x, max_y=self.max_y, mode='RGB', default="black", n_x=self.n_x, n_y=self.n_y)
         img.save(os.path.join(self.file_dir, "map_data", "provinces.png"))
 
-    def create_heightmap(self, height_from_cube):
+    def create_heightmap(self, height_from_vertex):
         """Uses height_from_cube to generate a simple heightmap."""
-        rgb_from_ijk = {k.tuple(): v for k,v in height_from_cube.items()}
-        img = create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, mode='L', default="white", n_x=self.n_x, n_y=self.n_y)
+        img = create_tri_map(height_from_vertex=height_from_vertex, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y)
         img.save(os.path.join(self.file_dir, "map_data", "heightmap.png"))
         with open(os.path.join(self.file_dir, "map_data", 'heightmap.heightmap'), 'w') as outf:
             outf.write("heightmap_file=\"map_data/packed_heightmap.png\"\n")
@@ -77,12 +76,11 @@ class V3Map:
             else:
                 terrain = [k for k,v in USED_MASKS.items() if v == mask_name][0]
                 rgb_from_ijk = {k.tuple(): 128 for k,v in terr_from_cube.items() if v == terrain}
-                img = create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black")
-                img.save(os.path.join(self.file_dir, "gfx", "map", "terrain", mask))
+                create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(self.file_dir, "gfx", "map", "terrain", mask))
     
     def create_rivers(self, river_background, river_edges, river_vertices, base_loc):
         """Create rivers.png"""
-        img = create_hex_map(rgb_from_ijk=river_background, rgb_from_edge=river_edges, rgb_from_vertex=river_vertices, max_x=self.max_x, max_y=self.max_y, mode='P', palette=get_palette(base_loc), default="white", n_x=self.n_x, n_y=self.n_y)
+        img = create_hex_map(rgb_from_ijk=river_background, rgb_from_edge=river_edges, rgb_from_vertex=river_vertices, max_x=self.max_x, max_y=self.max_y, mode='P', palette=get_palette(base_loc), default=254, n_x=self.n_x, n_y=self.n_y)
         img.save(os.path.join(self.file_dir, "map_data", "rivers.png"))
 
     def update_defines(self, base_dir):
@@ -304,7 +302,7 @@ def create_default(file_dir, sea_rgbs, lake_rgbs = []):
         outf.write("provinces = \"provinces.png\"\ntopology = \"heightmap.heightmap\"\nrivers = \"rivers.png\"\nadjacencies = \"adjacencies.csv\"\nwrap_x = yes\n\nsea_starts = {\n")
         outf.write("\t\t" + " ".join(sea_rgbs) + "\n}\nlakes= {\n\t" + " ".join(lake_rgbs) + "\n}\n")
 
-def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_cube, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid, region_trees, tag_from_pid, straits):
+def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid, region_trees, tag_from_pid, straits):
     """Creates the V3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
@@ -313,8 +311,8 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
     # Maps
     v3map = V3Map(file_dir=file_dir, max_x=config["max_x"], max_y=config["max_y"], n_x=config["n_x"], n_y=config["n_y"])
     v3map.create_provinces(rgb_from_cube=rgb_from_cube)
-    v3map.create_heightmap(height_from_cube=height_from_cube)
-    river_background = {k.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_cube.items()}
+    v3map.create_heightmap(height_from_vertex=height_from_vertex)
+    river_background = {k.cube.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_vertex.items() if k.rot==0}
     v3map.create_rivers(river_background, river_edges, river_vertices, base_loc=os.path.join(config["BASE_V3_DIR"], "map_data", "rivers.png"))
     v3map.create_terrain_masks(base_dir=config["BASE_V3_DIR"], terr_from_cube=terr_from_cube)
     create_terrain_file(file_dir, terr_from_pid=terr_from_pid, rgb_from_pid=rgb_from_pid)
