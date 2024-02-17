@@ -63,11 +63,11 @@ class CK3Map:
                 continue
             mask_name = mask.split("_mask")[0]
             if mask_name not in USED_MASKS.values():
-                create_hex_map(rgb_from_ijk={}, max_x=self.max_x, max_y=self.max_y, mode='L', default="black").save(os.path.join(file_dir, "gfx", "map", "terrain", mask))
+                create_hex_map(rgb_from_ijk={}, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(file_dir, "gfx", "map", "terrain", mask))
             else:
                 terrain = [k for k,v in USED_MASKS.items() if v == mask_name][0]
                 rgb_from_cube = {k.tuple(): 128 for k,v in terr_from_cube.items() if v == terrain}
-                create_hex_map(rgb_from_ijk=rgb_from_cube, max_x=self.max_x, max_y=self.max_y, mode='L', default="black").save(os.path.join(file_dir, "gfx", "map", "terrain", mask))
+                create_hex_map(rgb_from_ijk=rgb_from_cube, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(file_dir, "gfx", "map", "terrain", mask))
     
     def create_rivers(self, river_background, river_edges, river_vertices, base_loc):
         """Create rivers.png"""

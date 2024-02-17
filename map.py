@@ -27,7 +27,7 @@ def xy_from_cube(cube, box_width, box_height):
     return start_x, start_y
 
 
-def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, rgb_from_vertex={}, mode='RGB', default="black", n_x=235, n_y=72, palette=None):
+def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_from_vertex={}, mode='RGB', default="black", palette=None):
     """Draw a hex map with size (max_x,max_y) with colors from rgb_from_ijk, rgb_from_vertex, and rgb_from_edge. mode determines the image type, and also the correct format for rgb (which should be shared by everything).
     There will be n_x hexes horizontally and n_y hexes vertically. 
     n_x will be assumed odd and n_y is assumed even (to have split hexes in all corners).
@@ -151,7 +151,7 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, rgb_from_edge={}, rgb_from_vertex
         pix[start_x + (1 + vertex.rot) * 2 * box_width, start_y + box_height] = rgb
     return img
 
-def create_tri_map(height_from_vertex, max_x, max_y, mode='L', default="black", n_x=235, n_y=72, palette=None):
+def create_tri_map(height_from_vertex, max_x, max_y, n_x, n_y, mode='L', default="black", palette=None):
     """Creates a map out of triangular patches, each defined by three adjacent vertices in height_from_vertex."""
     assert n_x % 2 == 1
     box_height, box_width = box_from_max(max_x, max_y, n_x, n_y)
