@@ -101,11 +101,12 @@ class V3Map:
 def create_blanks(file_dir):
     """There are a lot of V3 files that we want to just blank out."""
     for file_path in [
+        ["common", "buildings", "10_canals.txt"],
         ["gfx", "map", "city_data", "american_mining_oilrig.txt"],  # These should perhaps be fine if we use the vanilla regions / cultures
         ["gfx", "map", "city_data", "wild_west_farm.txt"],  # These should perhaps be fine if we use the vanilla regions / cultures
     ]:
         os.makedirs(os.path.join(file_dir,*file_path[:-1]), exist_ok=True)
-        with open(os.path.join(file_dir, *file_path), 'w') as outf:
+        with open(os.path.join(file_dir, *file_path), 'w', encoding="utf_8_sig") as outf:
             outf.write("\n")
 
 
@@ -114,8 +115,14 @@ def create_terrain_file(file_dir, terr_from_pid, rgb_from_pid):
     # Masks were historically wrapped into create_heightmap, and should maybe be again.
     os.makedirs(os.path.join(file_dir, "map_data"), exist_ok=True)
     with open(os.path.join(file_dir, "map_data", "province_terrain.txt"), 'w') as outf:
-        for pid, terr in terr_from_pid.items():
+        for pid, terr in sorted(terr_from_pid.items()):
             outf.write(f"{hex_rgb(*rgb_from_pid[pid])}=\"{V3Terrain_Name_from_BaseTerrain[terr]}\"\n")
+    os.makedirs(os.path.join(file_dir, "common", "terrain_manipulators", "provinces"), exist_ok=True)
+    with open(os.path.join(file_dir, "common", "terrain_manipulators", "provinces", "allowed_provinces.txt"), 'w') as outf:
+        # TODO: remove cities from this list.
+        all_provs = " ".join([str(pid) for pid, terr in terr_from_pid.items() if terr != BaseTerrain.ocean])
+        for mask_type in ["farmland", "mining", "forestry"]:
+            outf.write(f"mask_dynamic_{mask_type}={{\n\tchecksum=\"\"\n\tallowed_provinces={{ {all_provs} }}\n}}\n")
 
 
 def create_dot_mod(file_dir, mod_name, mod_disp_name):
@@ -267,7 +274,7 @@ def create_strat_regions(file_dir, srs_from_place, srs_from_farm, region_trees, 
         for place, srs in srs_from_place.items():
             outf.write(f"state_is_in_{place} = {{\n")
             if len(srs) == 0:
-                outf.write("\tlimit = { always = no }\n}\n\n")
+                outf.write("\talways = no\n}\n\n")
             else:
                 outf.write("\tOR = {\n"+"\n".join(["\t\tregion = sr:" + region for region in srs]) + "\n\t}\n}\n\n")
             if "america" in place:
@@ -279,7 +286,7 @@ def create_strat_regions(file_dir, srs_from_place, srs_from_farm, region_trees, 
         for farm, srs in srs_from_farm.items():
             outf.write(f"is_{farm} = {{\n")
             if len(srs) == 0:
-                outf.write("\tlimit = { always = no }\n}\n\n")
+                outf.write("\talways = no\n}\n\n")
             else:
                 outf.write("\tOR = {\n"+"\n".join(["\t\tregion = sr:" + region for region in srs]) + "\n\t}\n}\n\n")
 
@@ -342,9 +349,22 @@ def create_adjacencies(file_dir, straits, rgb_from_pid, pid_from_cube, canals=[]
 def create_default(file_dir, sea_rgbs, lake_rgbs = []):
     """Create default.map"""
     os.makedirs(os.path.join(file_dir,"map_data"), exist_ok=True)
-    with open(os.path.join(file_dir,"map_data","default.map"),'w', encoding='utf_8_sig') as outf:
+    with open(os.path.join(file_dir,"map_data","default.map"), 'w', encoding='utf_8_sig') as outf:
         outf.write("provinces = \"provinces.png\"\ntopology = \"heightmap.heightmap\"\nrivers = \"rivers.png\"\nadjacencies = \"adjacencies.csv\"\nwrap_x = yes\n\nsea_starts = {\n")
         outf.write("\t\t" + " ".join(sea_rgbs) + "\n}\nlakes= {\n\t" + " ".join(lake_rgbs) + "\n}\n")
+
+
+def create_objectives(file_dir, base_dir, tags):
+    """Modifies 00_objective_tutorial and 01_player_objectives.txt to point to actual tags."""
+    os.makedirs(os.path.join(file_dir,"common", "objectives"), exist_ok=True)
+    with open(os.path.join(file_dir, "common", "objectives","00_objective_tutorial.txt"), 'w', encoding='utf_8_sig') as outf:
+        with open(os.path.join(base_dir, "common", "objectives","00_objective_tutorial.txt"), 'r', encoding='utf_8_sig') as inf:
+            for line in inf.readlines():
+                if "recommend_tags" in line:
+                    outf.write(line.split("=")[0] + "= { " + " ".join(random.sample(tags, k=4)) + " }\n")
+                else:
+                    outf.write(line)
+
 
 def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid, region_trees, tag_from_pid, straits):
     """Creates the V3 mod files in file_dir, given the basic data."""
@@ -370,7 +390,7 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
         "central_america": [],
         "south_america": [],
         "africa": [],
-        "middle_east": ["region_egypt, region_yemen, region_syria, region_arabia_middle"],
+        "middle_east": ["region_egypt", "region_yemen", "region_syria", "region_arabia_middle"],
         "central_asia": [],
         "india": [],
         "east_asia":[],
@@ -378,7 +398,7 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
         "southeast_asia":[],
     }
     srs_from_farm = {
-        "arabic_farmland": ["region_egypt, region_yemen, region_syria, region_arabia_middle"],
+        "arabic_farmland": ["region_egypt", "region_yemen", "region_syria", "region_arabia_middle"],
         "asian_farmland": [],
         "subtropic_farmland": [],
         "arid_region": [],
@@ -436,13 +456,14 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
         literacy_from_tag=literacy_from_tag,
         name_from_rid=name_from_rid,
         )
+    create_objectives(file_dir=file_dir, base_dir=config["BASE_V3_DIR"], tags=tags)
     strip_base_files(
         file_dir=file_dir,
         src_dir=config["BASE_V3_DIR"],
         subpaths=[
             "common/decisions",
             "common/history/global",
-            "events",
+            #"events",
         ],
         to_remove=["c:","s:"],  # cu: ? Also this should maybe be the list of historical tags instead?
         to_keep=[],

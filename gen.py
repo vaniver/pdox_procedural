@@ -593,14 +593,17 @@ def create_data(config):
             continue
         pid_from_loc = {}
         title = name_from_rid[rid]
+        if title[0] == "s":
+            continue
         pids = [pid for pid, rr in rid_from_pid.items() if rr==rid]
-        cubes = [cube for cube, pid in pid_from_cube.items() if pid in pids]
-        coastal_cubes = [cube for cube in cubes if cube in coast_from_cube]
         pid_from_loc["city"] = min(pids)
-        if len(coastal_cubes) > 0:
-            port_cube = random.sample(coastal_cubes, k=1)[0]
-            pid_from_loc["port"] = pid_from_cube[port_cube]
-            coast_from_rid[rid] = coast_from_cube[port_cube]
+        coastal_pid_cubes = sorted([(pid, coast_from_cube[cube]) for cube, pid in pid_from_cube.items() if pid in pids and cube in coast_from_cube])
+        if len(coastal_pid_cubes) > 0:
+            pid_from_loc["port"] = coastal_pid_cubes[0][0]
+            coast_from_rid[rid] = coastal_pid_cubes[0][1]
+        cubes = [cube for cube, pid in pid_from_cube.items() if pid in pids and pid != pid_from_loc["city"]]
+        if len(cubes) == 0:
+            print(pid)
         # TODO: farm, mine, wood dependent on trade goods
         pid_from_loc["farm"] = pid_from_cube[random.sample(cubes, k=1)[0]]
         pid_from_loc["mine"] = pid_from_cube[random.sample(cubes, k=1)[0]]
