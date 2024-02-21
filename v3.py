@@ -117,6 +117,7 @@ def create_terrain_file(file_dir, terr_from_pid, rgb_from_pid):
         for pid, terr in terr_from_pid.items():
             outf.write(f"{hex_rgb(*rgb_from_pid[pid])}=\"{V3Terrain_Name_from_BaseTerrain[terr]}\"\n")
 
+
 def create_dot_mod(file_dir, mod_name, mod_disp_name):
     """Creates the basic mod structure and metadata file."""
     file_dir = os.path.join(file_dir, mod_name)
@@ -141,6 +142,7 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
                     "common/history/population",
                     "common/history/production_methods",
                     "common/history/trade_routes",
+                    "common/strategic_regions",
                     "content_source/map_objects/masks",
                     "map_data/state_regions",
                 ]))
@@ -240,6 +242,48 @@ def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_fr
         outf.write("}\n")
 
 
+def create_strat_regions(file_dir, srs_from_place, srs_from_farm, region_trees, rgb_from_pid, name_from_rid):
+    """Create the strategic region files and a handful of other miscellaneous files."""
+    os.makedirs(os.path.join(file_dir, "common", "strategic_regions"), exist_ok=True)
+    for region_tree in region_trees:
+        grouping_name = region_tree.title[2:]  # Strip off the e_ or w/e
+        with open(os.path.join(file_dir, "common", "strategic_regions", grouping_name + "_strategic_regions.txt"), 'w', encoding='utf_8_sig') as outf:
+            outf.write(f"# Strategic Regions in {grouping_name}\n\n")
+            for rt in region_tree.children:
+                if rt.capital_pid == -1:
+                    continue
+                region_name = "region_" + rt.title[2:]
+                capital_prov = hex_rgb(*rgb_from_pid[rt.capital_pid])  # TODO: improve region_tree capitals
+                map_color = " ".join([str(x) for x in list(rt.color)])
+                states = " ".join(rt.some_ck3_titles("d_"))
+                outf.write(f"{region_name} = {{\n\tcapital_province = {capital_prov}\n\tmap_color = {{ {map_color} }}\n\tstates = {{ {states} }}\n\t}}\n\n")
+    with open(os.path.join(file_dir, "common", "strategic_regions", "water_strategic_regions.txt"), 'w', encoding='utf_8_sig') as outf:
+        for rid, rname in name_from_rid.items():
+            if rname[0] == "s":
+                outf.write(f"region_{rid} = {{\n\tstates = {{ s_{rid} }}\n}}\n\n")
+    os.makedirs(os.path.join(file_dir, "common", "scripted_triggers"), exist_ok=True)
+    with open(os.path.join(file_dir,  "common", "scripted_triggers", "00_geography_triggers.txt"), 'w', encoding='utf_8_sig') as outf:
+        americas_list = []
+        for place, srs in srs_from_place.items():
+            outf.write(f"state_is_in_{place} = {{\n")
+            if len(srs) == 0:
+                outf.write("\tlimit = { always = no }\n}\n\n")
+            else:
+                outf.write("\tOR = {\n"+"\n".join(["\t\tregion = sr:" + region for region in srs]) + "\n\t}\n}\n\n")
+            if "america" in place:
+                americas_list.append(f"state_is_in_{place}")
+        if len(americas_list) > 0:
+            outf.write("state_is_in_americas = {\n\tOR = {\n" + "".join([f"\t\t{am} = yes\n" for am in americas_list]) + "\t}\n}\n\n")
+        for place in srs_from_place.keys():
+            outf.write(f"country_is_in_{place} = {{\n\texists = capital\n\tcapital = {{\n\t\tstate_is_in_{place} = yes\n\t}}\n}}\n\n")
+        for farm, srs in srs_from_farm.items():
+            outf.write(f"is_{farm} = {{\n")
+            if len(srs) == 0:
+                outf.write("\tlimit = { always = no }\n}\n\n")
+            else:
+                outf.write("\tOR = {\n"+"\n".join(["\t\tregion = sr:" + region for region in srs]) + "\n\t}\n}\n\n")
+
+
 TIER_FROM_PREFIX = {
     "e": "empire",
     "k": "kingdom",
@@ -247,15 +291,15 @@ TIER_FROM_PREFIX = {
     "c": "principality",
 }
 
-def create_countries(file_dir, base_dir, region_trees, tech_from_tag, tax_from_tag, laws_from_tag, wealth_from_tag, literacy_from_tag):
+def create_countries(file_dir, base_dir, region_trees, tech_from_tag, tax_from_tag, laws_from_tag, wealth_from_tag, literacy_from_tag, name_from_rid):
     """Creates common/country_definitions files, as well as relevant history files."""
     os.makedirs(os.path.join(file_dir,"common","country_definitions"), exist_ok=True)
     with open(os.path.join(os.path.join(file_dir, "common", "country_definitions", "00_countries.txt")), 'w', encoding='utf_8_sig') as outf:
         for region_tree in region_trees:
             for region in region_tree.all_region_trees():
-                if region.tag is not None:
+                if region.tag is not None and region.capital_rid != -1:
                     r,g,b = region.color
-                    capital = region.title if region.title[0] == "d" else region.children[0].title  # TODO: we should have a capital_state in region_tree
+                    capital = name_from_rid[region.capital_rid]
                     outf.write(region.tag + f" = {{\n\tcolor = {{ {r} {g} {b} }}\n\tcountry_type = recognized\n\ttier = {TIER_FROM_PREFIX[region.title[0]]}\n\tcultures = {{ {region.culture} }}\n\tcapital = {capital}\n}}\n\n")
     with open(os.path.join(os.path.join(base_dir, "common", "country_definitions", "99_dynamic.txt")), 'r', encoding='utf_8_sig') as inf:
         with open(os.path.join(os.path.join(file_dir, "common", "country_definitions", "99_dynamic.txt")), 'w', encoding='utf_8_sig') as outf:
@@ -320,6 +364,26 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
     sea_rgbs = [hex_rgb(*rgb_from_pid[pid]) for pid in sorted(set(coast_from_rid.values()))]
     create_default(file_dir=file_dir, sea_rgbs=sea_rgbs, lake_rgbs=[])
     create_adjacencies(file_dir=file_dir, straits=straits, rgb_from_pid=rgb_from_pid, pid_from_cube=pid_from_cube, closest_xy=lambda fr, to: closest_xy(fr, to, v3map.box_height, v3map.box_width))
+    srs_from_place = {
+        "europe": ["region_east_francia", "region_france", "region_bavaria", "region_christendom_middle",],
+        "north_america": [],
+        "central_america": [],
+        "south_america": [],
+        "africa": [],
+        "middle_east": ["region_egypt, region_yemen, region_syria, region_arabia_middle"],
+        "central_asia": [],
+        "india": [],
+        "east_asia":[],
+        "china":[],
+        "southeast_asia":[],
+    }
+    srs_from_farm = {
+        "arabic_farmland": ["region_egypt, region_yemen, region_syria, region_arabia_middle"],
+        "asian_farmland": [],
+        "subtropic_farmland": [],
+        "arid_region": [],
+    }
+    create_strat_regions(file_dir=file_dir, srs_from_place=srs_from_place, srs_from_farm=srs_from_farm, region_trees=region_trees, rgb_from_pid=rgb_from_pid, name_from_rid=name_from_rid)
     traits_from_rid = {}
     arable_from_rid = {r: (10, ["bg_wheat_farms", "bg_livestock_ranches"]) for r in locs_from_rid.keys()}
     capped_from_rid = {r: {"bg_lead_mining": 10, "bg_iron_mining": 10, "bg_logging": 10, "bg_coal_mining": 10} for r in locs_from_rid.keys()}
@@ -370,6 +434,7 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
         laws_from_tag=laws_from_tag,
         wealth_from_tag=wealth_from_tag,
         literacy_from_tag=literacy_from_tag,
+        name_from_rid=name_from_rid,
         )
     strip_base_files(
         file_dir=file_dir,

@@ -22,7 +22,7 @@ class RegionTree:
     """A class to hold the region tree.
     This is game-agnostic, which means it needs to have the basic details for all games.
     The ordering goes something like:
-    - era ( the continent-grouping used for )
+    - era
       - continent
         - region
           - area
@@ -33,6 +33,8 @@ class RegionTree:
     """
     def __init__(self, title=None, tag=None, culture=None, religion=None, rough="forest", holy_site=None, color=("0","0","0"), capital_title=None, children = []):
         self.capital_title = capital_title
+        self.capital_pid = -1
+        self.capital_rid = -1
         self.culture = culture
         self.religion = religion
         self.rough = rough
@@ -104,7 +106,8 @@ class RegionTree:
         if self.title[0] == "c":
             return self.title
         if len(self.children) > 0 and isinstance(self.children[0], RegionTree):
-            return self.children[0].capital()
+            self.capital_title = self.children[0].capital()
+            return self.capital_title
         return ""
     
     def culrels(self):
@@ -525,6 +528,14 @@ def create_data(config):
         land_cubes = land_cubes.union(continent)
         last_pid += len(continent)
         terr_from_cube.update(assign_terrain_continent({v:k for k,v in pid_from_cube.items() if k in continent}, terr_templates[cind]))
+    # TODO: This section doesn't work. Probably should assign pids and rids in the initial continent creation step instead.
+    to_assign = [region_tree for region_tree in region_trees]
+    while len(to_assign) > 0:
+        curr = to_assign.pop()
+        if curr.title[0] in ["e_", "k_", "d_", "c_"]:  # Not sure about whether it makes sense to do this for counties.
+            cap = curr.capital()
+            curr.capital_pid = pid_from_title[cap]
+            curr.capital_rid = rid_from_pid[curr.capital_pid]
     # At this point, pid_from_cube should be a 1-1 mapping (because we haven't done the larger regions).
     terr_from_pid = {v:terr_from_cube[k] for k,v in pid_from_cube.items() if k in terr_from_cube}
     # Split out wastelands / mountains / lakes
