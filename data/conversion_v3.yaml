@@ -1,0 +1,23 @@
+﻿culture:
+  bavarian: south_german
+  bodpa: tibetan
+  cisalpine: north_italian
+  egyptian: misri
+  franconian: south_german
+  italian: north_italian
+  levantine: mashriqi
+  lombard: south_italian
+  pomeranian: north_german
+  prussian: north_german
+  sicilian: south_italian
+  tuyuhun: mongol
+  uyghur: uighur
+  visigothic: catalan
+  yemeni: yemenite
+religion:
+  asatru: animist
+  ashari: sunni
+  baltic_pagan: animist
+  lamaism: gelugpa
+  slavic_pagan: animist
+  vajrayana: mahayana

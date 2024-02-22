@@ -31,10 +31,10 @@ class RegionTree:
     The overall divisions of the world are not a tree, but landed_titles and related things are.
     At the county level, children (the baronies) is just a list of strings instead of a list of RegionTrees.
     """
-    def __init__(self, title=None, tag=None, culture=None, religion=None, rough="forest", holy_site=None, color=("0","0","0"), capital_title=None, children = []):
+    def __init__(self, title=None, tag=None, culture=None, religion=None, rough="forest", holy_site=None, color=("0","0","0"), capital_title=None, capital_pid=-1, capital_rid=-1, children = []):
         self.capital_title = capital_title
-        self.capital_pid = -1
-        self.capital_rid = -1
+        self.capital_pid = capital_pid
+        self.capital_rid = capital_rid
         self.culture = culture
         self.religion = religion
         self.rough = rough
@@ -146,14 +146,22 @@ class RegionTree:
         return None
 
     @classmethod
-    def from_csv(cls, filename):
+    def from_csv(cls, filename, last_pid=1, last_rid=1):
+        """last_pid and last_rid will be used to assign pids and rids as we go.
+        Returns the region_tree, the new last_pid, and the new last_rid."""
         with open(filename) as inf:
             current = {}
             for line in inf.readlines():
                 lsplit = line.split(",")
                 depth = DEPTH_MAP[lsplit[0][0]]
+                if depth == 2:  # This is a duchy/state, and so the region_id needs to increase.
+                    last_rid += 1
                 if depth == 4:  # This is a barony, and so just needs to be appended to children of the current county.
+                    for cind in current:
+                        if current[cind].capital_pid < 0:
+                            current[cind].capital_pid = last_pid
                     current[3].children.append(lsplit[0].strip())
+                    last_pid += 1
                     continue
                 if depth in current:  # We finished a unit and are on to the next one.
                     current[depth-1].children.append(current.pop(depth))
@@ -161,7 +169,7 @@ class RegionTree:
                 color = tuple([x.strip() for x in lsplit[1:4]]) if len(lsplit) > 3 else ("0","0","0")
                 tag, culture, religion, rough = lsplit[4:8] if len(lsplit) > 7 else [None, None, None, "forest"]
                 holy_site = lsplit[8].strip() if len(lsplit) > 8 else None
-                current[depth] = cls(title=title, color=color, tag=tag, culture=culture, religion=religion, rough=rough, holy_site=holy_site)
+                current[depth] = cls(title=title, color=color, tag=tag, culture=culture, religion=religion, rough=rough, holy_site=holy_site, capital_rid=last_rid,)
             while len(current) > 0:
                 depth = max(current.keys())
                 if depth-1 in current:
@@ -169,7 +177,7 @@ class RegionTree:
                 else:
                     result = current[depth]
                     break
-        return result
+        return result, last_pid, last_rid
 
 
 def assemble_culrels(region_trees):
@@ -346,9 +354,10 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
     return cube_from_pid, terr_templates, sea_centers
     
 
-def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65, num_centers=40):
+def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65, num_centers=40, last_pid=1, last_rid=0):
     """Create len(config["CONTINENT_LISTS"]) continents with the appropriate number of kingdoms.
-    Uses the standard triangle-border system, which requires 3 to 5 kingdoms per continent."""
+    Uses the standard triangle-border system, which requires 3 to 5 kingdoms per continent.
+    Will start province and region ids at last_pid and last_rid+1 respectively."""
     continents = []
     terr_templates = []
     region_trees = []
@@ -367,14 +376,16 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
         assert len(empires) == 1
         assert len(centers) == num_c
         assert len(borders) == num_b  # Changed this from >= to == so that we can use CONTINENT_LISTS elsewhere to determine which characters to spawn. If we want to randomize them, we'll have to do it in making the config.
-        region_tree = RegionTree.from_csv(os.path.join("data", empires[0])+".csv")
+        region_tree, last_pid, last_rid = RegionTree.from_csv(os.path.join("data", empires[0])+".csv", last_pid=last_pid, last_rid=last_rid)
         random.shuffle(kingdoms)
         random.shuffle(centers)
         random.shuffle(borders)
         for title in centers[:num_c] + borders[:num_b]:
-            region_tree.children[0].children.append(RegionTree.from_csv(os.path.join("data", title)+".csv")) # The empires come with an interstitial kingdom to add all of these duchies to.
+            rt, last_pid, last_rid = RegionTree.from_csv(os.path.join("data", title)+".csv", last_pid=last_pid, last_rid=last_rid)
+            region_tree.children[0].children.append(rt) # The empires come with an interstitial kingdom to add all of these duchies to.
         for title in kingdoms:
-            region_tree.children.append(RegionTree.from_csv(os.path.join("data", title)+".csv"))
+            rt, last_pid, last_rid = RegionTree.from_csv(os.path.join("data", title)+".csv", last_pid=last_pid, last_rid=last_rid)
+            region_tree.children.append(rt)
         region_trees.append(region_tree)
         candidates = compute_func(chunks, cids, num_k)
         all_sea_centers = []
@@ -394,7 +405,7 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
                     centers, chunks, cids = create_chunks(subweights, num_centers)
                     candidates = compute_func(chunks, cids, num_k)
                     ind = -1
-    return continents, terr_templates, region_trees, all_sea_centers
+    return continents, terr_templates, region_trees, all_sea_centers, last_pid, last_rid
 
 
 def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], min_province_distance=2):
@@ -488,7 +499,10 @@ def create_data(config):
     """The main function that calls all the other functions in order. 
     The resulting data structure should be enough to make the mod for any particular game."""
     random.seed(config.get("seed", 1945))
-    continents, terr_templates, region_trees, sea_centers = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", 40))
+    last_pid = 1  # province_id. They 1-index instead of 0-indexing.
+    last_cid = 1  # county_id. They 1-index instead of 0-indexing.
+    last_rid = 1  # region_id. They 1-index instead of 0-indexing.
+    continents, terr_templates, region_trees, sea_centers, last_pid, last_rid = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", 40), last_pid=last_pid, last_rid=last_rid)
     m_x = config["n_x"]//2
     m_y = -(config["n_y"]+config["n_x"]//2)//2
     continents, sea_region_centers = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
@@ -499,15 +513,17 @@ def create_data(config):
     tag_from_pid = {}
     land_cubes = set()
     sea_cubes = set()
-    last_pid = 1  # province_id. They 1-index instead of 0-indexing.
-    last_cid = 0  # county_id. Starts at 0 because we increment at each capital, which happens first.
-    last_rid = 0  # region_id. Starts at 0 because we increment at each capital, which happens first.
     terr_from_cube = {}
     name_from_title = {}  # TODO: Import this from localization or w/e
     name_from_pid = {}
     name_from_cid = {}
     name_from_rid = {}
+    
+    last_pid = 1  # province_id. They 1-index instead of 0-indexing.
+    last_cid = 0  # county_id. 
+    last_rid = 0  # region_id. This is incremented before use.
     for cind, continent in enumerate(continents):
+        # This is currently recalculating the pid and rid. This is presumably correct, but probably we should be reading it off the region_tree instead?
         ck3_titles = region_trees[cind].all_ck3_titles()
         region_caps = {ck3_titles[ind+2]: t for ind, t in enumerate(ck3_titles) if t[0] == "d"}
         county_caps = {ck3_titles[ind+1]: t for ind, t in enumerate(ck3_titles) if t[0] == "c"}

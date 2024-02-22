@@ -163,7 +163,7 @@ def hex_rgb(r, g, b):
     return "x" + HEX_LIST[r // 16] + HEX_LIST[r % 16] + HEX_LIST[g // 16] + HEX_LIST[g % 16] + HEX_LIST[b // 16] + HEX_LIST[b % 16]
 
 
-def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_from_rid, locs_from_rid, arable_from_rid, capped_from_rid, coast_from_rid, tag_from_pid, pop_from_rid, building_from_rid, homelands_from_rid={}, claims_from_rid={}):
+def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_from_rid, locs_from_rid, arable_from_rid, capped_from_rid, coast_from_rid, tag_from_pid, pop_from_rid, building_from_rid, culture_conv, religion_conv, homelands_from_rid={}, claims_from_rid={}):
     """Creates state_region files, as well as relevant history files."""
     os.makedirs(os.path.join(file_dir,"map_data","state_regions"), exist_ok=True)
     with open(os.path.join(file_dir,"map_data","state_regions", "00_state_regions.txt"), 'w', encoding='utf_8_sig') as outf:
@@ -214,7 +214,7 @@ def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_fr
                 outf.write(" ".join([hex_rgb(*rgb_from_pid[pid]) for pid in pids]))
                 outf.write("\t\t}\n")
             if rid in homelands_from_rid:
-                outf.write("\n"+"\n".join(["\t\tadd_homeland = cu:" + culture for culture in homelands_from_rid[rid]]) + "\n")
+                outf.write("\n"+"\n".join(["\t\tadd_homeland = cu:" + culture_conv.get(culture, culture) for culture in homelands_from_rid[rid]]) + "\n")
             if rid in claims_from_rid:
                 outf.write("\n"+"\n".join(["\t\tadd_homeland = c:" + tag for tag in claims_from_rid[rid]]) + "\n")
             outf.write("\t}\n")
@@ -228,9 +228,9 @@ def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_fr
                 for (size, culture, religion) in pops:
                     buffer = ""
                     if culture is not None:
-                        buffer += f"\t\t\t\tculture = {culture}\n"
+                        buffer += f"\t\t\t\tculture = {culture_conv.get(culture, culture)}\n"
                     if religion is not None:
-                        buffer += f"\t\t\t\treligion = {religion}\n"
+                        buffer += f"\t\t\t\treligion = {religion_conv.get(religion, religion)}\n"
                     outf.write(f"\t\t\tcreate_pop = {{\n{buffer}\t\t\t\tsize = {size}\n\t\t\t}}\n")
                 outf.write("\t\t}\n")
             outf.write("\t}\n")
@@ -298,7 +298,7 @@ TIER_FROM_PREFIX = {
     "c": "principality",
 }
 
-def create_countries(file_dir, base_dir, region_trees, tech_from_tag, tax_from_tag, laws_from_tag, wealth_from_tag, literacy_from_tag, name_from_rid):
+def create_countries(file_dir, base_dir, region_trees, tech_from_tag, tax_from_tag, laws_from_tag, wealth_from_tag, literacy_from_tag, name_from_rid, culture_conv, religion_conv,):
     """Creates common/country_definitions files, as well as relevant history files."""
     os.makedirs(os.path.join(file_dir,"common","country_definitions"), exist_ok=True)
     with open(os.path.join(os.path.join(file_dir, "common", "country_definitions", "00_countries.txt")), 'w', encoding='utf_8_sig') as outf:
@@ -307,7 +307,7 @@ def create_countries(file_dir, base_dir, region_trees, tech_from_tag, tax_from_t
                 if region.tag is not None and region.capital_rid != -1:
                     r,g,b = region.color
                     capital = name_from_rid[region.capital_rid]
-                    outf.write(region.tag + f" = {{\n\tcolor = {{ {r} {g} {b} }}\n\tcountry_type = recognized\n\ttier = {TIER_FROM_PREFIX[region.title[0]]}\n\tcultures = {{ {region.culture} }}\n\tcapital = {capital}\n}}\n\n")
+                    outf.write(region.tag + f" = {{\n\tcolor = {{ {r} {g} {b} }}\n\tcountry_type = recognized\n\ttier = {TIER_FROM_PREFIX[region.title[0]]}\n\tcultures = {{ {culture_conv.get(region.culture, region.culture)} }}\n\tcapital = {capital}\n}}\n\n")
     with open(os.path.join(os.path.join(base_dir, "common", "country_definitions", "99_dynamic.txt")), 'r', encoding='utf_8_sig') as inf:
         with open(os.path.join(os.path.join(file_dir, "common", "country_definitions", "99_dynamic.txt")), 'w', encoding='utf_8_sig') as outf:
             for line in inf.readlines():
@@ -368,6 +368,11 @@ def create_objectives(file_dir, base_dir, tags):
 
 def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid, region_trees, tag_from_pid, straits):
     """Creates the V3 mod files in file_dir, given the basic data."""
+    # Get some conversion data.
+    with open(os.path.join("data", "conversion_v3.yaml"), 'r', encoding="utf_8_sig") as inf:
+        conv = yaml.load(inf, yaml.Loader)
+        culture_conv = conv.get("culture", {})
+        religion_conv = conv.get("religion", {})
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
     create_blanks(file_dir=file_dir)  # This is here so if we do make the files later, we won't overwrite them.
@@ -420,6 +425,8 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
         capped_from_rid=capped_from_rid,
         coast_from_rid=coast_from_rid,
         tag_from_pid=tag_from_pid,
+        culture_conv=culture_conv,
+        religion_conv=religion_conv,
         homelands_from_rid={},  # TODO: Allocate homelands.
         claims_from_rid={},  # TODO: Claims--tho this is probably conversion-only.
         pop_from_rid=pop_from_rid,
@@ -455,6 +462,8 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
         wealth_from_tag=wealth_from_tag,
         literacy_from_tag=literacy_from_tag,
         name_from_rid=name_from_rid,
+        culture_conv=culture_conv,
+        religion_conv=religion_conv,
         )
     create_objectives(file_dir=file_dir, base_dir=config["BASE_V3_DIR"], tags=tags)
     strip_base_files(
