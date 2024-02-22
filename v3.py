@@ -357,13 +357,14 @@ def create_default(file_dir, sea_rgbs, lake_rgbs = []):
 def create_objectives(file_dir, base_dir, tags):
     """Modifies 00_objective_tutorial and 01_player_objectives.txt to point to actual tags."""
     os.makedirs(os.path.join(file_dir,"common", "objectives"), exist_ok=True)
-    with open(os.path.join(file_dir, "common", "objectives","00_objective_tutorial.txt"), 'w', encoding='utf_8_sig') as outf:
-        with open(os.path.join(base_dir, "common", "objectives","00_objective_tutorial.txt"), 'r', encoding='utf_8_sig') as inf:
-            for line in inf.readlines():
-                if "recommend_tags" in line:
-                    outf.write(line.split("=")[0] + "= { " + " ".join(random.sample(tags, k=4)) + " }\n")
-                else:
-                    outf.write(line)
+    for filename in os.listdir(os.path.join(base_dir, "common", "objectives")):
+        with open(os.path.join(file_dir, "common", "objectives", filename), 'w', encoding='utf_8_sig') as outf:
+            with open(os.path.join(base_dir, "common", "objectives", filename), 'r', encoding='utf_8_sig') as inf:
+                for line in inf.readlines():
+                    if "recommended_tags" in line:
+                        outf.write(line.split("=")[0] + "= { " + " ".join(random.sample(tags, k=4)) + " }\n")
+                    else:
+                        outf.write(line)
 
 
 def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid, region_trees, tag_from_pid, straits):
@@ -433,6 +434,7 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
         building_from_rid=building_from_rid,
     )
     tags = sorted(set(tag_from_pid.values()))
+    print(tags)
     tech_from_tag = {tag: "1" for tag in tags}
     tax_from_tag = {tag: "medium" for tag in tags}
     laws_from_tag = {tag: [
