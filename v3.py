@@ -149,6 +149,7 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
                     "common/history/population",
                     "common/history/production_methods",
                     "common/history/trade_routes",
+                    "common/journal_entries",
                     "common/strategic_regions",
                     "content_source/map_objects/masks",
                     "map_data/state_regions",
@@ -367,6 +368,53 @@ def create_objectives(file_dir, base_dir, tags):
                         outf.write(line)
 
 
+def create_journals(file_dir, base_dir):
+    """Copies over some valid journal files."""
+    os.makedirs(os.path.join(file_dir,"common", "journal_entries"), exist_ok=True)
+    for filename in [  #TODO: This should be programmatically determined instead of hardcoded :/
+        "00_abolish_monarch.txt",  # Has je_warlord_china reference which seems bad
+        "00_autocracy.txt",
+        "00_corn_laws.txt",
+        "00_fascism.txt",
+        "00_late_naval_tech.txt",
+        "00_liberalism.txt",
+        "00_military_tech_je.txt",
+        "00_miltech_era_4_5.txt",
+        "00_opium.txt",
+        "00_plague.txt",
+        "00_player_objectives_economic_dominance.txt",
+        "00_player_objectives_egalitarian_society.txt",
+        "00_player_objectives_hegemon.txt",
+        "00_secret_police.txt",
+        "00_skyscraper.txt",
+        "00_strike_je.txt",
+        "00_suffragists.txt",
+        "00_technology_production.txt",
+        "00_technology_society.txt",
+        "00_technology_society_cameras.txt",
+        "00_tutorial.txt",
+        "00_war_crimes.txt",
+        "00_we_live_in_a_society.txt",
+        "01_assassination.txt",
+        "01_coup.txt",
+        "01_flamethrowers.txt",
+        "01_grand_exhibition.txt",
+        "01_nursing.txt",
+        "01_prohibition_laws.txt",
+        "01_society_je.txt",
+        "01_standard_of_living.txt",
+        "01_urbanization.txt",
+        "02_nihilism.txt",
+        "02_silkworm_diseases.txt",
+        "03_positivism.txt",
+    ]:
+        with open(os.path.join(file_dir, "common", "journal_entries", filename), 'w', encoding='utf_8_sig') as outf:
+            with open(os.path.join(base_dir, "common", "journal_entries", filename), 'r', encoding='utf_8_sig') as inf:
+                for line in inf.readlines():
+                    outf.write(line)
+    # TODO: ones that could be customized are 00_belle_epoque and 00_canals
+
+
 def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid, region_trees, tag_from_pid, straits):
     """Creates the V3 mod files in file_dir, given the basic data."""
     # Get some conversion data.
@@ -434,7 +482,6 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
         building_from_rid=building_from_rid,
     )
     tags = sorted(set(tag_from_pid.values()))
-    print(tags)
     tech_from_tag = {tag: "1" for tag in tags}
     tax_from_tag = {tag: "medium" for tag in tags}
     laws_from_tag = {tag: [
@@ -472,11 +519,13 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
         file_dir=file_dir,
         src_dir=config["BASE_V3_DIR"],
         subpaths=[
+            "common/ai_strategies",
             "common/decisions",
             "common/history/global",
-            #"events",
+            "events",
         ],
-        to_remove=["c:","s:"],  # cu: ? Also this should maybe be the list of historical tags instead?
+        to_remove=["c:","s:","p:","sr:",],  # cu: ? Also this should maybe be the list of historical tags instead?
         to_keep=[],
-        subsection=["triggered_desc = {", "option = {"],
+        subsection=["triggered_desc = {", "option = {", "if = {"],
+        main_file=["common", "on_actions", "00_code_on_actions.txt"],
     )
