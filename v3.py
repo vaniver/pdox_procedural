@@ -263,7 +263,7 @@ def create_strat_regions(file_dir, srs_from_place, srs_from_farm, region_trees, 
                 capital_prov = hex_rgb(*rgb_from_pid[rt.capital_pid])  # TODO: improve region_tree capitals
                 map_color = " ".join([str(x) for x in list(rt.color)])
                 states = " ".join(rt.some_ck3_titles("d_"))
-                outf.write(f"{region_name} = {{\n\tcapital_province = {capital_prov}\n\tmap_color = {{ {map_color} }}\n\tstates = {{ {states} }}\n\t}}\n\n")
+                outf.write(f"{region_name} = {{\n\tcapital_province = {capital_prov}\n\tmap_color = {{ {map_color} }}\n\tstates = {{ {states} }}\n}}\n\n")
     with open(os.path.join(file_dir, "common", "strategic_regions", "water_strategic_regions.txt"), 'w', encoding='utf_8_sig') as outf:
         for rid, rname in name_from_rid.items():
             if rname[0] == "s":

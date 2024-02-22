@@ -169,7 +169,7 @@ class RegionTree:
                 color = tuple([x.strip() for x in lsplit[1:4]]) if len(lsplit) > 3 else ("0","0","0")
                 tag, culture, religion, rough = lsplit[4:8] if len(lsplit) > 7 else [None, None, None, "forest"]
                 holy_site = lsplit[8].strip() if len(lsplit) > 8 else None
-                current[depth] = cls(title=title, color=color, tag=tag, culture=culture, religion=religion, rough=rough, holy_site=holy_site, capital_rid=last_rid,)
+                current[depth] = cls(title=title, color=color, tag=tag, culture=culture, religion=religion, rough=rough, holy_site=holy_site, capital_rid=last_rid)
             while len(current) > 0:
                 depth = max(current.keys())
                 if depth-1 in current:
@@ -377,6 +377,7 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
         assert len(centers) == num_c
         assert len(borders) == num_b  # Changed this from >= to == so that we can use CONTINENT_LISTS elsewhere to determine which characters to spawn. If we want to randomize them, we'll have to do it in making the config.
         region_tree, last_pid, last_rid = RegionTree.from_csv(os.path.join("data", empires[0])+".csv", last_pid=last_pid, last_rid=last_rid)
+        region_tree.children[0].capital_pid = last_pid  # The interstitial kingdom has its capital in another file, and so this needs to be assigned here.
         random.shuffle(kingdoms)
         random.shuffle(centers)
         random.shuffle(borders)
