@@ -32,6 +32,10 @@ CONTINENT_LISTS:
   - b_silesia
   - b_bohemia
   - b_amdo
+n_x: 171
+n_y: 57
+max_x: 8192
+max_y: 3616
 RELIGION_DIR: "data"
 GUARANTEED_INNOS:
 - tribal

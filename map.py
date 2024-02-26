@@ -15,13 +15,13 @@ def box_from_max(max_x, max_y, n_x, n_y):
     return box_width, box_height
 
 
-def hor_ver_from_cube(cube, box_width, box_height):
+def hor_ver_from_cube(cube):
     hor = cube.x
     ver = - cube.y - hor // 2 - hor % 2
     return hor,ver
 
 def xy_from_cube(cube, box_width, box_height):
-    hor, ver = hor_ver_from_cube(cube, box_width=box_width, box_height=box_height)
+    hor, ver = hor_ver_from_cube(cube)
     start_x = (3 * hor - 2) * box_width
     start_y = (2 * ver - 1 + (hor % 2)) * box_height
     return start_x, start_y
@@ -175,7 +175,6 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_f
 
 def create_tri_map(height_from_vertex, max_x, max_y, n_x, n_y, mode='L', default="black", palette=None):
     """Creates a map out of triangular patches, each defined by three adjacent vertices in height_from_vertex."""
-    assert n_x % 2 == 1
     box_width, box_height = box_from_max(max_x, max_y, n_x, n_y)
     river_border = [x*box_height//box_width for x in range(box_width)] + [box_height]
     # It is the same triangle everywhere, so we can compute once the barycentric ratios for all the pixels in the triangle.

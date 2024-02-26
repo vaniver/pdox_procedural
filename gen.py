@@ -354,7 +354,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
     return cube_from_pid, terr_templates, sea_centers
     
 
-def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65, num_centers=40, last_pid=1, last_rid=0):
+def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65, num_centers=None, last_pid=1, last_rid=0):
     """Create len(config["CONTINENT_LISTS"]) continents with the appropriate number of kingdoms.
     Uses the standard triangle-border system, which requires 3 to 5 kingdoms per continent.
     Will start province and region ids at last_pid and last_rid+1 respectively."""
@@ -363,6 +363,8 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
     region_trees = []
     if weight_from_cube is None:
         weight_from_cube = {cub: random.randint(1,8) for cub in valid_cubes(n_x,n_y)}
+    if num_centers is None:
+        num_centers = len(weight_from_cube) * 3 // (2 * config["KINGDOM_SIZE"])
     centers, chunks, cids = create_chunks(weight_from_cube, num_centers)
     ind = -1
     for cind, cont_list in enumerate(config["CONTINENT_LISTS"]):
@@ -417,7 +419,9 @@ def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], 
     for ind, k in enumerate(province_centers):
         if not any([ok.sub(k).mag() <= min_province_distance for ok in province_centers[ind:]]):  # Should this 2 be configurable?
             sea_province_centers.append(k)
-    v_centers = random.sample(list(sea_cubes),max(0, config.get("SEA_PROVINCES", 80) - len(sea_province_centers))) + sea_province_centers
+    if "SEA_PROVINCES" not in config:
+        config["SEA_PROVINCES"] = len(sea_cubes) // config.get("SEA_PROVINCE_SIZE", 40)
+    v_centers = random.sample(list(sea_cubes),max(0, config["SEA_PROVINCES"] - len(sea_province_centers))) + sea_province_centers
     v_centers, pid_from_cube, _ = voronoi(v_centers, {k:1 for k in sea_cubes})  # TODO: This really ought to be better.
     # Group the provinces together into regions.
     pids = sorted(set(pid_from_cube.values()))
@@ -462,7 +466,7 @@ def arrange_inner_sea(continents, inner_sea_center, angles=[2,4,0]):
     moved_continents = []
     sea_region_centers = [inner_sea_center]
     longest_dim = 0
-    offs = [Cube(0,0,0),Cube(0,0,0),Cube(-1,0,1)]  # These are hardcoded for the 1945 seed.
+    offs = [Cube(0,0,0),Cube(0,0,0),Cube(0,0,0)]  # These are hardcoded for the 1945 seed.
     for ind,continent in enumerate(continents):
         ac = Area(ind, continent)  # Area has unordered membership, which is why we have to construct the dict again later. Continent should probably be a Tile (old code w/ ordered membership).
         off1 = ac.calc_average()
@@ -581,6 +585,7 @@ def create_data(config):
         rid_from_pid[last_pid] = last_rid
         last_pid += 1
         last_rid += 1
+    #TODO: Assigning sea provinces should 1) look for major inland seas, like the med, 2) use more regular things that are faster for the deep ocean
     sid_from_cube, srid_from_sid = assign_sea_zones(sea_cubes, config, province_centers=sea_centers, region_centers=sea_region_centers)
     pid_from_cube.update({k:v+last_pid for k,v in sid_from_cube.items()})
     for k, sid in sid_from_cube.items():
@@ -620,7 +625,7 @@ def create_data(config):
             coast_from_rid[rid] = coastal_pid_cubes[0][1]
         cubes = [cube for cube, pid in pid_from_cube.items() if pid in pids and pid != pid_from_loc["city"]]
         if len(cubes) == 0:
-            print(pid)
+            print(f"Province {pid} only has one cube in it!")
         # TODO: farm, mine, wood dependent on trade goods
         pid_from_loc["farm"] = pid_from_cube[random.sample(cubes, k=1)[0]]
         pid_from_loc["mine"] = pid_from_cube[random.sample(cubes, k=1)[0]]

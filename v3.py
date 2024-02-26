@@ -42,7 +42,7 @@ class V3Map:
         self.max_y = max_y
         self.n_x = n_x
         self.n_y = n_y
-        self.box_height, self.box_width = box_from_max(self.max_x, self.max_y, self.n_x, self.n_y)
+        self.box_width, self.box_height = box_from_max(self.max_x, self.max_y, self.n_x, self.n_y)
 
     def create_provinces(self, rgb_from_cube):
         """Creates provinces.png and definition.csv"""
@@ -62,6 +62,24 @@ class V3Map:
             outf.write("level_offsets={ { 0 0 } { 0 6695 } { 0 7569 } { 0 7662 } { 0 7680 } }\n")
             outf.write("max_compress_level=4\n")
             outf.write("empty_tile_offset={ 201 76 }\n")
+
+    def create_locators(self, file_dir, locs_from_rid, pid_from_cube):
+        os.makedirs(os.path.join(file_dir,"gfx","map", "map_object_data"), exist_ok=True)
+        for loc in VALID_LOCS:
+            with open(os.path.join(file_dir, "gfx", "map", "map_object_data", f"generated_map_object_locators_{loc}.txt"), 'w', encoding='utf_8_sig') as outf:
+                clamp = "yes" if loc == "port" else "no"
+                outf.write("game_object_locator={\n\tname=\""+loc+"\"\n\tclamp_to_water_level="+clamp+"\n\trender_under_water=no\n\tgenerated_content=no\n\tlayer=\"locators\"\n\tinstances={\n")
+                for rid in sorted(locs_from_rid.keys()):
+                    if loc in locs_from_rid[rid]:
+                        cubes = [cube for cube, pid in pid_from_cube.items() if pid == locs_from_rid[rid][loc]]
+                        if len(cubes) == 0:
+                            raise ValueError(f"Missing {loc} for {rid} with pid {locs_from_rid[rid][loc]}")
+                        # TODO: choose more intelligently / have them offset?
+                        x,y = xy_from_cube(random.sample(cubes, k=1)[0], self.box_width, self.box_height)
+                        x += 2*self.box_width
+                        y += self.box_height
+                        outf.write(f"\t\t{{\n\t\t\tid={rid}\n\t\t\tposition={{ {x} 0.0 {y} }}\n\t\t\trotation={{ 0 0 0 1 }}\n\t\t\tscale={{ 1 1 1 }}\n\t\t}}\n")
+                outf.write("\t}\n}\n")
 
     def create_terrain_masks(self, base_dir, terr_from_cube):
         """Creates all the terrain masks; just fills each cube.
@@ -110,8 +128,8 @@ class V3Map:
                 for line in inf.readlines():
                     if line.startswith("\tWORLD_EXTENTS_X"):
                         outf.write(line.split("=")[0] + f"= {self.max_x}\n")
-                    elif line.startswith("\tWORLD_EXTENTS_Y"):
-                        outf.write(line.split("=")[0] + f"= {self.max_y}\n")
+                    elif line.startswith("\tWORLD_EXTENTS_Z"):
+                        outf.write(line.split("=")[0] + f"= {self.max_y-1}\n")
                     else:
                         outf.write(line)
         # TODO: Confirm that I don't need to update 00_graphics.txt, mostly CAMERA_START.
@@ -130,10 +148,10 @@ def create_blanks(file_dir):
 
 
 def create_terrain_file(file_dir, terr_from_pid, rgb_from_pid):
-    """Writes out common/province_terrain."""
+    """Writes out common/province_terrains."""
     # Masks were historically wrapped into create_heightmap, and should maybe be again.
     os.makedirs(os.path.join(file_dir, "map_data"), exist_ok=True)
-    with open(os.path.join(file_dir, "map_data", "province_terrain.txt"), 'w') as outf:
+    with open(os.path.join(file_dir, "map_data", "province_terrains.txt"), 'w') as outf:
         for pid, terr in sorted(terr_from_pid.items()):
             outf.write(f"{hex_rgb(*rgb_from_pid[pid])}=\"{V3Terrain_Name_from_BaseTerrain[terr]}\"\n")
     os.makedirs(os.path.join(file_dir, "common", "terrain_manipulators", "provinces"), exist_ok=True)
@@ -193,10 +211,11 @@ def create_states(file_dir, rid_from_pid, rgb_from_pid, name_from_rid, traits_fr
                 if rname[0] == "i":  # We don't care about the impassable regions. Might need to fix this later.
                     continue
                 buffer = f"{rname} = {{\n\tid = {rid}\n\tprovinces = {{ "
-                buffer += " ".join(["\""+hex_rgb(*rgb_from_pid[pid])+"\"" for pid, rrid in rid_from_pid.items() if rid==rrid]) + "}\n"
                 if rname[0] == "s":  # sea regions
-                    soutf.write(buffer + "}\n\n")
+                    buffer += f"\" {hex_rgb(*rgb_from_pid[pid])} \" }}\n}}\n\n"
+                    soutf.write(buffer)
                     continue
+                buffer += " ".join(["\""+hex_rgb(*rgb_from_pid[pid])+"\"" for pid, rrid in rid_from_pid.items() if rid==rrid]) + "}\n"
                 outf.write(buffer + "\tsubsistence_building = \"building_subsistence_farms\"\n")
                 if rid in traits_from_rid:
                     outf.write("\ttraits = { " + " ".join(["\""+trait+"\"" for trait in traits_from_rid[rid]]) + " }\n")
@@ -445,7 +464,18 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
     create_blanks(file_dir=file_dir)  # This is here so if we do make the files later, we won't overwrite them.
-    rgb_from_cube = {k:rgb_from_pid[pid] for k, pid in pid_from_cube.items()}
+    # Combine sea provinces
+    new_rgb_from_pid = {}
+    rgb_from_rid = {}
+    for rid, name in name_from_rid.items():
+        if name[0] == "s":
+            rgb_from_rid[rid] = rgb_from_pid[min([pid for pid, rr in rid_from_pid.items() if rid==rr])]
+    for pid, rgb in rgb_from_pid.items():
+        if name_from_rid[rid_from_pid[pid]][0] == "s":
+            new_rgb_from_pid[pid] = rgb_from_rid[rid_from_pid[pid]]
+        else:
+            new_rgb_from_pid[pid] = rgb
+    rgb_from_cube = {k:new_rgb_from_pid[pid] for k, pid in pid_from_cube.items()}
     # Maps
     v3map = V3Map(file_dir=file_dir, max_x=config["max_x"], max_y=config["max_y"], n_x=config["n_x"], n_y=config["n_y"])
     v3map.create_provinces(rgb_from_cube=rgb_from_cube)
@@ -453,11 +483,16 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
     river_background = {k.cube.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_vertex.items() if k.rot==0}
     v3map.create_rivers(river_background, river_edges, river_vertices, base_loc=os.path.join(config["BASE_V3_DIR"], "map_data", "rivers.png"))
     v3map.create_terrain_masks(base_dir=config["BASE_V3_DIR"], terr_from_cube=terr_from_cube)
-    create_terrain_file(file_dir, terr_from_pid=terr_from_pid, rgb_from_pid=rgb_from_pid)
+    create_terrain_file(file_dir, terr_from_pid=terr_from_pid, rgb_from_pid=new_rgb_from_pid)
+    v3map.create_locators(
+        file_dir=file_dir,
+        locs_from_rid=locs_from_rid,
+        pid_from_cube=pid_from_cube,
+    )
     v3map.update_defines(base_dir=config["BASE_V3_DIR"])
-    sea_rgbs = [hex_rgb(*rgb_from_pid[pid]) for pid in sorted(set(coast_from_rid.values()))]
+    sea_rgbs = sorted({hex_rgb(*new_rgb_from_pid[pid]) for pid in sorted(set(coast_from_rid.values()))})
     create_default(file_dir=file_dir, sea_rgbs=sea_rgbs, lake_rgbs=[])
-    create_adjacencies(file_dir=file_dir, straits=straits, rgb_from_pid=rgb_from_pid, pid_from_cube=pid_from_cube, closest_xy=lambda fr, to: closest_xy(fr, to, v3map.box_height, v3map.box_width))
+    create_adjacencies(file_dir=file_dir, straits=straits, rgb_from_pid=new_rgb_from_pid, pid_from_cube=pid_from_cube, closest_xy=lambda fr, to: closest_xy(fr, to, v3map.box_height, v3map.box_width))
     srs_from_place = {
         "europe": ["region_east_francia", "region_france", "region_bavaria", "region_christendom_middle",],
         "north_america": [],
@@ -486,7 +521,7 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, terr_from_cube, te
     create_states(
         file_dir=file_dir,
         rid_from_pid=rid_from_pid,
-        rgb_from_pid=rgb_from_pid,
+        rgb_from_pid=new_rgb_from_pid,
         name_from_rid=name_from_rid,
         traits_from_rid=traits_from_rid,
         locs_from_rid=locs_from_rid,

@@ -26,7 +26,7 @@ class CK3Map:
         self.max_y = max_y
         self.n_x = n_x
         self.n_y = n_y
-        self.box_height, self.box_width = box_from_max(self.max_x, self.max_y, self.n_x, self.n_y)
+        self.box_width, self.box_height = box_from_max(self.max_x, self.max_y, self.n_x, self.n_y)
 
     def create_provinces(self, rgb_from_pid, pid_from_cube, name_from_pid):
         """Creates provinces.png and definition.csv"""
@@ -639,7 +639,7 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     shared = "version = \"0.0.1\"\n"
     shared += "tags = {\n\t\"Total Conversion\"\n}\n"
     shared += "name = \"{}\"\n".format(mod_disp_name)
-    shared += "supported_version = \"1.11.4\"\n"
+    shared += "supported_version = \"1.11.5\"\n"
     outer = "path = \"mod/{}\"\n".format(mod_name)
     
     replace_paths = [
