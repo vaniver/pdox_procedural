@@ -665,7 +665,7 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     for region_tree in region_trees:
         all_titles.extend(region_tree.all_ck3_titles())
         holy_sites.extend(region_tree.all_holy_sites())
-    print(f"there are {len(all_titles)} titles.")
+    print(f"There are {len(all_titles)} titles.")
     create_coa(file_dir, base_dir=os.path.join(config["BASE_CK3_DIR"], "common", "coat_of_arms", "coat_of_arms"), custom_dir=config.get("COA_DIR", None), title_list=all_titles)
     create_landed_titles(file_dir, pid_from_title, region_trees)  # TODO: add special_titles
     create_terrain_file(file_dir=file_dir, terr_from_pid=terr_from_pid)

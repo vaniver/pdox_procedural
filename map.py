@@ -12,7 +12,7 @@ def box_from_max(max_x, max_y, n_x, n_y):
     box_height = max_y // (n_y * 2 - 2)  # TODO: make this divide exactly?
     # There are n_x+1 thin boxes (n_x-1 plus 2 on the edges) and n_x-2 double boxes, so 3n_x-3 total.
     box_width = max_x // (n_x * 3 - 3)   # TODO: make this divide exactly?
-    return box_height, box_width
+    return box_width, box_height
 
 
 def hor_ver_from_cube(cube, box_width, box_height):
@@ -29,8 +29,7 @@ def xy_from_cube(cube, box_width, box_height):
 
 def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_from_vertex={}, mode='RGB', default="black", palette=None):
     """Draw a hex map with size (max_x,max_y) with colors from rgb_from_ijk, rgb_from_vertex, and rgb_from_edge. mode determines the image type, and also the correct format for rgb (which should be shared by everything).
-    There will be n_x hexes horizontally and n_y hexes vertically. 
-    n_x will be assumed odd and n_y is assumed even (to have split hexes in all corners).
+    There will be n_x hexes horizontally and n_y hexes vertically.
     rgb_from_edge should be a dictionary from edge to (rgb, thickness) tuples; also, please don't use edges near the map edge.
     rgb_from_vertex should be a dictionary from vertex to rgb."""
     # We have three different positions to track:
@@ -40,8 +39,7 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_f
     
     # Calculate hex size
     # There are 2n_y-2 vertical boxes.
-    assert n_x % 2 == 1
-    box_height, box_width = box_from_max(max_x, max_y, n_x, n_y)
+    box_width, box_height = box_from_max(max_x, max_y, n_x, n_y)
     # We want the edges between hexes to be always uniform. (Later we'll have an option to save this hex-by-hex.)
     # This is more awkward than trusting the triangle function but what are you gonna do
     river_border = [x*box_height//box_width for x in range(box_width)] + [box_height]
@@ -53,9 +51,11 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_f
         hor = ijk[0]
         if hor >= n_x:
             print(ijk, rgb, "out of bounds!")
+            continue
         ver = - ijk[1] - hor // 2 - hor % 2
         if ver >= n_y - hor % 2:
             print(ijk, rgb, "out of bounds!")
+            continue
         start_x = (3 * hor - 2) * box_width
         start_y = (2 * ver - 1 + (hor % 2)) * box_height
         # Compute what we actually need to paint for this:            
@@ -71,6 +71,9 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_f
                     for y in range(river_border[x], box_height):
                         pix[start_x+box_width*3+x, start_y+y] = rgb
                 center_vrange = range(box_height)
+                for x in range(2*box_width):  # Go all the way to the bottom edge
+                    for y in range(start_y + box_height, max_y):
+                        pix[x, y] = rgb
             else: # left edge
                 for x in range(box_width):
                     for y in range(river_border[x], box_height * 2 - river_border[x]):
@@ -78,21 +81,33 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_f
                 center_vrange = range(box_height*2)
         elif hor == n_x - 1:
             center_wrange = range(box_width)
-            if ver == 0: # top right                    
+            if ver == 0 and hor % 2 == 0: # top right; if it's even it's the full right side.
                 for x in range(box_width):
                     for y in range(box_height, box_height + river_border[x]):
                         pix[start_x+x, start_y+y] = rgb
                 center_vrange = range(box_height, box_height*2)
-            elif ver == n_y - 1: # bottom right
+                for x in range(start_x+2*box_width, max_x):  # Go all the way to the edge
+                    for y in range(box_height):
+                        pix[x, y] = rgb
+            elif ver == n_y - 1 and hor % 2 == 0: # bottom right
                 for x in range(box_width):
                     for y in range(box_height - river_border[x], box_height):
                         pix[start_x+x, start_y+y] = rgb
                 center_vrange = range(box_height)
+                for x in range(start_x+2*box_width, max_x):  # Go all the way to the edge
+                    for y in range(box_height):
+                        pix[x, start_y+y] = rgb
+                for x in range(start_x, max_x):
+                    for y in range(start_y+box_height, max_y):
+                        pix[x, y] = rgb
             else: # right edge
                 for x in range(box_width):
                     for y in range(box_height - river_border[x], box_height + river_border[x]):
                         pix[start_x+x, start_y+y] = rgb
                 center_vrange = range(box_height*2)
+                for x in range(start_x+2*box_width, max_x):  # Go all the way to the edge
+                    for y in range(box_height*2):
+                        pix[x, start_y+y] = rgb
         elif hor % 2 == 0 and ver == 0:
             for x in range(box_width):
                 for y in range(box_height, box_height + river_border[x]):
@@ -111,6 +126,9 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_f
                     pix[start_x+box_width*3+x, start_y+y] = rgb
             center_wrange = range(box_width*2)
             center_vrange = range(box_height)
+            for x in range(4*box_width):  # Go all the way to the bottom edge
+                for y in range(start_y + box_height, max_y):
+                    pix[start_x+x, y] = rgb
         else:
             for x in range(box_width):
                 for y in range(box_height - river_border[x], box_height + river_border[x]):
@@ -120,6 +138,10 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_f
                     pix[start_x+box_width*3+x, start_y+y] = rgb
             center_wrange = range(box_width*2)
             center_vrange = range(box_height*2)
+            if ver == n_y - 2 and hor % 2 == 1:  # Go all the way to the bottom edge    
+                for x in range(box_width, 3*box_width):
+                    for y in range(start_y + 2*box_height, max_y):
+                        pix[start_x+x, y] = rgb
         #Paint the center boxes. This could be a drawn rectangle but w/e
         for x in center_wrange:
             for y in center_vrange:
@@ -154,7 +176,7 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_f
 def create_tri_map(height_from_vertex, max_x, max_y, n_x, n_y, mode='L', default="black", palette=None):
     """Creates a map out of triangular patches, each defined by three adjacent vertices in height_from_vertex."""
     assert n_x % 2 == 1
-    box_height, box_width = box_from_max(max_x, max_y, n_x, n_y)
+    box_width, box_height = box_from_max(max_x, max_y, n_x, n_y)
     river_border = [x*box_height//box_width for x in range(box_width)] + [box_height]
     # It is the same triangle everywhere, so we can compute once the barycentric ratios for all the pixels in the triangle.
     bary_up = {}
@@ -258,7 +280,6 @@ def get_palette(base_loc):
 
 def valid_cubes(n_x=235, n_y=72):
     """Construct the list of on-map cube positions."""
-    assert n_x % 2 == 1
     cube_list = []
     for hor in range(n_x):
         hor2 = hor//2

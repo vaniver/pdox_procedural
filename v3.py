@@ -51,7 +51,7 @@ class V3Map:
 
     def create_heightmap(self, height_from_vertex):
         """Uses height_from_cube to generate a simple heightmap."""
-        img = create_tri_map(height_from_vertex=height_from_vertex, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y)
+        img = create_tri_map(height_from_vertex=height_from_vertex, max_x=self.max_x * 2, max_y=self.max_y * 2, n_x=self.n_x, n_y=self.n_y)
         img.save(os.path.join(self.file_dir, "map_data", "heightmap.png"))
         with open(os.path.join(self.file_dir, "map_data", 'heightmap.heightmap'), 'w') as outf:
             outf.write("heightmap_file=\"map_data/packed_heightmap.png\"\n")
@@ -77,6 +77,25 @@ class V3Map:
                 terrain = [k for k,v in USED_MASKS.items() if v == mask_name][0]
                 rgb_from_ijk = {k.tuple(): 128 for k,v in terr_from_cube.items() if v == terrain}
                 create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(self.file_dir, "gfx", "map", "terrain", mask))
+        os.makedirs(os.path.join(self.file_dir, "gfx", "map", "masks"), exist_ok=True)
+        for mask in os.listdir(os.path.join(base_dir, "gfx", "map", "masks")):
+            if not mask.startswith("mask"):
+                continue
+            #TODO: Assign farmland/forestry/mining to provinces
+            create_hex_map(rgb_from_ijk={}, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(self.file_dir, "gfx", "map", "masks", mask))
+        os.makedirs(os.path.join(self.file_dir, "gfx", "map", "dynamic_masks"), exist_ok=True)
+        # TODO: I think this should be land + one sea depth
+        create_hex_map(rgb_from_ijk={}, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(self.file_dir, "gfx", "map", "dynamic_masks", "exclusion_mask.dds"))
+        os.makedirs(os.path.join(self.file_dir, "gfx", "map", "textures"), exist_ok=True)
+        # Land mask is white for land and black for ocean
+        create_hex_map(rgb_from_ijk={k.tuple(): 0 if v == BaseTerrain.ocean else 255 for k,v in terr_from_cube.items()}, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(self.file_dir, "gfx", "map", "textures", "land_mask.dds"))
+        create_hex_map(rgb_from_ijk={}, max_x=self.max_x//8, max_y=self.max_y//8, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(self.file_dir, "gfx", "map", "textures", "windmap_tree.dds"))
+        create_hex_map(rgb_from_ijk={}, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='RGB', default="white").save(os.path.join(self.file_dir, "gfx", "map", "textures", "colormap.dds"))
+        create_hex_map(rgb_from_ijk={}, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='RGB', default="white").save(os.path.join(self.file_dir, "gfx", "map", "textures", "flatmap.dds"))
+        create_hex_map(rgb_from_ijk={}, max_x=self.max_x//8, max_y=self.max_y//8, n_x=self.n_x, n_y=self.n_y, mode='RGB', default="black").save(os.path.join(self.file_dir, "gfx", "map", "textures", "colormap_tree.dds"))
+        os.makedirs(os.path.join(self.file_dir, "content_source", "map_objects", "masks"), exist_ok=True)
+        for mask in os.listdir(os.path.join(base_dir, "content_source", "map_objects", "masks")):
+            create_hex_map(rgb_from_ijk={}, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(self.file_dir, "content_source", "map_objects", "masks", mask))
     
     def create_rivers(self, river_background, river_edges, river_vertices, base_loc):
         """Create rivers.png"""
@@ -136,6 +155,7 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
                     "common/country_creation",
                     "common/country_definitions",
                     "common/country_formation",
+                    "common/history/ai",
                     "common/history/buildings",
                     "common/history/characters",
                     "common/history/countries",
