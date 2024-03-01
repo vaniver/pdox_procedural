@@ -110,3 +110,10 @@ def strip_base_files(file_dir, src_dir, subpaths, to_remove, to_keep, subsection
                     if brackets > 0 and (any([tr in line for tr in to_remove])) and (not(any([tk in line for tk in to_keep]))):
                         valid = False
                 outf.write(file_buffer)
+                
+def create_blanks(file_dir, file_paths):
+    """There are a lot of files that we want to just blank out."""
+    for file_path in file_paths:
+        os.makedirs(os.path.join(file_dir,*file_path[:-1]), exist_ok=True)
+        with open(os.path.join(file_dir, *file_path), 'w', encoding="utf_8_sig") as outf:
+            outf.write("\n")

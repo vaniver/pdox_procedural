@@ -6,7 +6,7 @@ Current status is:
 * CK3: CTD
 * EU4: Not started
 * V3: loads
-* HOI4: Not started
+* HOI4: CTD
 
 The core procedures are in `gen.py`, with configuration details set in `config.yaml` and `/data`. In order to get it to work, you'll need to change the output location, at least, and then run `python3 gen.py`.
 

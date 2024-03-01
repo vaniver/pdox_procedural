@@ -2,7 +2,8 @@ import os
 import random
 import yaml
 
-from map import *
+from basic_map import BasicMap
+from map_io import *
 from stripper import strip_base_files
 from terrain import *
 
@@ -17,36 +18,23 @@ USED_MASKS = {
     BaseTerrain.jungle: "forest_jungle_01",
 }
 
-class CK3Map:
+class CK3Map(BasicMap):
     def __init__(self, file_dir, max_x, max_y, n_x, n_y):
         """Creates a map of size max_x * max_y, which is n_x hexes wide and n_y hexes tall."""
-        self.file_dir = file_dir
-        os.makedirs(os.path.join(file_dir, "map_data"), exist_ok=True)
-        self.max_x = max_x
-        self.max_y = max_y
-        self.n_x = n_x
-        self.n_y = n_y
-        self.box_width, self.box_height = box_from_max(self.max_x, self.max_y, self.n_x, self.n_y)
+        super().__init__(file_dir, "map_data", max_x, max_y, n_x, n_y)
 
-    def create_provinces(self, rgb_from_pid, pid_from_cube, name_from_pid):
-        """Creates provinces.png and definition.csv"""
-        rgb_from_ijk = {}
-        for k, pid in pid_from_cube.items():
-            rgb_from_ijk[k.tuple()] = rgb_from_pid[pid]
-        img = create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, mode='RGB', default="black", n_x=self.n_x, n_y=self.n_y)
-        img.save(os.path.join(self.file_dir, "map_data", "provinces.png"))
-        with open(os.path.join(self.file_dir, "map_data", "definition.csv"), 'w') as outf:
+    def prov_extra(self, rgb_from_pid, pid_from_cube, name_from_pid):
+        """Creates definition.csv"""
+        with open(os.path.join(self.file_dir, self.map_dir, "definition.csv"), 'w') as outf:
             outf.write("0;0;0;0;x;x;\n")
             for pid in sorted(name_from_pid.keys()):
                 name = name_from_pid[pid]
                 r,g,b = rgb_from_pid[pid]
                 outf.write(";".join([str(x) for x in [pid,r,g,b,name,"x"]])+"\n")
 
-    def create_heightmap(self, height_from_vertex):
+    def height_extra(self):
         """Uses height_from_cube to generate a simple heightmap."""
-        img = create_tri_map(height_from_vertex=height_from_vertex, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y)
-        img.save(os.path.join(self.file_dir, "map_data", "heightmap.png"))
-        with open(os.path.join(self.file_dir, "map_data", 'heightmap.heightmap'), 'w') as outf:
+        with open(os.path.join(self.file_dir, self.map_dir, 'heightmap.heightmap'), 'w') as outf:
             outf.write("heightmap_file=\"map_data/packed_heightmap.png\"\n")
             outf.write("indirection_file=\"map_data/indirection_heightmap.png\"\n")
             outf.write(f"original_heightmap_size={{ {self.max_x} {self.max_y} }}\n")
@@ -68,17 +56,12 @@ class CK3Map:
                 terrain = [k for k,v in USED_MASKS.items() if v == mask_name][0]
                 rgb_from_cube = {k.tuple(): 128 for k,v in terr_from_cube.items() if v == terrain}
                 create_hex_map(rgb_from_ijk=rgb_from_cube, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(file_dir, "gfx", "map", "terrain", mask))
-    
-    def create_rivers(self, river_background, river_edges, river_vertices, base_loc):
-        """Create rivers.png"""
-        img = create_hex_map(rgb_from_ijk=river_background, rgb_from_edge=river_edges, rgb_from_vertex=river_vertices, max_x=self.max_x, max_y=self.max_y, mode='P', palette=get_palette(base_loc), default=254, n_x=self.n_x, n_y=self.n_y)
-        img.save(os.path.join(self.file_dir, "map_data", "rivers.png"))
 
     def create_positions(self, name_from_pid, pid_from_cube):
         """Create positions.txt"""
         ox = self.box_width // 3
         oy = self.box_height // 3
-        with open(os.path.join(self.file_dir, "map_data", "positions.txt"), 'w') as outf:
+        with open(os.path.join(self.file_dir, self.map_dir, "positions.txt"), 'w') as outf:
             for pid, name in name_from_pid.items():
                 cube = [k for k,v in pid_from_cube.items() if v == pid]
                 if len(cube) == 0:
@@ -676,10 +659,9 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     # Determine major rivers and impassable mountain boundaries (done here b/c it affects provinces also)
     # Make map
     ck3map = CK3Map(file_dir, max_x=config["max_x"], max_y=config["max_y"], n_x=config["n_x"], n_y=config["n_y"])
-    ck3map.create_provinces(rgb_from_pid,pid_from_cube, name_from_pid)
-    ck3map.create_heightmap(height_from_vertex=height_from_vertex)
-    river_background = {k.cube.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_vertex.items() if k.rot==0}
-    ck3map.create_rivers(river_background, river_edges, river_vertices, base_loc=os.path.join(config["BASE_CK3_DIR"], "map_data", "rivers.png"))
+    ck3map.create_provinces(rgb_from_pid, pid_from_cube, ".png", name_from_pid=name_from_pid)
+    ck3map.create_heightmap(height_from_vertex=height_from_vertex, file_ext=".png")
+    ck3map.create_rivers(height_from_vertex, river_edges, river_vertices, base_loc=config["BASE_CK3_DIR"], file_ext=".png")
     ck3map.create_positions(name_from_pid, pid_from_cube)
     ck3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], terr_from_cube=terr_from_cube)
     ck3map.update_defines(base_dir=config["BASE_CK3_DIR"])

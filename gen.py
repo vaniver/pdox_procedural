@@ -3,7 +3,7 @@ import os
 import random
 import yaml
 
-from map import valid_cubes
+from map_io import valid_cubes
 from area import Area
 from chunk_split import check_contiguous, find_contiguous, split_chunk, SplitChunkMaxIterationExceeded
 from cube import *
@@ -12,6 +12,7 @@ from voronoi import area_voronoi, iterative_voronoi, growing_voronoi, voronoi
 
 import ck3
 import v3
+import hoi4
 
 class CreationError(Exception):
     pass
@@ -514,6 +515,7 @@ def create_data(config):
     pid_from_cube = {}
     rid_from_pid = {}
     cid_from_pid = {}  # This is mostly useful for EU4, whose lowest level is the cid, not the pid.
+    cont_from_pid = {}
     pid_from_title = {}
     tag_from_pid = {}
     land_cubes = set()
@@ -545,6 +547,7 @@ def create_data(config):
             rid_from_pid[pid + last_pid] = last_rid
             name_from_pid[pid + last_pid] = name_from_title.get(title,title)
             pid_from_title[title] = pid + last_pid
+            cont_from_pid[pid + last_pid] = cind + 1
         tag_from_pid.update({pid + last_pid: tag for pid, tag in enumerate(region_trees[cind].all_tag_pids())})
         land_cubes = land_cubes.union(continent)
         last_pid += len(continent)
@@ -583,6 +586,8 @@ def create_data(config):
             terr_from_pid[last_pid] = BaseTerrain.mountains
             land_cubes.add(nlc)
         rid_from_pid[last_pid] = last_rid
+        # TODO: determine continent
+        # cont_from_pid[last_pid] = 
         last_pid += 1
         last_rid += 1
     #TODO: Assigning sea provinces should 1) look for major inland seas, like the med, 2) use more regular things that are faster for the deep ocean
@@ -700,7 +705,15 @@ def create_data(config):
     # Create rivers
     river_edges = {Edge(Cube(3,-2,-1),0): (4,1)}
     river_vertices = {Vertex(Cube(2,-2,0),1): 0}
-    return continents, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, tag_from_pid
+    type_from_pid = {}
+    lakes = []  # This should be pids, not cubes
+    for k in land_cubes:
+        type_from_pid[pid_from_cube[k]] = "land"
+    for k in sea_cubes:
+        type_from_pid[pid_from_cube[k]] = "sea"
+    for k in lakes:
+        type_from_pid[k] = "lake"
+    return continents, pid_from_cube, rid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid
 
 
 
@@ -723,9 +736,15 @@ if __name__ == "__main__":
     config["max_x"] = config.get("max_x", config.get("box_width", 10)*(config["n_x"]*3-3))
     config["max_y"] = config.get("max_y", config.get("box_height", 17)*(config["n_y"]*2-2))
 
-    continents, pid_from_cube, rid_from_pid, terr_from_cube, terr_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, tag_from_pid = create_data(config)
+    continents, pid_from_cube, rid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid = create_data(config)
     cultures, religions = assemble_culrels(region_trees=region_trees)  # Not obvious this should be here instead of just derived later?
     rgb_from_pid = create_colors(pid_from_cube)
+    pids_from_rid = {}
+    for pid, rid in sorted(rid_from_pid.items()):
+        if rid in pids_from_rid:
+            pids_from_rid[rid].append(pid)
+        else:
+            pids_from_rid[rid] = [pid]
     if "CK3" in config["MOD_OUTPUTS"]:
         ck3.create_mod(
             file_dir=config["MOD_OUTPUTS"]["CK3"],
@@ -751,6 +770,7 @@ if __name__ == "__main__":
             config=config,
             pid_from_cube=pid_from_cube,
             rid_from_pid=rid_from_pid,
+            pids_from_rid=pids_from_rid,
             terr_from_cube=terr_from_cube,
             terr_from_pid=terr_from_pid,
             rgb_from_pid=rgb_from_pid,
@@ -763,4 +783,24 @@ if __name__ == "__main__":
             region_trees=region_trees,
             tag_from_pid=tag_from_pid,
             straits=straits,
+        )
+    if "HOI4" in config["MOD_OUTPUTS"]:
+        hoi4.create_mod(
+            file_dir=config["MOD_OUTPUTS"]["HOI4"],
+            config=config,
+            pid_from_cube=pid_from_cube,
+            rgb_from_pid=rgb_from_pid,
+            terr_from_cube=terr_from_cube,
+            terr_from_pid=terr_from_pid,
+            rid_from_pid=rid_from_pid,
+            tag_from_pid=tag_from_pid,
+            type_from_pid=type_from_pid,
+            cont_from_pid=cont_from_pid,
+            coast_from_cube=coast_from_cube,
+            name_from_rid=name_from_rid,
+            pids_from_rid=pids_from_rid,
+            river_edges=river_edges,
+            river_vertices=river_vertices,
+            height_from_vertex=height_from_vertex,
+            region_trees=region_trees,
         )
