@@ -1,7 +1,7 @@
 from enum import Enum
 
 # HEIGHTMAP constants
-WATER_HEIGHT = 18 # TODO: I think this is game-specific, fix that.
+WATER_HEIGHT = 95 # TODO: This is game-specific but can be fixed with WATERLEVEL in 00_defines.txt
 
 # RIVERS constants
 MAJOR_RIVER_THRESHOLD = 9

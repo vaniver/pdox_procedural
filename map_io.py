@@ -1,4 +1,6 @@
 # This file is for map-rendering code / file-IO that's game-independent.
+from math import sqrt
+
 import PIL.Image
 
 from cube import Cube, Edge, Vertex
@@ -173,6 +175,7 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_f
         pix[start_x + (1 + vertex.rot) * 2 * box_width, start_y + box_height] = rgb
     return img
 
+
 def create_tri_map(height_from_vertex, max_x, max_y, n_x, n_y, mode='L', default="black", palette=None):
     """Creates a map out of triangular patches, each defined by three adjacent vertices in height_from_vertex."""
     box_width, box_height = box_from_max(max_x, max_y, n_x, n_y)
@@ -233,6 +236,22 @@ def create_tri_map(height_from_vertex, max_x, max_y, n_x, n_y, mode='L', default
     return img        
 
 
+def create_normal(heightmap):
+    """Given heightmap (a PIL.Image), return an image that's the normal vector for heightmap."""
+    max_x, max_y = heightmap.size
+    wono = PIL.Image.new(mode="RGB", size=heightmap.size, color="black")
+    bpix = heightmap.load()
+    wpix = wono.load()
+    for x in range(max_x):
+        for y in range(max_y):
+            xComp = min(11,max(-11, bpix[max(0,x-1),y]-bpix[min(max_x-1, x+1),y]))
+            yComp = min(11,max(-11, bpix[x,max(0,y-1)]-bpix[x,min(max_y-1, y+1)]))
+            xComp *= abs(xComp)
+            yComp *= abs(yComp)
+            zComp = sqrt(max(0,127*127 - xComp*xComp - yComp*yComp))
+            wpix[x,y] = (int(xComp + 128), int(yComp + 128), int(zComp + 128))
+    return wono
+
 def closest_xy(fr, to, box_height, box_width, shrinkage=2):
     """Rather than the strict closest x,y position, this function returns either
     - the midpoint of the edge for all hexes that are in a straight line (shrunk a few pixels towards the center)
@@ -276,6 +295,7 @@ def closest_xy(fr, to, box_height, box_width, shrinkage=2):
 def get_palette(base_loc):
     """Pulls out the palette from an image"""
     return PIL.Image.open(base_loc).palette
+
 
 def valid_cubes(n_x=235, n_y=72):
     """Construct the list of on-map cube positions."""

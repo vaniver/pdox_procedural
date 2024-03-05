@@ -89,8 +89,10 @@ class CK3Map(BasicMap):
                 for line in inf.readlines():
                     if line.startswith("\tWORLD_EXTENTS_X"):
                         outf.write(line.split("=")[0] + f"= {self.max_x}\n")
-                    elif line.startswith("\tWORLD_EXTENTS_Y"):
+                    elif line.startswith("\tWORLD_EXTENTS_Z"):
                         outf.write(line.split("=")[0] + f"= {self.max_y}\n")
+                    elif line.startswith("\tWATERLEVEL"):
+                        outf.write(line.split("=")[0] + f"= 19.0\n")
                     else:
                         outf.write(line)
         # TODO: Confirm that I don't need to update 00_graphics.txt, mostly CAMERA_START.
@@ -675,8 +677,8 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     create_default_map(file_dir, impassable, sea_min, sea_max)
     create_climate(file_dir=file_dir)
     strip_base_files(file_dir, config["BASE_CK3_DIR"], subpaths=[
-        "common/decisions",
-        "common/travel",
+        "common\\decisions",
+        "common\\travel",
         "events"
     ],
     to_remove=["province:", "title:", "character:"],

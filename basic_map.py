@@ -14,6 +14,7 @@ class BasicMap:
         self.n_x = n_x
         self.n_y = n_y
         self.box_width, self.box_height = box_from_max(self.max_x, self.max_y, self.n_x, self.n_y)
+        self.heightmap_loc = None
 
     def create_provinces(self, rgb_from_pid, pid_from_cube, file_ext, **extras):
         """Creates provinces.file_ext and calls self.prov_extra, where you should put things like definition.csv"""
@@ -26,11 +27,16 @@ class BasicMap:
 
     def create_heightmap(self, height_from_vertex, file_ext, size_factor=1, **extras):
         """Uses height_from_cube to generate a simple heightmap."""
-        create_tri_map(height_from_vertex=height_from_vertex, max_x=self.max_x * size_factor, max_y=self.max_y * size_factor, n_x=self.n_x, n_y=self.n_y).save(os.path.join(self.file_dir, self.map_dir, "heightmap"+file_ext))
+        self.heightmap_loc = os.path.join(self.file_dir, self.map_dir, "heightmap"+file_ext)
+        create_tri_map(height_from_vertex=height_from_vertex, max_x=self.max_x * size_factor, max_y=self.max_y * size_factor, n_x=self.n_x, n_y=self.n_y).save(self.heightmap_loc)
         self.height_extra(**extras)
 
     def height_extra(self):
         pass
+
+    def create_world_normal(self, file_ext=".bmp"):
+        """Uses the heightmap to generate the normal vector map."""
+        create_normal(PIL.Image.open(self.heightmap_loc)).save(os.path.join(self.file_dir, self.map_dir, "world_normal"+file_ext))
 
     def create_rivers(self, height_from_vertex, river_edges, river_vertices, base_loc, file_ext):
         """Create rivers.file_ext"""

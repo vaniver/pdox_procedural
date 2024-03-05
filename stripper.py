@@ -1,6 +1,6 @@
 import os
 
-def strip_base_files(file_dir, src_dir, subpaths, to_remove, to_keep, subsection, main_file=None):
+def strip_base_files(file_dir, src_dir, subpaths, to_remove, to_keep, subsection, main_file=None, encoding="utf_8_sig",):
     """There's a bunch of base game files that are necessary but contain _some_ hardcoded references to provinces.
     Rather than having to manually remove them, let's try to do it automatically.
     
@@ -18,7 +18,8 @@ def strip_base_files(file_dir, src_dir, subpaths, to_remove, to_keep, subsection
     for subpath in expanded_subpaths:
         file_stripped = False
         file_buffer = ""
-        with open(os.path.join(src_dir, subpath), encoding='utf_8_sig') as inf:
+        file_name = os.path.join(src_dir, subpath)
+        with open(file_name, encoding=encoding) as inf:
             valid = True
             brackets = 0
             mod_brackets = 0
@@ -58,16 +59,16 @@ def strip_base_files(file_dir, src_dir, subpaths, to_remove, to_keep, subsection
                     buffer = ""
                     valid = True
         if file_stripped:  # We did a replacement, so need to write out buffer.
-            relpath = os.path.relpath(subpath,src_dir)
+            relpath = os.path.relpath(file_name,src_dir)
             print(relpath)
             os.makedirs(os.path.join(file_dir, os.path.dirname(relpath)), exist_ok=True)
-            with open(os.path.join(file_dir, relpath), 'w', encoding='utf_8_sig') as outf:
+            with open(os.path.join(file_dir, relpath), 'w', encoding=encoding) as outf:
                 outf.write(file_buffer)
     # Main file is currently V3 specific. Might have to refactor it or split it out to the V3 file.
     if main_file is not None:
         os.makedirs(os.path.join(file_dir, *main_file[:-1]), exist_ok=True)
-        with open(os.path.join(src_dir, *main_file), encoding='utf_8_sig') as inf:
-            with open(os.path.join(file_dir, *main_file), 'w', encoding='utf_8_sig') as outf:
+        with open(os.path.join(src_dir, *main_file), encoding=encoding) as inf:
+            with open(os.path.join(file_dir, *main_file), 'w', encoding=encoding) as outf:
                 valid = True
                 brackets = 0
                 mod_brackets = 0
@@ -111,9 +112,9 @@ def strip_base_files(file_dir, src_dir, subpaths, to_remove, to_keep, subsection
                         valid = False
                 outf.write(file_buffer)
                 
-def create_blanks(file_dir, file_paths):
+def create_blanks(file_dir, file_paths, encoding="utf_8_sig"):
     """There are a lot of files that we want to just blank out."""
     for file_path in file_paths:
         os.makedirs(os.path.join(file_dir,*file_path[:-1]), exist_ok=True)
-        with open(os.path.join(file_dir, *file_path), 'w', encoding="utf_8_sig") as outf:
+        with open(os.path.join(file_dir, *file_path), 'w', encoding=encoding) as outf:
             outf.write("\n")

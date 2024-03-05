@@ -111,8 +111,12 @@ class V3Map(BasicMap):
                 for line in inf.readlines():
                     if line.startswith("\tWORLD_EXTENTS_X"):
                         outf.write(line.split("=")[0] + f"= {self.max_x}\n")
+                    elif line.startswith("\tWORLD_EXTENTS_Y"):
+                        outf.write(line.split("=")[0] + f"= 25.5\n")  # Line it back up with the other games.
                     elif line.startswith("\tWORLD_EXTENTS_Z"):
                         outf.write(line.split("=")[0] + f"= {self.max_y-1}\n")
+                    elif line.startswith("\tWATERLEVEL"):
+                        outf.write(line.split("=")[0] + f"= 9.5\n")
                     else:
                         outf.write(line)
         # TODO: Confirm that I don't need to update 00_graphics.txt, mostly CAMERA_START.

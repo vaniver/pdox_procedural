@@ -661,31 +661,32 @@ def create_data(config):
     height_from_vertex = {}
     for cube, height in land_height_from_cube.items():
         a,b = TERRAIN_HEIGHT[terr_from_cube[cube]]
-        height_from_vertex[Vertex(cube, 0)] = height * 3 + sum([random.randint(a,b) for _ in range(3)]) + WATER_HEIGHT
-        l = height + random.randint(a,b)
-        r = height + random.randint(a,b)
+        height_from_vertex[Vertex(cube, 0)] = height * 3 + sum([random.randint(a,b) for _ in range(4)]) + WATER_HEIGHT
+        l = height + random.randint(a,b) + random.randint(a,b)
+        r = height + random.randint(a,b) + random.randint(a,b)
         for k in [cube.add(Cube(-1,1,0)), cube.add(Cube(-1,0,1))]:
             if k in land_height_from_cube:
                 a,b = TERRAIN_HEIGHT[terr_from_cube[k]]
-                l += land_height_from_cube[k] + random.randint(a,b)
+                l += land_height_from_cube[k] + random.randint(a,b) + random.randint(a,b)
             else:
                 l -= 2
         height_from_vertex[Vertex(cube, -1)] = l + WATER_HEIGHT
         for k in [cube.add(Cube(1,-1,0)), cube.add(Cube(1,0,-1))]:
             if k in land_height_from_cube:
                 a,b = TERRAIN_HEIGHT[terr_from_cube[k]]
-                r += land_height_from_cube[k] + random.randint(a,b)
+                r += land_height_from_cube[k] + random.randint(a,b) + random.randint(a,b)
             else:
                 r -= 2
         height_from_vertex[Vertex(cube, 1)] = r + WATER_HEIGHT
     a,b = TERRAIN_HEIGHT[BaseTerrain.ocean]
+    base_water = WATER_HEIGHT * 4 // 5
     for cube, depth in water_depth_from_cube.items():
         if depth > 3:
             continue
-        height_from_vertex[Vertex(cube, 0)] = max(0, 12 - 3 * depth * depth + sum([random.randint(a,b) for _ in range(3)]))
+        height_from_vertex[Vertex(cube, 0)] = max(0, base_water - 3 * depth * depth + sum([random.randint(a,b) for _ in range(4)]))
         vl = Vertex(cube, -1)
         if vl not in height_from_vertex:
-            l = 12 - depth * depth + random.randint(a,b)
+            l = base_water - depth * depth + random.randint(a,b) + random.randint(a,b)
             for k in [cube.add(Cube(-1,1,0)), cube.add(Cube(-1,0,1))]:
                 if k in water_depth_from_cube:
                     l += random.randint(a,b) - water_depth_from_cube[k] * water_depth_from_cube[k]
@@ -694,7 +695,7 @@ def create_data(config):
             height_from_vertex[vl] = min(max(0, l), WATER_HEIGHT - 1)
         vr = Vertex(cube, 1)
         if vr not in height_from_vertex:
-            r = 12 - depth * depth + random.randint(a,b)
+            r = base_water - depth * depth + random.randint(a,b) + random.randint(a,b)
             for k in [cube.add(Cube(1,-1,0)), cube.add(Cube(1,0,-1))]:
                 if k in water_depth_from_cube:
                     r += random.randint(a,b) - water_depth_from_cube[k] * water_depth_from_cube[k]
@@ -714,7 +715,6 @@ def create_data(config):
     for k in lakes:
         type_from_pid[k] = "lake"
     return continents, pid_from_cube, rid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid
-
 
 
 if __name__ == "__main__":
@@ -801,6 +801,7 @@ if __name__ == "__main__":
             pids_from_rid=pids_from_rid,
             river_edges=river_edges,
             river_vertices=river_vertices,
+            locs_from_rid=locs_from_rid,
             height_from_vertex=height_from_vertex,
             region_trees=region_trees,
         )

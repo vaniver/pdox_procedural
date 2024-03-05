@@ -2,7 +2,7 @@ MOD_NAME: testmod
 MOD_DISPLAY_NAME: testing_worldgen
 MOD_OUTPUTS:
   # CK3: "C:\\Users\\vaniv\\Documents\\Paradox Interactive\\Crusader Kings III\\mod"
-  # V3: "C:\\Users\\vaniv\\Documents\\Paradox Interactive\\Victoria 3\\mod"
+  V3: "C:\\Users\\vaniv\\Documents\\Paradox Interactive\\Victoria 3\\mod"
   HOI4: "C:\\Users\\vaniv\\Documents\\Paradox Interactive\\Hearts of Iron IV\\mod"
 BASE_CK3_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Crusader Kings III\\game"
 BASE_EU4_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Europa Universalis IV\\game"
@@ -35,8 +35,8 @@ CONTINENT_LISTS:
   - b_amdo
 n_x: 171
 n_y: 57
-max_x: 8192
-max_y: 3616
+max_x: 5632
+max_y: 2048
 RELIGION_DIR: "data"
 GUARANTEED_INNOS:
 - tribal
