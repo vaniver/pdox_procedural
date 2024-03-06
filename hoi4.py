@@ -189,11 +189,17 @@ def create_minimal(file_dir, base_loc, filenames_from_dirs):
                             break
 
 
-def create_rail_supplies(file_dir, config):
+def create_rail_supplies(file_dir, supply_nodes, railways):
     """Creates map/supply_nodes.txt and map/railways.txt"""
-    pass
+    with open(os.path.join(file_dir, "map", "supply_nodes.txt"), 'w', encoding="utf-8") as outf:
+        for pid in supply_nodes:
+            outf.write(f"1 {pid}\n")
+    with open(os.path.join(file_dir, "map", "railways.txt"), 'w', encoding="utf-8") as outf:
+        for level, path in railways:
+            outf.write(str(level) + " " + str(len(path)) + " " + " ".join(str(pid) for pid in path) + "\n")
 
-def create_mod(file_dir, config, pid_from_cube, rgb_from_pid, terr_from_cube, terr_from_pid, rid_from_pid, tag_from_pid, type_from_pid, cont_from_pid, coast_from_cube, pids_from_rid, name_from_rid, river_edges, river_vertices, locs_from_rid, height_from_vertex, region_trees,):
+
+def create_mod(file_dir, config, pid_from_cube, rgb_from_pid, terr_from_cube, terr_from_pid, rid_from_pid, tag_from_pid, type_from_pid, cont_from_pid, coast_from_cube, pids_from_rid, name_from_rid, river_edges, river_vertices, locs_from_rid, height_from_vertex, region_trees, supply_nodes, railways,):
     """Creates the HOI4 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
@@ -210,6 +216,7 @@ def create_mod(file_dir, config, pid_from_cube, rgb_from_pid, terr_from_cube, te
     hoi4map.create_world_normal()
     hoi4map.create_buildings(file_dir=file_dir, pids_from_rid=pids_from_rid, coastal=coastal)
     hoi4map.create_rivers(height_from_vertex, river_edges, river_vertices, base_loc=config["BASE_HOI4_DIR"], file_ext=".bmp")
+    create_rail_supplies(file_dir, supply_nodes, railways)
     tags = sorted(set(tag_from_pid.values()))
     tag_from_rid = {rid_from_pid[pid]: tag for pid, tag in tag_from_pid.items()}
     tech_from_tag = {tag: ["infantry_weapons", "infantry_weapons1", "tech_support", "tech_engineers", "tech_recon", "tech_mountaineers", "tech_trucks", "motorised_infantry", "gw_artillery", "interwar_antiair", "trench_warfare", "fleet_in_being", "fuel_silos", "fuel_refining", "basic_train",] for tag in tags}
@@ -231,6 +238,7 @@ def create_mod(file_dir, config, pid_from_cube, rgb_from_pid, terr_from_cube, te
     category_from_rid = {rid: "large_city" for rid, name in name_from_rid.items() if name[0] != "s"}
     cores_from_rid = {rid: [tag] for rid, tag in tag_from_rid.items()}
     create_states(file_dir, config, pids_from_rid, name_from_rid, manpower_from_rid, category_from_rid, tag_from_rid, cores_from_rid, vps_from_rid, buildings_from_rid,)
+    
     # create_minimal(file_dir, config["BASE_HOI4_DIR"], [
     #     (["gfx","interface","equipmentdesigner", "graphic_db"], ["00_plane_icons.txt", "00_tank_icons.txt"]),
     #     (["common", "ideas"], ["_economic.txt", "_manpower.txt", "zzz_generic.txt"]),  # TODO: The first two need to be stripped instead.

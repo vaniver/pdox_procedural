@@ -22,6 +22,15 @@ TERRAIN_HEIGHT = {
     BaseTerrain.mountains: (3,10),
 }
 
+RAIL_DIST = {
+    BaseTerrain.urban: 1, BaseTerrain.farmlands: 1, BaseTerrain.plains: 1,
+    BaseTerrain.marsh: 2, BaseTerrain.desert: 2,
+    BaseTerrain.forest: 3,
+    BaseTerrain.hills: 5, BaseTerrain.jungle: 5,
+    BaseTerrain.mountains: 10,
+    BaseTerrain.ocean: 99,
+}
+
 CK3Terrain = Enum('CK3Terrain','plains farmlands hills mountains desert desert_mountains oasis jungle forest taiga wetlands steppe floodplains drylands')
 CK3Terrain_from_BaseTerrain = {
     BaseTerrain.plains: CK3Terrain.plains,

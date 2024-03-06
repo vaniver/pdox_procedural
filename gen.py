@@ -7,7 +7,7 @@ from map_io import valid_cubes
 from area import Area
 from chunk_split import check_contiguous, find_contiguous, split_chunk, SplitChunkMaxIterationExceeded
 from cube import *
-from terrain import BaseTerrain, TERRAIN_HEIGHT, WATER_HEIGHT
+from terrain import BaseTerrain, RAIL_DIST, TERRAIN_HEIGHT, WATER_HEIGHT
 from voronoi import area_voronoi, iterative_voronoi, growing_voronoi, voronoi
 
 import ck3
@@ -165,7 +165,10 @@ class RegionTree:
                     last_pid += 1
                     continue
                 if depth in current:  # We finished a unit and are on to the next one.
-                    current[depth-1].children.append(current.pop(depth))
+                    dd = max(current.keys())
+                    while dd >= depth:  # We've got to make sure we finish any smaller units first.
+                        current[dd-1].children.append(current.pop(dd))
+                        dd -= 1
                 title = lsplit[0]
                 color = tuple([x.strip() for x in lsplit[1:4]]) if len(lsplit) > 3 else ("0","0","0")
                 tag, culture, religion, rough = lsplit[4:8] if len(lsplit) > 7 else [None, None, None, "forest"]
@@ -501,6 +504,85 @@ def create_colors(pid_from_cube):
         rgb_from_pid[pid] = assign_color(rgb_from_pid)
     return rgb_from_pid
 
+
+def create_supply_rails(terr_from_cube, pids_from_rid, rid_from_cube, cube_from_pid, pid_from_cube, name_from_rid):
+    """Create supply nodes and railways"""
+    supply_nodes = []
+    railways = []
+    areas = {}
+    rail_dist_from_cube = {k:RAIL_DIST[v] for k,v in terr_from_cube.items()}
+    rail_connex = {}
+    for rid, pids in pids_from_rid.items():
+        if name_from_rid[rid][0] == "s":
+            continue
+        cap_pid = min(pids)
+        supply_nodes.append(cap_pid)
+        areas[rid] = Area(cid=rid, members=[cube_from_pid[pid] for pid in pids if pid in cube_from_pid])
+        areas[rid].calc_edges(rid_from_cube)
+        for orid in areas[rid].self_edges:
+            if name_from_rid[orid][0] == "s":
+                continue
+            ocap_pid = min(pids_from_rid[orid])
+            cap_cube = land_cube_from_pid[cap_pid]
+            ocap_cube = land_cube_from_pid[ocap_pid]
+            partial_paths = [(0, [cap_cube], False), (0,[ocap_cube], True)]
+            need_path = True
+            final_path = None
+            reached_cubes = {False: {cap_cube}, True: {ocap_cube}}
+            while need_path:  # This could be smarter by doing A* instead of just expanding 
+                if len(partial_paths) == 0:  # Somehow we failed to find a path.
+                    need_path=False
+                    continue
+                partial_paths = sorted(partial_paths)
+                this_path = partial_paths.pop(0)
+                for nbr in this_path[1][-1].neighbors():
+                    if rid_from_cube.get(nbr,-1) in [rid, orid] and nbr not in reached_cubes[this_path[2]]:
+                        if nbr in reached_cubes[not this_path[2]]:
+                            other_part = sorted([pp for pp in partial_paths if nbr in pp[1] and this_path[2] != pp[2]])[0][1]
+                            other_part.reverse()
+                            final_path = this_path[1] + other_part
+                            need_path = False
+                            break
+                        partial_paths.append((this_path[0] + rail_dist_from_cube[nbr], this_path[1] + [nbr], this_path[2]))
+                        reached_cubes[this_path[2]].add(nbr)
+            if final_path is not None:
+                for ind in range(len(final_path)-1):
+                    a = pid_from_cube[final_path[ind]]
+                    b = pid_from_cube[final_path[ind+1]]
+                    if a in rail_connex:
+                        rail_connex[a].add(b)
+                    else:
+                        rail_connex[a] = {b}
+                    if b in rail_connex:
+                        rail_connex[b].add(a)
+                    else:
+                        rail_connex[b] = {a}
+    supply_nodes = sorted(supply_nodes)
+    starting_points = {x for x in supply_nodes}
+    while len(starting_points) > 0:
+        start = starting_points.pop()
+        while len(rail_connex.get(start, [])) > 0:
+            next_node = rail_connex[start].pop()
+            rail_connex[next_node].discard(start)
+            pathway = [start, next_node]
+            next_nodes = rail_connex[next_node]
+            start = next_node
+            while len(next_nodes) == 1:  # Only one place to go; add it to this railroad.
+                next_node = next_nodes.pop()
+                rail_connex[next_node].discard(start)
+                pathway.append(next_node)
+                next_nodes = rail_connex[next_node]
+                start = next_node
+            if len(next_nodes) == 0:  # end of the line
+                if pathway[-1] in starting_points:
+                    starting_points.remove(pathway[-1])  # We don't need to do it from that side because we did it from this side.
+                railways.append((1, pathway))
+            else:  # Multiple ways to go from here
+                starting_points.add(pathway[-1])
+                railways.append((1, pathway))
+    return supply_nodes, railways
+
+
 def create_data(config):
     """The main function that calls all the other functions in order. 
     The resulting data structure should be enough to make the mod for any particular game."""
@@ -512,6 +594,7 @@ def create_data(config):
     m_x = config["n_x"]//2
     m_y = -(config["n_y"]+config["n_x"]//2)//2
     continents, sea_region_centers = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
+
     pid_from_cube = {}
     rid_from_pid = {}
     cid_from_pid = {}  # This is mostly useful for EU4, whose lowest level is the cid, not the pid.
@@ -562,6 +645,7 @@ def create_data(config):
             curr.capital_rid = rid_from_pid[curr.capital_pid]
     # At this point, pid_from_cube should be a 1-1 mapping (because we haven't done the larger regions).
     terr_from_pid = {v:terr_from_cube[k] for k,v in pid_from_cube.items() if k in terr_from_cube}
+    land_cube_from_pid = {v:k for k,v in pid_from_cube.items()}
     # Split out wastelands / mountains / lakes
     non_land = sorted(find_contiguous(set(valid_cubes(config["n_x"], config["n_y"])) - land_cubes), key=len)
     sea_cubes = set(non_land.pop(-1))  # The largest non-land chunk is the ocean.
@@ -714,7 +798,7 @@ def create_data(config):
         type_from_pid[pid_from_cube[k]] = "sea"
     for k in lakes:
         type_from_pid[k] = "lake"
-    return continents, pid_from_cube, rid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid
+    return continents, pid_from_cube, land_cube_from_pid, rid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid
 
 
 if __name__ == "__main__":
@@ -736,7 +820,7 @@ if __name__ == "__main__":
     config["max_x"] = config.get("max_x", config.get("box_width", 10)*(config["n_x"]*3-3))
     config["max_y"] = config.get("max_y", config.get("box_height", 17)*(config["n_y"]*2-2))
 
-    continents, pid_from_cube, rid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid = create_data(config)
+    continents, pid_from_cube, land_cube_from_pid, rid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid = create_data(config)
     cultures, religions = assemble_culrels(region_trees=region_trees)  # Not obvious this should be here instead of just derived later?
     rgb_from_pid = create_colors(pid_from_cube)
     pids_from_rid = {}
@@ -745,6 +829,9 @@ if __name__ == "__main__":
             pids_from_rid[rid].append(pid)
         else:
             pids_from_rid[rid] = [pid]
+    rid_from_cube = {k: rid_from_pid[pid_from_cube[k]] for k in land_cube_from_pid.values()}
+    supply_nodes, railways = create_supply_rails(terr_from_cube, pids_from_rid, rid_from_cube, land_cube_from_pid, pid_from_cube, name_from_rid,)
+
     if "CK3" in config["MOD_OUTPUTS"]:
         ck3.create_mod(
             file_dir=config["MOD_OUTPUTS"]["CK3"],
@@ -804,4 +891,6 @@ if __name__ == "__main__":
             locs_from_rid=locs_from_rid,
             height_from_vertex=height_from_vertex,
             region_trees=region_trees,
+            supply_nodes=supply_nodes,
+            railways=railways,
         )
