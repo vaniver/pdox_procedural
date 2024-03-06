@@ -77,7 +77,7 @@ class RegionTree:
         return rt_list
     
     def all_tag_pids(self, last_tag=""):
-        """Returns a list tag mappings defined by this region_tree.
+        """Returns a list of tag mappings defined by this region_tree.
         Will have a blank string for any untagged provinces."""
         if self.tag is not None:
             last_tag = self.tag
@@ -146,7 +146,7 @@ class RegionTree:
         return None
 
     @classmethod
-    def from_csv(cls, filename, last_pid=1, last_rid=1):
+    def from_csv(cls, filename, last_pid=1, last_rid=1, last_srid=1):
         """last_pid and last_rid will be used to assign pids and rids as we go.
         Returns the region_tree, the new last_pid, and the new last_rid."""
         with open(filename) as inf:
@@ -154,9 +154,11 @@ class RegionTree:
             for line in inf.readlines():
                 lsplit = line.split(",")
                 depth = DEPTH_MAP[lsplit[0][0]]
-                if depth == 2:  # This is a duchy/state, and so the region_id needs to increase.
+                if depth == 1:
+                    last_srid += 1
+                elif depth == 2:  # This is a duchy/state, and so the region_id needs to increase.
                     last_rid += 1
-                if depth == 4:  # This is a barony, and so just needs to be appended to children of the current county.
+                elif depth == 4:  # This is a barony, and so just needs to be appended to children of the current county.
                     for cind in current:
                         if current[cind].capital_pid < 0:
                             current[cind].capital_pid = last_pid
@@ -180,7 +182,7 @@ class RegionTree:
                 else:
                     result = current[depth]
                     break
-        return result, last_pid, last_rid
+        return result, last_pid, last_rid, last_srid
 
 
 def assemble_culrels(region_trees):
@@ -357,7 +359,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
     return cube_from_pid, terr_templates, sea_centers
     
 
-def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65, num_centers=None, last_pid=1, last_rid=0):
+def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65, num_centers=None, last_pid=1, last_rid=0, last_srid=0):
     """Create len(config["CONTINENT_LISTS"]) continents with the appropriate number of kingdoms.
     Uses the standard triangle-border system, which requires 3 to 5 kingdoms per continent.
     Will start province and region ids at last_pid and last_rid+1 respectively."""
@@ -381,16 +383,16 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
         assert len(empires) == 1
         assert len(centers) == num_c
         assert len(borders) == num_b  # Changed this from >= to == so that we can use CONTINENT_LISTS elsewhere to determine which characters to spawn. If we want to randomize them, we'll have to do it in making the config.
-        region_tree, last_pid, last_rid = RegionTree.from_csv(os.path.join("data", empires[0])+".csv", last_pid=last_pid, last_rid=last_rid)
+        region_tree, last_pid, last_rid, last_srid = RegionTree.from_csv(os.path.join("data", empires[0])+".csv", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
         region_tree.children[0].capital_pid = last_pid  # The interstitial kingdom has its capital in another file, and so this needs to be assigned here.
         random.shuffle(kingdoms)
         random.shuffle(centers)
         random.shuffle(borders)
         for title in centers[:num_c] + borders[:num_b]:
-            rt, last_pid, last_rid = RegionTree.from_csv(os.path.join("data", title)+".csv", last_pid=last_pid, last_rid=last_rid)
+            rt, last_pid, last_rid, last_srid = RegionTree.from_csv(os.path.join("data", title)+".csv", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
             region_tree.children[0].children.append(rt) # The empires come with an interstitial kingdom to add all of these duchies to.
         for title in kingdoms:
-            rt, last_pid, last_rid = RegionTree.from_csv(os.path.join("data", title)+".csv", last_pid=last_pid, last_rid=last_rid)
+            rt, last_pid, last_rid, last_srid = RegionTree.from_csv(os.path.join("data", title)+".csv", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
             region_tree.children.append(rt)
         region_trees.append(region_tree)
         candidates = compute_func(chunks, cids, num_k)
@@ -411,7 +413,7 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
                     centers, chunks, cids = create_chunks(subweights, num_centers)
                     candidates = compute_func(chunks, cids, num_k)
                     ind = -1
-    return continents, terr_templates, region_trees, all_sea_centers, last_pid, last_rid
+    return continents, terr_templates, region_trees, all_sea_centers, last_pid, last_rid, last_srid
 
 
 def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], min_province_distance=2, style="random"):
@@ -446,7 +448,8 @@ def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], 
         pid_centers.extend(random.sample([x for x in pids if x not in pid_centers], k=extra_regions))
     # Now that we have a bunch of centers, we need to allocate all of the regions.
     rid_from_pid = area_voronoi(pid_from_cube, pid_centers)
-    return pid_from_cube, rid_from_pid
+    # TODO: Assign strategic regions instead of just doing the region clumping?
+    return pid_from_cube, rid_from_pid, rid_from_pid
 
 
 def assign_terrain_subregion(region, template, rough="forest"):
@@ -601,13 +604,15 @@ def create_data(config):
     last_pid = 1  # province_id. They 1-index instead of 0-indexing.
     last_cid = 1  # county_id. They 1-index instead of 0-indexing.
     last_rid = 1  # region_id. They 1-index instead of 0-indexing.
-    continents, terr_templates, region_trees, sea_centers, last_pid, last_rid = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", 40), last_pid=last_pid, last_rid=last_rid)
+    last_srid = 1  # strategic_region_id. They 1-index instead of 0-indexing.
+    continents, terr_templates, region_trees, sea_centers, last_pid, last_rid, last_srid = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", 40), last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
     m_x = config["n_x"]//2
     m_y = -(config["n_y"]+config["n_x"]//2)//2
     continents, sea_region_centers = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
 
     pid_from_cube = {}
     rid_from_pid = {}
+    srid_from_pid = {}
     cid_from_pid = {}  # This is mostly useful for EU4, whose lowest level is the cid, not the pid.
     cont_from_pid = {}
     pid_from_title = {}
@@ -619,18 +624,24 @@ def create_data(config):
     name_from_pid = {}
     name_from_cid = {}
     name_from_rid = {}
+    name_from_srid = {}
     
     last_pid = 1  # province_id. They 1-index instead of 0-indexing.
     last_cid = 0  # county_id. 
     last_rid = 0  # region_id. This is incremented before use.
+    last_srid = 0  # strategic_region_id. This is incremented before use.
     for cind, continent in enumerate(continents):
         # This is currently recalculating the pid and rid. This is presumably correct, but probably we should be reading it off the region_tree instead?
         ck3_titles = region_trees[cind].all_ck3_titles()
+        sregion_caps = {ck3_titles[ind+3]: t for ind, t in enumerate(ck3_titles) if t[0] == "k"}
         region_caps = {ck3_titles[ind+2]: t for ind, t in enumerate(ck3_titles) if t[0] == "d"}
         county_caps = {ck3_titles[ind+1]: t for ind, t in enumerate(ck3_titles) if t[0] == "c"}
         names = [x for x in ck3_titles if x[0] == "b"]
         for pid, cube in enumerate(continent):
             title = names[pid]
+            if title in sregion_caps:
+                last_srid += 1
+                name_from_srid[last_srid] = name_from_title.get(sregion_caps[title],sregion_caps[title])
             if title in region_caps:
                 last_rid += 1
                 name_from_rid[last_rid] = name_from_title.get(region_caps[title],region_caps[title])
@@ -639,6 +650,7 @@ def create_data(config):
                 name_from_cid[last_cid] = name_from_title.get(county_caps[title],county_caps[title])
             pid_from_cube[cube] = pid + last_pid
             rid_from_pid[pid + last_pid] = last_rid
+            srid_from_pid[pid + last_pid] = last_srid
             name_from_pid[pid + last_pid] = name_from_title.get(title,title)
             pid_from_title[title] = pid + last_pid
             cont_from_pid[pid + last_pid] = cind + 1
@@ -646,14 +658,6 @@ def create_data(config):
         land_cubes = land_cubes.union(continent)
         last_pid += len(continent)
         terr_from_cube.update(assign_terrain_continent({v:k for k,v in pid_from_cube.items() if k in continent}, terr_templates[cind]))
-    # TODO: This section doesn't work. Probably should assign pids and rids in the initial continent creation step instead.
-    to_assign = [region_tree for region_tree in region_trees]
-    while len(to_assign) > 0:
-        curr = to_assign.pop()
-        if curr.title[0] in ["e_", "k_", "d_", "c_"]:  # Not sure about whether it makes sense to do this for counties.
-            cap = curr.capital()
-            curr.capital_pid = pid_from_title[cap]
-            curr.capital_rid = rid_from_pid[curr.capital_pid]
     # At this point, pid_from_cube should be a 1-1 mapping (because we haven't done the larger regions).
     terr_from_pid = {v:terr_from_cube[k] for k,v in pid_from_cube.items() if k in terr_from_cube}
     land_cube_from_pid = {v:k for k,v in pid_from_cube.items()}
@@ -686,19 +690,22 @@ def create_data(config):
         last_pid += 1
         last_rid += 1
     #TODO: Assigning sea provinces should 1) look for major inland seas, like the med, 2) use more regular things that are faster for the deep ocean
-    sid_from_cube, srid_from_sid = assign_sea_zones(sea_cubes, config, province_centers=sea_centers, region_centers=sea_region_centers, style=config.get("SEA_PROVINCE_STYLE", "even"))
-    pid_from_cube.update({k:v+last_pid for k,v in sid_from_cube.items()})
+    sid_from_cube, rid_from_sid, srid_from_sid = assign_sea_zones(sea_cubes, config, province_centers=sea_centers, region_centers=sea_region_centers, style=config.get("SEA_PROVINCE_STYLE", "even"))
+    pid_from_cube.update({k:v + last_pid for k,v in sid_from_cube.items()})
     for k, sid in sid_from_cube.items():
-        pid = sid+last_pid
+        pid = sid + last_pid
         pid_from_cube[k] = pid
         pid_from_title[f"s_{sid}"] = pid
         name_from_pid[pid] = f"s_{sid}"
-    for sid, srid in srid_from_sid.items():
-        rid_from_pid[sid+last_pid] = srid+last_rid
-        name_from_rid[srid+last_rid] = "s_" + str(srid+last_rid)
-        terr_from_pid[sid+last_pid] = BaseTerrain.ocean
+    for sid, rid in rid_from_sid.items():
+        rid_from_pid[sid + last_pid] = rid + last_rid
+        srid_from_pid[sid + last_pid] = srid_from_sid[sid] + last_srid
+        name_from_rid[rid + last_rid] = "s_" + str(rid + last_rid)
+        terr_from_pid[sid + last_pid] = BaseTerrain.ocean
     last_pid += max(sid_from_cube.values())
-    last_rid += max(srid_from_sid.values())
+    last_rid += max(rid_from_sid.values())
+    name_from_srid.update({k + last_srid: "ocean_"+str(k) for k in sorted(set(srid_from_sid.values()))})
+    last_srid += max(srid_from_sid.values())
     terr_from_cube.update({k:BaseTerrain.ocean for k in sea_cubes})
     # Finish up straits
     straits = [(k, ok, pid_from_cube[x1]) for (k, ok, x1, x2) in straits]
@@ -809,7 +816,7 @@ def create_data(config):
         type_from_pid[pid_from_cube[k]] = "sea"
     for k in lakes:
         type_from_pid[k] = "lake"
-    return continents, pid_from_cube, land_cube_from_pid, rid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid
+    return continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid
 
 
 if __name__ == "__main__":
@@ -831,7 +838,7 @@ if __name__ == "__main__":
     config["max_x"] = config.get("max_x", config.get("box_width", 10)*(config["n_x"]*3-3))
     config["max_y"] = config.get("max_y", config.get("box_height", 17)*(config["n_y"]*2-2))
 
-    continents, pid_from_cube, land_cube_from_pid, rid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid = create_data(config)
+    continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid = create_data(config)
     cultures, religions = assemble_culrels(region_trees=region_trees)  # Not obvious this should be here instead of just derived later?
     rgb_from_pid = create_colors(pid_from_cube)
     pids_from_rid = {}
@@ -840,9 +847,30 @@ if __name__ == "__main__":
             pids_from_rid[rid].append(pid)
         else:
             pids_from_rid[rid] = [pid]
+    pids_from_srid = {}
+    for pid, rid in sorted(srid_from_pid.items()):
+        if rid in pids_from_srid:
+            pids_from_srid[rid].append(pid)
+        else:
+            pids_from_srid[rid] = [pid]
     rid_from_cube = {k: rid_from_pid[pid_from_cube[k]] for k in land_cube_from_pid.values()}
     supply_nodes, railways = create_supply_rails(terr_from_cube, pids_from_rid, rid_from_cube, land_cube_from_pid, pid_from_cube, name_from_rid,)
-
+    weather_periods_from_srid = {}
+    for srid in name_from_srid.keys():
+        weather_periods_from_srid[srid] = [{
+            "between": "{ 0.0 30.11}",
+            "temperature": "{ 1.0 6.0 }",
+            "no_phenomenon": "0.500",
+            "rain_light": "0.250",
+            "rain_heavy": "0.100",
+            "snow": "0.000",
+            "blizzard": "0.000",
+            "arctic_water": "1.000",
+            "mud": "1.000",
+            "sandstorm": "0.000",
+            "min_snow_level": "0.000",
+        }]
+    naval_from_srid = {}
     if "CK3" in config["MOD_OUTPUTS"]:
         ck3.create_mod(
             file_dir=config["MOD_OUTPUTS"]["CK3"],
@@ -904,4 +932,8 @@ if __name__ == "__main__":
             region_trees=region_trees,
             supply_nodes=supply_nodes,
             railways=railways,
+            pids_from_srid=pids_from_srid,
+            name_from_srid=name_from_srid,
+            weather_periods_from_srid=weather_periods_from_srid,
+            naval_from_srid=naval_from_srid,
         )

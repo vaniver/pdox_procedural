@@ -1,5 +1,6 @@
 import os
 import random
+import shutil
 
 from basic_map import BasicMap
 from map_io import *
@@ -42,7 +43,7 @@ class HOI4Map(BasicMap):
         # This doesn't use the superclass create_provinces and prov_extra because we need to modify the create_hex_map call, and also flip the image.
         rgb_from_ijk = {k.tuple(): rgb_from_pid[pid] for k, pid in pid_from_cube.items()}
         # TODO: fix four-corner joins by painting with rgb_from_vertex? Need to test it to figure out how to use it correctly on map edge.
-        create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, mode='RGB', default="black", n_x=self.n_x, n_y=self.n_y, four_corners=True).transpose(PIL.Image.FLIP_TOP_BOTTOM).save(os.path.join(self.file_dir, "map", "provinces.bmp"))
+        create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, mode='RGB', default="black", n_x=self.n_x, n_y=self.n_y, four_corners=True).save(os.path.join(self.file_dir, "map", "provinces.bmp"))  # .transpose(PIL.Image.FLIP_TOP_BOTTOM)
         with open(os.path.join(self.file_dir, "map", "definition.csv"), 'w') as outf:
             outf.write("0;0;0;0;land;false;unknown;0\n")
             for pid, rgb in sorted(rgb_from_pid.items()):
@@ -98,16 +99,17 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     outer = "path = \"mod/{}\"\n".format(mod_name)
     
     replace_paths = [
-            # "common/ai_strategy",
-            # "common/ai_strategy_plans",
-            # "common/ai_templates",
-            # "common/countries",
-            # "common/country_tags",
-            # "common/country_tag_aliases",
-            # "common/ideas",
-            # "common/national_focus",
-            # "history/countries",
+            "common/ai_strategy",
+            "common/ai_strategy_plans",
+            "common/ai_templates",
+            "common/countries",
+            "common/country_tags",
+            "common/country_tag_aliases",
+            "common/ideas",
+            "common/national_focus",
+            "history/countries",
             "history/states",
+            "map/strategicregions",
         ]
     shared += "replace_path = \"" + "\"\nreplace_path = \"".join(replace_paths)+"\""
     os.makedirs(os.path.join(file_dir, mod_name), exist_ok=True)
@@ -116,6 +118,15 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     with open(os.path.join(file_dir, mod_name, "descriptor.mod".format(mod_name)),'w') as f:
         f.write(shared)
     return os.path.join(file_dir, mod_name)
+
+
+def create_adjacencies(file_dir):
+    # TODO: Actually write out adjacencies
+    with open(os.path.join(file_dir, "map", "adjacencies.csv"), 'w', encoding="utf-8") as outf:
+        outf.write("From;To;Type;Through;start_x;start_y;stop_x;stop_y;adjacency_rule_name;Comment\n")
+        outf.write("-1;-1;;-1;-1;-1;-1;-1;-1")
+    with open(os.path.join(file_dir, "map", "adjacency_rules.txt"), 'w', encoding="utf-8") as outf:
+        outf.write("\n")
 
 
 def create_countries(file_dir, config, region_trees, tech_from_tag, popularities_from_tag = {}, chars_from_tag = {}, max_dnum=75,):
@@ -128,7 +139,7 @@ def create_countries(file_dir, config, region_trees, tech_from_tag, popularities
         for region in region_tree.all_region_trees():
             if region.tag is not None and region.capital_rid != -1:
                 with open(os.path.join(file_dir, "common", "countries", f"{region.title}.txt"), 'w', encoding="utf-8") as outf:
-                    outf.write(f"graphical_culture = western_european_gfx\n\tgraphical_culture_2d = western_european_2d\n\ncolor = {{ {region.color} }}")
+                    outf.write(f"graphical_culture = western_european_gfx\ngraphical_culture_2d = western_european_2d\n\ncolor = {{ {' '.join(region.color)} }}")
                 country_tag_buffer += f"{region.tag} = \"countries/{region.title}.txt\"\n"
                 with open(os.path.join(file_dir, "history", "countries", f"{region.tag}-{region.title}.txt"), 'w', encoding="utf-8") as outf:
                     outf.write(f"capital = {region.capital_pid}\nset_oob = \"{region.tag}_1936\"\n\nstarting_train_buffer = 2\nset_technology = {{\n")
@@ -140,12 +151,12 @@ def create_countries(file_dir, config, region_trees, tech_from_tag, popularities
                         outf.write("\n".join(["recruit_character = {char}" for char in chars_from_tag[region.tag]]))
     with open(os.path.join(file_dir, "common", "country_tags", "02_country_tags.txt"), 'w', encoding="utf-8") as outf:
         outf.write(country_tag_buffer)
-    # assert max_dnum < 100  # We _could_ use additional letters to get more than 100, but... why
-    # with open(os.path.join(file_dir, "common", "country_tags", "zz_dynamic_tags.txt"), 'w', encoding="utf-8") as outf:
-    #     outf.write("dynamic_tags = yes\n" + "\n".join(["D" + str(dnum).rjust(2,"0") + " = \"countries/D" + str(dnum).rjust(2,"0") +".txt\"" for dnum in range(1,max_dnum + 1)]) + "\n")
-    # for dnum in range(1, max_dnum + 1):
-    #     with open(os.path.join(file_dir, "common", "countries", "D"+str(dnum).rjust(2,"0")+".txt"), 'w', encoding="utf-8") as outf:
-    #         outf.write("color = { " + " ".join([str(random.randint(0,255)) for _ in range(3)]) +"}\n")  # Maybe this should copy the vanilla ones instead? They probably have better color choices.
+    assert max_dnum < 100  # We _could_ use additional letters to get more than 100, but... why
+    with open(os.path.join(file_dir, "common", "country_tags", "zz_dynamic_tags.txt"), 'w', encoding="utf-8") as outf:
+        outf.write("dynamic_tags = yes\n" + "\n".join(["D" + str(dnum).rjust(2,"0") + " = \"countries/D" + str(dnum).rjust(2,"0") +".txt\"" for dnum in range(1,max_dnum + 1)]) + "\n")
+    for dnum in range(1, max_dnum + 1):
+        with open(os.path.join(file_dir, "common", "countries", "D"+str(dnum).rjust(2,"0")+".txt"), 'w', encoding="utf-8") as outf:
+            outf.write("color = { " + " ".join([str(random.randint(0,255)) for _ in range(3)]) +"}\n")  # Maybe this should copy the vanilla ones instead? They probably have better color choices.
     
 
 def create_states(file_dir, config, pids_from_rid, name_from_rid, manpower_from_rid, category_from_rid, tag_from_rid, cores_from_rid, vps_from_rid, buildings_from_rid,):
@@ -170,6 +181,27 @@ def create_states(file_dir, config, pids_from_rid, name_from_rid, manpower_from_
             outf.write(f"\n\t}}\n\n\tprovinces={{\n")
             outf.write("\t\t"+" ".join([str(pid) for pid in pids]))
             outf.write(f"\t}}\n\n\tlocal_supplies=0.0\n}}\n")
+
+
+def create_strategic_regions(file_dir, pids_from_srid, name_from_srid, weather_periods_from_srid, naval_from_srid={}):
+    """Creates map/strategicregions"""
+    os.makedirs(os.path.join(file_dir, "map", "strategicregions"), exist_ok=True)
+    weather_pos_buffer = ""
+    for srid, sname in name_from_srid.items():
+        with open(os.path.join(file_dir, "map", "strategicregions", f"{srid}-{sname}.txt"), 'w', encoding="utf-8") as outf:
+            outf.write(f"strategic_region={{\n\tid={srid}\n\tname=\"STRATEGIC_REGION{srid}\"\n\tprovinces={{\n\t\t")
+            outf.write(" ".join(str(pid) for pid in pids_from_srid[srid]))
+            outf.write(f"\n\t}}\n")
+            if srid in naval_from_srid:
+                outf.write(f"\tnaval_terrain={naval_from_srid[srid]}\n")
+            outf.write("\tweather={\n")
+            for weather_period in weather_periods_from_srid[srid]:
+                outf.write("\t\tperiod={\n" + "\n".join([f"\t\t\t{k}={v}" for k,v in weather_period.items()])+"\n\t\t}\n")
+            outf.write("\t}\n}\n")
+        # TODO: locate weather correctly
+        weather_pos_buffer += f"{srid};1000.0;10.0;1000.0;small\n{srid};1000.0;10.0;1000.0;big\n"
+    with open(os.path.join(file_dir, "map", "weatherpositions.txt"), 'w', encoding="utf-8") as outf:
+        outf.write(weather_pos_buffer)
 
 
 def create_minimal(file_dir, base_loc, filenames_from_dirs):
@@ -199,13 +231,28 @@ def create_rail_supplies(file_dir, supply_nodes, railways):
             outf.write(str(level) + " " + str(len(path)) + " " + " ".join(str(pid) for pid in path) + "\n")
 
 
-def create_mod(file_dir, config, pid_from_cube, rgb_from_pid, terr_from_cube, terr_from_pid, rid_from_pid, tag_from_pid, type_from_pid, cont_from_pid, coast_from_cube, pids_from_rid, name_from_rid, river_edges, river_vertices, locs_from_rid, height_from_vertex, region_trees, supply_nodes, railways,):
+def create_flags(file_dir, base_dir, tag_mapping, tags):
+    """Move vanilla flags to file_dir, using tag_mapping to determine which ones."""
+    os.makedirs(os.path.join(file_dir, "gfx", "flags", "medium"), exist_ok=True)
+    os.makedirs(os.path.join(file_dir, "gfx", "flags", "small"), exist_ok=True)
+    gov_types = ["communism", "democratic", "fascism", "neutrality"]
+    for tag in tags:
+        vanilla_tag = tag_mapping.get(tag, "ZIM")
+        for gov_type in gov_types:
+            for dirs in [["flags"], ["flags", "medium"], ["flags", "small"]]:
+                try:
+                    shutil.copy(os.path.join(base_dir, "gfx", *dirs, vanilla_tag+"_"+gov_type+".tga"), os.path.join(file_dir, "gfx", *dirs, tag+"_"+gov_type+".tga"))
+                except:
+                    continue
+
+
+def create_mod(file_dir, config, pid_from_cube, rgb_from_pid, terr_from_cube, terr_from_pid, rid_from_pid, tag_from_pid, type_from_pid, cont_from_pid, coast_from_cube, pids_from_rid, name_from_rid, river_edges, river_vertices, locs_from_rid, height_from_vertex, region_trees, supply_nodes, railways, pids_from_srid, name_from_srid, weather_periods_from_srid, naval_from_srid,):
     """Creates the HOI4 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
-    # create_blanks(file_dir=file_dir, file_paths=[
-    #     ["common", "country_tag_aliases", "tag_aliases.txt"],
-    # ], encoding="utf-8")  # This is here so if we do make the files later, we won't overwrite them.
+    create_blanks(file_dir=file_dir, file_paths=[
+        ["common", "country_tag_aliases", "tag_aliases.txt"],
+    ], encoding="utf-8")  # This is here so if we do make the files later, we won't overwrite them.
     hoi4map = HOI4Map(file_dir=file_dir, max_x=config["max_x"], max_y=config["max_y"], n_x=config["n_x"], n_y=config["n_y"])
     # Figure out which pids are coastal, given which cubes are coastal.
     coastal = {pid_from_cube[cube]: coast_from_cube[cube] for cube in coast_from_cube}
@@ -216,6 +263,7 @@ def create_mod(file_dir, config, pid_from_cube, rgb_from_pid, terr_from_cube, te
     hoi4map.create_world_normal()
     hoi4map.create_buildings(file_dir=file_dir, pids_from_rid=pids_from_rid, coastal=coastal)
     hoi4map.create_rivers(height_from_vertex, river_edges, river_vertices, base_loc=config["BASE_HOI4_DIR"], file_ext=".bmp")
+    create_adjacencies(file_dir)
     create_rail_supplies(file_dir, supply_nodes, railways)
     tags = sorted(set(tag_from_pid.values()))
     tag_from_rid = {rid_from_pid[pid]: tag for pid, tag in tag_from_pid.items()}
@@ -238,11 +286,12 @@ def create_mod(file_dir, config, pid_from_cube, rgb_from_pid, terr_from_cube, te
     category_from_rid = {rid: "large_city" for rid, name in name_from_rid.items() if name[0] != "s"}
     cores_from_rid = {rid: [tag] for rid, tag in tag_from_rid.items()}
     create_states(file_dir, config, pids_from_rid, name_from_rid, manpower_from_rid, category_from_rid, tag_from_rid, cores_from_rid, vps_from_rid, buildings_from_rid,)
-    
-    # create_minimal(file_dir, config["BASE_HOI4_DIR"], [
-    #     (["gfx","interface","equipmentdesigner", "graphic_db"], ["00_plane_icons.txt", "00_tank_icons.txt"]),
-    #     (["common", "ideas"], ["_economic.txt", "_manpower.txt", "zzz_generic.txt"]),  # TODO: The first two need to be stripped instead.
-    # ])
-    # strip_base_files(file_dir=file_dir, src_dir=config["BASE_HOI4_DIR"],subpaths=[
-    #     "common\\national_focus\\generic.txt",
-    # ], to_remove=["\ttag ="], to_keep=[], subsection=["modifier = {"], encoding="utf-8")
+    create_strategic_regions(file_dir, pids_from_srid, name_from_srid, weather_periods_from_srid, naval_from_srid)
+    create_flags(file_dir, config["BASE_HOI4_DIR"], {}, tags)
+    create_minimal(file_dir, config["BASE_HOI4_DIR"], [
+        (["gfx","interface","equipmentdesigner", "graphic_db"], ["00_plane_icons.txt", "00_tank_icons.txt"]),
+        (["common", "ideas"], ["_economic.txt", "_manpower.txt", "zzz_generic.txt"]),  # TODO: The first two need to be stripped instead.
+    ])
+    strip_base_files(file_dir=file_dir, src_dir=config["BASE_HOI4_DIR"],subpaths=[
+        "common\\national_focus\\generic.txt",
+    ], to_remove=["\ttag ="], to_keep=[], subsection=["modifier = {"], encoding="utf-8")
