@@ -29,7 +29,7 @@ def xy_from_cube(cube, box_width, box_height):
     return start_x, start_y
 
 
-def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_from_vertex={}, mode='RGB', default="black", palette=None):
+def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_from_vertex={}, mode='RGB', default="black", palette=None, four_corners=False):
     """Draw a hex map with size (max_x,max_y) with colors from rgb_from_ijk, rgb_from_vertex, and rgb_from_edge. mode determines the image type, and also the correct format for rgb (which should be shared by everything).
     There will be n_x hexes horizontally and n_y hexes vertically.
     rgb_from_edge should be a dictionary from edge to (rgb, thickness) tuples; also, please don't use edges near the map edge.
@@ -148,6 +148,10 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_f
         for x in center_wrange:
             for y in center_vrange:
                 pix[start_x + box_width + x,start_y + y] = rgb
+    if four_corners:
+        for ver in range(1,max_y):
+            if (0,-ver,ver) in rgb_from_ijk:
+                pix[0, (2 * ver - 1) * box_height-1] = rgb_from_ijk[(0,-ver,ver)]
     for edge, (rgb, thickness) in rgb_from_edge.items():
         # The edges that get painted are the south (0), southeast (1), and northeast edges (2).
         # This currently doesn't check that the edges are actually on-map, which it probably should? These are not supposed to be populated near the edge.

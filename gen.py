@@ -1,4 +1,3 @@
-from enum import Enum
 import os
 import random
 import yaml
@@ -415,17 +414,29 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
     return continents, terr_templates, region_trees, all_sea_centers, last_pid, last_rid
 
 
-def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], min_province_distance=2):
+def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], min_province_distance=2, style="random"):
     """Given the set of cubes sea_cubes, the overall config and optional centers (for regions or provinces), determine the sea regions and sea provinces."""
     # Determine if any of the proposed centers are close to each other, and drop the spare(s) if so. 
     sea_province_centers = []
     rid_from_pid = {}
     for ind, k in enumerate(province_centers):
-        if not any([ok.sub(k).mag() <= min_province_distance for ok in province_centers[ind:]]):  # Should this 2 be configurable?
+        if not any([ok.sub(k).mag() <= min_province_distance for ok in province_centers[ind:]]):
             sea_province_centers.append(k)
     if "SEA_PROVINCES" not in config:
         config["SEA_PROVINCES"] = len(sea_cubes) // config.get("SEA_PROVINCE_SIZE", 40)
-    v_centers = random.sample(list(sea_cubes),max(0, config["SEA_PROVINCES"] - len(sea_province_centers))) + sea_province_centers
+    if style == "random":
+        v_centers = random.sample(list(sea_cubes),max(0, config["SEA_PROVINCES"] - len(sea_province_centers))) + sea_province_centers
+    elif style == "even":
+        y_num = 20 #sqrt(config["SEA_PROVINCES"] * config["n_y"] / config["n_x"]).__round__()
+        x_num = y_num * config["n_x"] // config["n_y"]
+        v_centers = [s for s in sea_province_centers]
+        for x in range(x_num):
+            for y in range(y_num):
+                xx = (2*x + 1) * config["n_x"] // (2*x_num)
+                yy = (2*y + 1) * config["n_y"] // (2*y_num) + xx//2
+                center =  Cube(xx,-yy,-xx+yy)
+                if center in sea_cubes:
+                    v_centers.append(center)
     v_centers, pid_from_cube, _ = voronoi(v_centers, {k:1 for k in sea_cubes})  # TODO: This really ought to be better.
     # Group the provinces together into regions.
     pids = sorted(set(pid_from_cube.values()))
@@ -434,7 +445,7 @@ def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], 
     if extra_regions > 0:
         pid_centers.extend(random.sample([x for x in pids if x not in pid_centers], k=extra_regions))
     # Now that we have a bunch of centers, we need to allocate all of the regions.
-    rid_from_pid = area_voronoi(pid_from_cube, pid_centers)    
+    rid_from_pid = area_voronoi(pid_from_cube, pid_centers)
     return pid_from_cube, rid_from_pid
 
 
@@ -675,7 +686,7 @@ def create_data(config):
         last_pid += 1
         last_rid += 1
     #TODO: Assigning sea provinces should 1) look for major inland seas, like the med, 2) use more regular things that are faster for the deep ocean
-    sid_from_cube, srid_from_sid = assign_sea_zones(sea_cubes, config, province_centers=sea_centers, region_centers=sea_region_centers)
+    sid_from_cube, srid_from_sid = assign_sea_zones(sea_cubes, config, province_centers=sea_centers, region_centers=sea_region_centers, style=config.get("SEA_PROVINCE_STYLE", "even"))
     pid_from_cube.update({k:v+last_pid for k,v in sid_from_cube.items()})
     for k, sid in sid_from_cube.items():
         pid = sid+last_pid

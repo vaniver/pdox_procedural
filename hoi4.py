@@ -42,7 +42,7 @@ class HOI4Map(BasicMap):
         # This doesn't use the superclass create_provinces and prov_extra because we need to modify the create_hex_map call, and also flip the image.
         rgb_from_ijk = {k.tuple(): rgb_from_pid[pid] for k, pid in pid_from_cube.items()}
         # TODO: fix four-corner joins by painting with rgb_from_vertex? Need to test it to figure out how to use it correctly on map edge.
-        create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, mode='RGB', default="black", n_x=self.n_x, n_y=self.n_y).transpose(PIL.Image.FLIP_TOP_BOTTOM).save(os.path.join(self.file_dir, "map", "provinces.bmp"))
+        create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, mode='RGB', default="black", n_x=self.n_x, n_y=self.n_y, four_corners=True).transpose(PIL.Image.FLIP_TOP_BOTTOM).save(os.path.join(self.file_dir, "map", "provinces.bmp"))
         with open(os.path.join(self.file_dir, "map", "definition.csv"), 'w') as outf:
             outf.write("0;0;0;0;land;false;unknown;0\n")
             for pid, rgb in sorted(rgb_from_pid.items()):
