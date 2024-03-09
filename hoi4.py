@@ -89,7 +89,7 @@ class HOI4Map(BasicMap):
                 if dockyard:
                     outf.write(f"{rid};dockyard;{dx};{dy};{dz};{drot};0\n")
 
-    
+
 def create_dot_mod(file_dir, mod_name, mod_disp_name):
     """Creates the basic mod structure and metadata file."""
     shared = "version = \"0.0.1\"\n"

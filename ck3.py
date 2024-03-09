@@ -556,9 +556,6 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
         outf.write("\n")
 
 
-
-
-
 def create_default_map(file_dir, impassable, sea_min, sea_max):
     """Writes out default.map."""
     os.makedirs(os.path.join(file_dir, "map_data"), exist_ok=True)
@@ -616,7 +613,6 @@ def create_religion(file_dir, base_dir, religions, holy_sites, custom_dir=None):
                         copying = False
         for holy_site in holy_sites:
             print(holy_site)  # These are the ones that didn't get found.
-
 
 
 def create_dot_mod(file_dir, mod_name, mod_disp_name):

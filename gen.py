@@ -10,6 +10,7 @@ from terrain import BaseTerrain, RAIL_DIST, TERRAIN_HEIGHT, WATER_HEIGHT
 from voronoi import area_voronoi, iterative_voronoi, growing_voronoi, voronoi
 
 import ck3
+import eu4
 import v3
 import hoi4
 
@@ -856,6 +857,7 @@ if __name__ == "__main__":
     rid_from_cube = {k: rid_from_pid[pid_from_cube[k]] for k in land_cube_from_pid.values()}
     supply_nodes, railways = create_supply_rails(terr_from_cube, pids_from_rid, rid_from_cube, land_cube_from_pid, pid_from_cube, name_from_rid,)
     weather_periods_from_srid = {}
+    cont_names = ["europe", "asia", "africa", "north_america", "south_america", "oceania",]
     for srid in name_from_srid.keys():
         weather_periods_from_srid[srid] = [{
             "between": "{ 0.0 30.11}",
@@ -889,6 +891,26 @@ if __name__ == "__main__":
             river_edges=river_edges,
             river_vertices=river_vertices,
             straits=straits,
+        )
+    if "EU4" in config["MOD_OUTPUTS"]:
+        eu4.create_mod(
+            file_dir=config["MOD_OUTPUTS"]["EU4"],
+            config=config,
+            region_trees=region_trees,
+            rgb_from_pid=rgb_from_pid,
+            name_from_pid=name_from_pid,
+            pids_from_rid=pids_from_rid,
+            name_from_rid=name_from_rid,
+            pid_from_cube=pid_from_cube,
+            terr_from_cube=terr_from_cube,
+            gov_from_tag={},
+            height_from_vertex=height_from_vertex,
+            river_edges=river_edges,
+            river_vertices=river_vertices,
+            srid_from_pid=srid_from_pid,
+            name_from_srid=name_from_srid,
+            cont_names=cont_names,
+            cont_from_pid=cont_from_pid,
         )
     if "V3" in config["MOD_OUTPUTS"]:
         v3.create_mod(
