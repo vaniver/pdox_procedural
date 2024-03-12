@@ -266,48 +266,144 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
     num_b = num_k * 2 - 3
     if num_k == 3:
         a,b,c = candidate[0]
-        abc_center = list(chunks[a].self_edges[b].intersection(chunks[a].self_edges[c]))[0]
-        _, _, cdistmap = voronoi([abc_center], weight_from_cube)
-        cube_from_pid = [abc_center] + list(abc_center.neighbors())
+        centers = [((a,b,c), list(chunks[a].self_edges[b].intersection(chunks[a].self_edges[c]))[0])]
+        fixed_borders = []
+        dyna_borders = [(a,b),(b,c),(a,c)]
     elif num_k == 4:
-        raise NotImplementedError
+        # a and d only connect to b and c, both b and c connect to everyone.
+        nums = {2: [], 3: []}
+        for ind in range(4):
+            others = list(candidate[0][:ind]) + list(candidate[0][ind+1:])
+            nums[sum([o in chunks[candidate[0][ind]].self_edges for o in others])].append(candidate[0][ind])
+        if len(nums[3]) < 2:
+            print("No b-c edge for 4-continent")
+            raise CreationError
+        elif len(nums[3]) > 2:  # We need to pick the longest edge to be the b-c edge
+            nums[3] = sorted([y for y in nums[3]], key=lambda x: max([chunks[x].self_edges[o] for o in nums[3] if o != x]), reverse=True)
+        b,c,a,d = nums[3] + nums[2]
+        centers = [
+            ((a,b,c), list(chunks[a].self_edges[b].intersection(chunks[a].self_edges[c]))[0]),
+            ((b,c,d), list(chunks[d].self_edges[b].intersection(chunks[d].self_edges[c]))[0])
+        ]
+        fixed_borders = [(b,c)]
+        dyna_borders = [(a,b),(a,c),(b,d),(c,d)]
     elif num_k == 5:
-        raise NotImplementedError
+        nums = {2: [], 3: [], 4: []}
+        for ind in range(5):
+            others = list(candidate[0][:ind]) + list(candidate[0][ind+1:])
+            nums[sum([o in candidate[ind].self_edges for o in others])].append(candidate[0][ind])
+        # b connects to at least 4; abc, bcd, bde are the triangles. 
+        if len(nums[4]) < 1:
+            print("No b for 5-continent")
+            raise CreationError
+        b = nums[4][0]
+        c, d, alpha, beta = nums[4][1:] + nums[3] + nums[2]
+        a = alpha if alpha in chunks[c].self_edges else beta
+        e = alpha if alpha in chunks[d].self_edges else beta
+        if d not in chunks[c].self_edges:
+            print("c-d didn't line up correctly for 5-continent")
+            raise CreationError
+        centers = [
+            ((a,b,c), list(chunks[a].self_edges[b].intersection(chunks[a].self_edges[c]))[0]),
+            ((b,c,d), list(chunks[d].self_edges[b].intersection(chunks[d].self_edges[c]))[0]),
+            ((c,d,e), list(chunks[d].self_edges[c].intersection(chunks[d].self_edges[e]))[0]),
+        ]
+        fixed_borders = [(b,c), (b,d)]
+        dyna_borders = [(a,b),(a,c),(b,c),(b,e),(d,e)]
     # We're going to mostly hardcode how the central duchy works.
-    if not all([x in weight_from_cube for x in cube_from_pid]):  # Check to make sure the center is actually contained.
-        raise CreationError
-    # Add the three counties to the central duchy, each one carved out of a different original region.
-    for cid, other in enumerate([a,b,c]):
-        options = {k:weight_from_cube[k] for k in cdistmap.keys() if k in chunks[other].members and k not in cube_from_pid}
-        _, _, selection = voronoi([min(options, key=cdistmap.get)],options)
-        ss = sorted(selection, key=selection.get)
-        for k in ss[:config["CENTER_SIZE_LIST"][cid+1]]:
-            cube_from_pid.append(k)
+    cube_from_pid = []
+    for (aa,bb,cc), center in centers:
+        _, _, cdistmap = voronoi([center], weight_from_cube)
+        if not all([x not in cube_from_pid for x in center.neighbors()]):  # The center is too close to an existing center.
+            print("Centers too close together")
+            raise CreationError
+        cube_from_pid.extend([center] + list(center.neighbors()))
+        if not all([x in weight_from_cube for x in cube_from_pid]):  # Check to make sure the center is actually contained.
+            print("Center too close to edge")
+            raise CreationError
+        # Add the three counties to the central duchy, each one carved out of a different original region.
+        for cid, other in enumerate([aa,bb,cc]):
+            options = {k:weight_from_cube[k] for k in cdistmap.keys() if k in chunks[other].members and k not in cube_from_pid}
+            _, _, selection = voronoi([min(options, key=cdistmap.get)],options)
+            ss = sorted(selection, key=selection.get)
+            for k in ss[:config["CENTER_SIZE_LIST"][cid+1]]:
+                cube_from_pid.append(k)
+        terr_templates.append(config["CENTER_TERRAIN_TEMPLATE"])
     allocated = set([x for x in cube_from_pid])
-    terr_templates.append(config["CENTER_TERRAIN_TEMPLATE"])
+    # Create the border duchies inside the annular region
+    group_from_cube = {}
+    for ind, (aa,bb) in enumerate(fixed_borders):
+        initiala = [x for x in chunks[aa].self_edges[bb] if x not in allocated]
+        initialb = [x for x in chunks[bb].self_edges[aa] if x not in allocated]
+        if len(initiala) == 0 or len(initialb) == 0:  # One of the sections is cut off from the other by the center.
+            print("Fixed edge cut off by center expansion.")
+            raise CreationError
+        # This should maybe be a call to growing_voronoi or something? I'm doing it manually here b/c
+        # I want to ensure that the whole connection between the centers is included, but this is maybe something that would be done by the right choice of distance.
+        if len(initiala) + len(initialb) > config["BORDER_SIZE"]:  # TODO: Handle this case correctly
+            print("Fixed edge too large for border duchy.")
+            raise CreationError
+        this_border = initiala + initialb
+        options = {}
+        for cube in this_border:
+            for nbr in cube.neighbors():
+                if nbr in allocated or nbr in this_border or nbr not in weight_from_cube:
+                    continue
+                w = weight_from_cube[nbr] + 8  # We don't want to have any gaps, so we need the base distance to matter more than the random weight, while still counting the random weight.
+                if w in options:
+                    options[w].append(nbr)
+                else:
+                    options[w] = [nbr]
+        while len(this_border) < config["BORDER_SIZE"] and len(options) > 0:
+            minw = min(options.keys())
+            random.shuffle(options[minw])
+            next_bit = options[minw].pop()
+            if len(options[minw]) == 0:
+                del options[minw]
+            if next_bit in this_border:
+                continue
+            this_border.append(next_bit)
+            for nbr in next_bit.neighbors():
+                if nbr in allocated or nbr in this_border or nbr not in weight_from_cube:
+                    continue
+                w = weight_from_cube[nbr] + minw + 8
+                if w in options:
+                    options[w].append(nbr)
+                else:
+                    options[w] = [nbr]
+        if len(this_border) != config["BORDER_SIZE"]:
+            print("Fixed edge too small for border size.")
+            raise CreationError
+        for cube in this_border:
+            group_from_cube[cube] = ind
+            allocated.add(cube)
     # Set up the centers for the annular regions
     new_centers = []
     # Add the borders
-    for o1, o2 in [(a,b),(b,c),(a,c)]:
+    for o1, o2 in dyna_borders:
         options = {k for k in chunks[o1].self_edges[o2].union(chunks[o1].other_edges[o2]) if k not in allocated}
         if len(options) == 0:
+            print("No connection between regions left for dynamic border region.")
             raise CreationError
         new_centers.append(min(options, key=cdistmap.get))
     # Add the kingdoms
-    for o in [a,b,c]:
-        options = {k: min([k.sub(nc).mag() for nc in new_centers[:3]]) for k in chunks[o].members if k not in allocated and any([kn in allocated for kn in k.neighbors()])}
+    for o in candidate[0]:
+        options = {k: min([k.sub(nc).mag() for nc in new_centers[:len(dyna_borders)]]) for k in chunks[o].members if k not in allocated and any([kn in allocated for kn in k.neighbors()])}
         new_centers.append(max(options, key=options.get))
     subweights = {k:v for k,v in weight_from_cube.items() if k not in allocated}
     try:
-        new_centers, group_from_cube = growing_voronoi(new_centers, [config["BORDER_SIZE"]]*3 + [config["KINGDOM_SIZE"]]*3, subweights)
+        new_centers, dyna_group_from_cube = growing_voronoi(new_centers, [config["BORDER_SIZE"]]*len(dyna_borders) + [config["KINGDOM_SIZE"]]*num_k, subweights)
     except ValueError:
+        print("growing_voronoi failed for some reason.")
         raise CreationError
     # Split the border duchies into counties
+    group_from_cube.update({k: v + len(fixed_borders) for k, v in dyna_group_from_cube.items() if v != -1})
     for ind in range(num_b):
-        duchy = [k for k,v in group_from_cube.items() if v==ind]
+        duchy = [k for k, v in group_from_cube.items() if v==ind]
         try:
             counties = split_chunk(duchy, config["BORDER_SIZE_LIST"])
         except:  # Covers both difficult-to-split and incorrectly-sized regions.
+            print("Duchy splitting failed for some reason.")
             raise CreationError
         for county in counties:
             cube_from_pid.extend(county)
@@ -344,6 +440,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
                     except SplitChunkMaxIterationExceeded:
                         continue
                     except AssertionError:  # The kingdom was incorrectly sized.
+                        print("Kingdom was incorrectly sized.")
                         raise CreationError
         if not to_be_continued:
             cube_from_pid.extend(this_capital)
@@ -354,6 +451,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
                 try:
                     dsplit = split_chunk(duchy, config["KINGDOM_SIZE_LIST"][dind][start_ind:])
                 except:
+                    print("Kingdom failed to split.")
                     raise CreationError
                 for county in dsplit:
                     cube_from_pid.extend(county)
@@ -370,7 +468,7 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
     if weight_from_cube is None:
         weight_from_cube = {cub: random.randint(1,8) for cub in valid_cubes(n_x,n_y)}
     if num_centers is None:
-        num_centers = len(weight_from_cube) * 3 // (2 * config["KINGDOM_SIZE"])
+        num_centers = len(weight_from_cube) // (4 * config["KINGDOM_SIZE"])
     centers, chunks, cids = create_chunks(weight_from_cube, num_centers)
     ind = -1
     for cind, cont_list in enumerate(config["CONTINENT_LISTS"]):
@@ -400,7 +498,7 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
         all_sea_centers = []
         while len(continents) <= cind:
             ind += 1
-            print(ind)
+            print(ind, len(candidates))
             subweights = {k:v for k,v in weight_from_cube.items() if any([k in chunks[cid].members for cid in candidates[ind][0]])}
             try:
                 continent, terr_template, sea_centers = create_triangular_continent(subweights, chunks, candidates[ind], config)
@@ -409,9 +507,9 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
                 all_sea_centers.extend(sea_centers)
             except CreationError:
                 print("Creation error")
-                if ind == len(candidates):
+                if ind == len(candidates) - 1:
                     print(f"Failed to make enough of size {num_k}, had to rechunk.")
-                    centers, chunks, cids = create_chunks(subweights, num_centers)
+                    centers, chunks, cids = create_chunks(weight_from_cube, num_centers)
                     candidates = compute_func(chunks, cids, num_k)
                     ind = -1
     return continents, terr_templates, region_trees, all_sea_centers, last_pid, last_rid, last_srid
@@ -606,7 +704,7 @@ def create_data(config):
     last_cid = 1  # county_id. They 1-index instead of 0-indexing.
     last_rid = 1  # region_id. They 1-index instead of 0-indexing.
     last_srid = 1  # strategic_region_id. They 1-index instead of 0-indexing.
-    continents, terr_templates, region_trees, sea_centers, last_pid, last_rid, last_srid = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", 40), last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+    continents, terr_templates, region_trees, sea_centers, last_pid, last_rid, last_srid = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", None), last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
     m_x = config["n_x"]//2
     m_y = -(config["n_y"]+config["n_x"]//2)//2
     continents, sea_region_centers = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))

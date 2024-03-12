@@ -21,10 +21,14 @@ CONTINENT_LISTS:
   - k_east_francia
   - k_france
   - k_bavaria
+  - k_aquitaine
   - c_latium
+  - c_lombardia
   - b_alsace
   - b_toscana
   - b_genoa
+  - b_capua
+  - b_west_franconia
 - - e_eeurope
   - k_norway
   - k_burgundy
