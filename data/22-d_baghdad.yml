@@ -1,0 +1,47 @@
+﻿children:
+- children:
+  - b_baghdad|Baghdad
+  - b_baquba|Baquba
+  - b_ukbara|Ukbara
+  - b_an-nahrawan|an-Nahrawan
+  - b_al-farasa|al-Farasa
+  - b_sarsar|Sarsar
+  - b_al-hila|al-Hila
+  color: 16 135 12
+  l: Baghdad
+  title: c_baghdad
+- children:
+  - b_iskaf|Iskaf
+  - b_jabbul|Jabbul
+  - b_humaniya|Humaniya
+  - b_al-anbar|al-Anbar
+  - b_ar-rabb|ar-Rabb
+  color: 150 205 113
+  l: Iskaf
+  title: c_iskaf
+- children:
+  - b_badaraya|Badaraya
+  - b_bakusaya|Bakusaya
+  - b_tarsukh|Tarsukh
+  - b_karbala|Karbala
+  - b_hit|Hit
+  color: 110 190 80
+  l: Badaraya
+  title: c_badaraya
+- children:
+  - b_wasit|Wasit
+  - b_kaskar|Kaskar
+  - b_an-numaniya|an-Numaniya
+  - b_at-tib|at-Tib
+  - b_karkha|Karkha
+  color: 55 165 110
+  l: Wasit
+  title: c_wasit
+color: 6 100 50
+cul: bedouin
+l: Baghdad
+rel: ismaili
+title: d_baghdad
+rough: desert
+tag: BAG
+holy: baghdad

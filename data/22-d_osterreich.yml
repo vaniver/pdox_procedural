@@ -1,0 +1,55 @@
+﻿children:
+- children:
+  - b_vienna|Wien
+  - b_ernstbrunn|Ernstbrunn
+  - b_floridsdorf|Floridsdorf
+  - b_padun|Padun
+  - b_bruck|Bruck
+  - b_hohenau|Hohenau
+  - b_laa|Laa
+  color: 211 202 202
+  l: Wien
+  title: c_vienna
+- children:
+  color: 191 182 182
+  l: Hohenau
+  title: c_hohenau
+- children:
+  - "b_sankt_polten|Sankt P\xF6lten"
+  - b_mariazell|Mariazell
+  - b_wieselburg|Wieselburg
+  - b_amstetten|Amstetten
+  - b_waidhofen|Waidhofen
+  color: 200 180 180
+  l: "Sankt P\xF6lten"
+  title: c_sankt_polten
+- children:
+  - b_freistadt|Freistadt
+  - b_spitz|Spitz
+  - b_zwettl|Zwettl
+  - "b_gmund|Gm\xFCnd"
+  - b_linz|Linz
+  color: 200 195 160
+  l: Freistadt
+  title: c_freistadt
+- children:
+  color: 170 160 160
+  l: Amstetten
+  title: c_amstetten
+- children:
+  - b_krems|Krems
+  - b_wild|Raabs
+  - b_horn|Horn
+  - b_haugsdorf|Haugsdorf
+  - b_mistelbach|Mistelbach
+  color: 190 180 165
+  l: Krems
+  title: c_krems
+color: 191 182 182
+cul: bavarian
+l: Austria
+rel: catholic
+title: d_osterreich
+rough: forest
+tag: AUS
+holy: sankt_polten

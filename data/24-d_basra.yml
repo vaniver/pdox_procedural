@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - b_bajlan|Bajlan
+  - b_basra|Basra
+  - b_hifair|Hifair
+  - b_ar-rukhail|Ar-Rukhail
+  color: 80 147 30
+  l: Basra
+  title: c_basra
+- children:
+  - b_al-ubulla|Al-Ubulla
+  - b_matara-iraq|Matara-Iraq
+  - b_ain_said|Ain Said
+  - b_al-kufa|Al-Kufa
+  color: 80 170 5
+  l: Ubulla
+  title: c_ubulla
+- children:
+  - b_ar-rusafa-iraq|Ar-Rusafa-Iraq
+  - b_al-farut|Al-Farut
+  - b_al-qatr|Al-Qatr
+  - b_nahr_simmara|Nahr Simmara
+  color: 70 125 40
+  l: Rusafa
+  title: c_rusafa
+- children:
+  - b_safata|Safata
+  - b_ain_at-tamr|Ain At-Tamr
+  - b_khaffan|Khaffan
+  - b_an-najaf|An-Najaf
+  color: 25 150 30
+  l: Safata
+  title: c_safata
+- children:
+  - b_al-qadisiya|Al-Qadisiya
+  - b_al-udhaib|Al-Udhaib
+  - b_al-qara|Al-Qara
+  - b_niffar|Niffar
+  color: 55 170 70
+  l: Qadisiya
+  title: c_qadisiya
+- children:
+  - b_waqisa|Waqisa
+  - b_as-subia|As-Subia
+  - b_as-salman|As-Salman
+  - b_al-akhadid|Al-Akhadid
+  color: 52 144 20
+  l: Waqisa
+  title: c_waqisa
+color: 5 130 40
+cul: bedouin
+l: Basra
+rel: ismaili
+title: d_basra
+rough: desert
+tag: BAS

@@ -1,0 +1,154 @@
+﻿children:
+- children:
+  - children:
+    - b_sanaa|San'a
+    - b_ash-sharaf|Ash-Sharaf
+    - b_huth|Huth
+    - b_ar-rayda|Ar-Rayda
+    - b_shibam-sanaa|Shibam
+    - b_sada|Sa'da
+    color: 225 235 36
+    l: San'a'
+    title: c_sanaa
+  - children:
+    - b_attar|Attar
+    - b_harad|Harad
+    - b_al-mahjam|Al-Mahjam
+    - b_kamaran|Kamaran
+    color: 218 228 28
+    l: Tihamat al-Yamani
+    title: c_tihamat-al-yamani
+  - children:
+    - b_najran|Najran
+    - b_wabar|Wabar
+    - b_hisn_al-abr|Hisn al-'Abr
+    - b_shibam|Shibam
+    color: 223 231 34
+    l: Najran
+    title: c_najran
+  - children:
+    - b_zabid|Zabid
+    - b_fashal|Fashal
+    - b_ghalafiqa|Ghalafiqa
+    - b_mawza|Mawza'
+    color: 216 225 25
+    l: Zabid
+    title: c_zabid
+  - children:
+    - b_main|Ma'in
+    - b_shabwa|Shabwa
+    - b_bayhan|Bayhan
+    - b_baraqish|Baraqish
+    color: 227 242 42
+    l: Al-Jawf al-Yamani
+    title: c_jawf-al-yamani
+  color: 220 230 30
+  l: San'a'
+  title: d_sanaa
+- children:
+  - children:
+    - b_nizwa|Nizwa
+    - b_bahla|Bahla
+    - b_samad|Samad
+    - b_jaalan|Ja'alan
+    color: 232 163 27
+    l: Nizwa
+    title: c_nizwa
+  - children:
+    - b_julfar|Julfar
+    - b_tawwam|Tawwam
+    - b_tawwam_west|Tawwam al-Gharb
+    - b_musandam|Musandam
+    color: 233 162 33
+    l: Julfar
+    title: c_julfar
+  - children:
+    - b_sohar|Suhar
+    - b_batina-east|Batina
+    - b_rustaq-oman|Rustaq
+    color: 233 157 27
+    l: Batina
+    title: c_batina
+  - children:
+    - b_hafit|Hafit
+    - b_dhank|Dhank
+    - b_dabba|Dabba
+    color: 238 157 36
+    l: Dhahira
+    title: c_az-dhahira
+  color: 235 160 30
+  l: Oman
+  title: d_oman
+- children:
+  - children:
+    - b_muscat|Masqat
+    - b_matrah|Matrah
+    - b_qalhat|Qalhat
+    - b_sur|Sur
+    color: 230 154 24
+    l: Muscat
+    title: c_muscat
+  - children:
+    - b_raysut|Raysut
+    - b_dhufar|Dhufar
+    - b_mirba|Mirba
+    - b_hasik|Hasik
+    color: 204 235 34
+    l: Dhufar
+    title: c_dhofar
+  - children:
+    - b_ash-shihr|Ash-Shihr
+    - b_balhaf|Balhaf
+    - b_mukalla|Mukalla
+    color: 212 233 43
+    l: Mahra
+    title: c_mahra
+  - children:
+    - b_al-asa|Al-As'a'
+    - b_duqm|Duqm
+    - b_wahiba|Wahiba
+    color: 215 227 46
+    l: Al-As'a'
+    title: c_al-asa
+  - children:
+    color: 240 166 36
+    l: Duqm
+    title: c_duqm
+  color: 210 230 40
+  l: Mahra
+  title: d_mahra
+- children:
+  - children:
+    - b_taizz|Ta'izz
+    - b_al-janad|Al-Janad
+    - b_zafar|Zafar
+    - b_rada|Rada'
+    color: 242 252 52
+    l: Ta'izz
+    title: c_taizz
+  - children:
+    - b_al-mandab|Al-Mandab
+    - b_al-maafir|Al-Ma'afir
+    - b_musaymir|Musaymir
+    - b_aden|Aden
+    color: 236 246 48
+    l: Mandab
+    title: c_mandab
+  - children:
+    - b_saqra|Saqra
+    - b_ahwan|Ahwan
+    - b_azzan|Azzan
+    color: 238 248 52
+    l: Dathina
+    title: c_dathina
+  color: 240 250 50
+  l: Ta'izz
+  title: d_taizz
+color: 218 234 33
+cul: yemeni
+l: Yemen
+rel: zayidi
+title: k_yemen
+tag: YEM
+rough: desert
+holy: nizwa

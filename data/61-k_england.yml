@@ -1,0 +1,147 @@
+﻿children:
+- children:
+  - children:
+    - b_london|London
+    - b_southwark|Southwark
+    - b_woxbrigge|Woxbrigge
+    - b_gore|Gore
+    - b_brentford|Brentford
+    - b_kingston|Kingston
+    color: 230 5 5
+    l: Middlesex
+    title: c_middlesex
+  - children:
+    - b_colchester|Colchester
+    - b_maldon|Maldon
+    - b_chelmsford|Chelmsford
+    - b_dunmow|Dunmow
+    color: 220 20 30
+    l: Essex
+    title: c_essex
+  - children:
+    - b_bedford|Bedford
+    - b_ampthill|Ampthill
+    - b_luton|Luton
+    - b_ipswich|Ipswich
+    color: 205 20 15
+    l: Bedford
+    title: c_bedford
+  - children:
+    - b_berkhamsted|Berkhamsted
+    - b_saint_albans|Saint Albans
+    - b_hertford|Hertford
+    - b_sudbury|Sudbury
+    color: 250 35 35
+    l: Hertfordshire
+    title: c_hertfordshire
+  - children:
+    - b_buckingham|Buckingham
+    - b_aylesbury|Aylesbury
+    - b_newport|Newport
+    - b_wycombe|Wycombe
+    color: 200 25 25
+    l: Buckinghamshire
+    title: c_buckinghamshire
+  color: 241 15 15
+  l: Essex
+  title: d_bedford
+- children:
+  - children:
+    - b_winchester|Winchester
+    - b_southampton|Southampton
+    - b_portsmouth|Portsmouth
+    - b_christchurch|Christchurch
+    color: 230 15 55
+    l: Hampshire
+    title: c_hampton
+  - children:
+    - b_bath|Bath
+    - b_winterstoke|Winterstoke
+    - b_ilchester|Ilchester
+    - b_taunton|Taunton
+    color: 156 0 83
+    l: Somerset
+    title: c_somerset
+  - children:
+    - b_carisbrooke|Carisbrooke
+    - b_lyme|Lyme
+    - b_basingstoke|Basingstoke
+    color: 250 10 90
+    l: Wight
+    title: c_isle_of_wight
+  - children:
+    - b_wareham|Wareham
+    - b_poole|Poole
+    - b_shaftesbury|Shaftesbury
+    color: 185 0 75
+    l: Dorset
+    title: c_dorset
+  color: 1 0.9 0.9
+  l: Wessex
+  title: d_somerset
+- children:
+  - children:
+    - b_gloucester|Gloucester
+    - b_bristol|Bristol
+    - b_winchcombe|Winchcombe
+    - b_blything|Blything
+    color: 245 85 20
+    l: Gloucestershire
+    title: c_gloucestershire
+  - children:
+    - b_salisbury|Salisbury
+    - b_wilton|Wilton
+    - b_ramsbury|Ramsbury
+    - b_malmesbury|Malmesbury
+    color: 250 55 15
+    l: Wiltshire
+    title: c_wiltshire
+  - children:
+    - b_oxford|Oxford
+    - b_banbury|Banbury
+    - b_witney|Witney
+    color: 255 115 15
+    l: Oxfordshire
+    title: c_oxfordshire
+  - children:
+    - b_reading|Reading
+    - b_newbury|Newbury
+    - b_abingdon|Abingdon
+    color: 255 100 25
+    l: Berkshire
+    title: c_berkshire
+  color: 241 79 15
+  l: Hwicce
+  title: d_gloucester
+- children:
+  - children:
+    - b_dover|Dover
+    - b_canterbury|Canterbury
+    - b_rochester|Rochester
+    - b_tonbridge|Tonbridge
+    color: 245 105 20
+    l: Kent
+    title: c_kent
+  - children:
+    - b_lewes|Lewes
+    - b_chichester|Chichester
+    - b_arun|Arun
+    - b_hastings|Hastings
+    color: 225 105 10
+    l: Sussex
+    title: c_sussex
+  - children:
+    - b_chertsey|Chertsey
+    - b_guildford|Guildford
+    - b_tandbridge|Tandbridge
+    color: 225 80 20
+    l: Surrey
+    title: c_surrey
+  color: 241 100 15
+  l: Kent
+  title: d_canterbury
+color: 202 26 26
+cul: anglo_saxon
+l: England
+rel: catholic
+title: k_england

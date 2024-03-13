@@ -1,0 +1,150 @@
+﻿children:
+- children:
+  - children:
+    - b_al-madina|Al-Madina
+    - b_as-sayaa|As-Saya'a
+    - b_batn_nakhl|Batn Nakhl
+    - b_as-safra|As-Safra'
+    - b_jadila|Jadila
+    - b_fajla|Falja
+    color: 162 253 55
+    l: Medina
+    title: c_medina
+  - children:
+    - b_al-wajh|Al-Wajh
+    - b_an-nabak|An-Nabak
+    - b_al-awnid|Al-'Awnid
+    - b_bada|Bada
+    color: 158 253 51
+    l: Wajh
+    title: c_wajh
+  - children:
+    - b_khaybar|Khaybar
+    - b_as-suqya|As-Suqya
+    - b_al-ula|Al-'Ula'
+    - b_al-hijr|Al-Hijr
+    color: 164 248 57
+    l: Khaybar
+    title: c_khaybar
+  - children:
+    - b_yanbu|Yanbu
+    - b_al-jar|Badr
+    - b_al-hawra|Al-Hawra'
+    - b_dhul-marwa|Dhu-l-Marwa
+    color: 156 248 48
+    l: Yanbu
+    title: c_yanbu
+  - children:
+    - b_as-sawariqiya|As-Sawariqiya
+    - b_as-salila|As-Salila
+    - b_madinat_sulaym|Madinat Bani Sulaym
+    - b_sufaina|Sufaina
+    color: 162 246 46
+    l: Harrat Rahat
+    title: c_harrat_rahat
+  color: 160 250 50
+  l: Medina
+  title: d_medina
+- children:
+  - children:
+    - b_dariya|Dariya
+    - b_hajir|Hajir
+    - b_rabadha|Rabadha
+    - b_madin-an-naqira|Ma'din an-Naqira
+    color: 157 197 7
+    l: Sharaf
+    title: c_sharaf
+  - children:
+    - b_ad-dathina|Ad-Dathina
+    - b_marran|Marran
+    - b_subay|Subay
+    - b_ranya|Ranya
+    color: 163 203 13
+    l: Subay
+    title: c_subay
+  - children:
+    - b_hail|Ha'il
+    - b_jubba-hail|Jubba
+    - b_mawqaq|Mawqaq
+    color: 154 194 13
+    l: Ha'il
+    title: c_hail
+  - children:
+    - b_unayza|Unayza
+    - b_al-qaryatan-qasim|Al-qaryatan-qasim
+    - b_rama|Rama
+    color: 166 206 16
+    l: Qasim
+    title: c_qasim
+  color: 160 200 10
+  l: Najd
+  title: d_najd
+- children:
+  - children:
+    - b_tabuk|Tabuk
+    - b_sarj|Sarj
+    - b_fajr|Fajr
+    - b_yabrin|Yabrin
+    color: 130 205 11
+    l: Tabuk
+    title: c_tabuk
+  - children:
+    - b_aqaba|Aqaba
+    - b_maqna|Maqna
+    - b_ainun|Ainun
+    - b_sharaf_al-bal|Sharaf al-Ba'l
+    color: 124 199 5
+    l: Al-Aqabah
+    title: c_al_aqabah
+  - children:
+    - b_maan|Ma'an
+    - b_al-humayma|Al-Humayma
+    - b_adruh|Adruh
+    color: 127 202 8
+    l: Ma'an
+    title: c_maan
+  - children:
+    - b_tayma|Tayma'
+    - b_al-aqra|Al-Aqra'
+    - b_al-muhdatha|Al-Muhdatha
+    color: 97 208 137
+    l: Tayma'
+    title: c_tayma
+  color: 121 196 2
+  l: Shammar
+  title: d_shammar
+- children:
+  - children:
+    - b_yamama|Yamama
+    - b_al-khadarim|Al-Khadarim
+    - b_al-kharj|Al-Kharj
+    - b_tikhfa|Tikhfa
+    color: 153 183 2
+    l: Yamama
+    title: c_yamama
+  - children:
+    - b_al-arid|Al-'Arid
+    - b_ubad|Ubad
+    - b_fayd|Fayd
+    - b_tuz|Tuz
+    color: 147 177 3
+    l: Al-'Arid
+    title: c_al-arid
+  - children:
+    - b_nufud-as-surrah|Nufud as-Surrah
+    - b_jibal-al-urd|Jibal al-'Urd
+    - b_jibala|Jibala
+    color: 166 194 18
+    l: Surrah
+    title: c_surrah
+  color: 150 180 0
+  l: Yamama
+  title: d_yamama
+color: 124 199 50
+cul: bedouin
+l: Arabia
+rel: ashari
+title: k_arabia
+rough: desert
+holy: medina
+tag: ARB

@@ -1,0 +1,147 @@
+﻿children:
+- children:
+  - children:
+    - b_lancaster|Lancaster
+    - b_salford|Salford
+    - b_west_derby|West Derby
+    - b_chester|Chester
+    - b_northwich|Northwich
+    - b_macclesfield|Macclesfield
+    color: 250 55 5
+    l: Lancashire
+    title: c_lancashire
+  - children:
+    - b_kendal|Kendal
+    - b_appleby|Appleby
+    - b_richmond|Richmond
+    - b_halifax|Halifax
+    color: 210 35 10
+    l: Westmorland
+    title: c_westmorland
+  - children:
+    - b_derby|Derby
+    - b_chesterfield|Chesterfield
+    - b_castleton|Castleton
+    - b_sheffield|Escafeld
+    color: 255 50 20
+    l: Derby
+    title: c_derby
+  - children:
+    - b_stafford|Stafford
+    - b_wolverhampton|Wolverhampton
+    - b_stoke_on_trent|Burslem
+    - b_bolton|Bolton
+    color: 210 90 65
+    l: Staffordshire
+    title: c_staffordshire
+  - children:
+    - b_shrewsbury|Shrewsbury
+    - b_ludlow|Ludlow
+    - b_bishops_castle|Westbury
+    - b_grimsby|Grimsby
+    color: 241 70 70
+    l: Shropshire
+    title: c_shropshire
+  color: 255 48 0
+  l: Lancaster
+  title: d_lancaster
+- children:
+  - children:
+    - b_york|York
+    - b_scarborough|Scarborough
+    - b_whitby|Whitby
+    - b_yarlestre|Yarlestre
+    color: 255 95 20
+    l: North Riding
+    title: c_north_riding
+  - children:
+    - b_lincoln|Lincoln
+    - b_stamford|Stamford
+    - b_boston|Boston
+    - b_bolingsbroke|Bolingstone
+    color: 232 195 74
+    l: Lincolnshire
+    title: c_lincolnshire
+  - children:
+    - b_pockington|Pockington
+    - b_cottingham|Cottingham
+    - b_bridlington|Bridlington
+    color: 255 139 15
+    l: East Riding
+    title: c_east_riding
+  - children:
+    - b_leeds|Leeds
+    - b_doncaster|Doncaster
+    - b_ripon|Ripon
+    color: 255 120 35
+    l: West Riding
+    title: c_west_riding
+  color: 255 90 15
+  l: York
+  title: d_york
+- children:
+  - children:
+    - b_warwick|Warwick
+    - b_coventry|Coventry
+    - b_birmingham|Birmingham
+    - b_kettering|Kettering
+    color: 190 30 30
+    l: Warwickshire
+    title: c_warwickshire
+  - children:
+    - b_leicester|Leicester
+    - b_melton|Melton
+    - b_bosworth|Bosworth
+    - b_rutland|Rutland
+    color: 130 5 25
+    l: Leicestershire
+    title: c_leicestershire
+  - children:
+    - b_nottingham|Nottingham
+    - b_newark|Sherwood
+    - b_retford|Retford
+    color: 175 0 30
+    l: Nottinghamshire
+    title: c_nottinghamshire
+  - children:
+    - b_worcester|Worcester
+    - b_evesham|Evesham
+    - b_kidderminster|Kidderminster
+    color: 160 20 5
+    l: Worcestershire
+    title: c_worcestershire
+  color: 200 30 0
+  l: Mercia
+  title: d_hereford
+- children:
+  - children:
+    - b_bamburgh|Bamburgh
+    - b_rothbury|Rothbury
+    - b_lindisfarne|Lindisfarne
+    - b_hexham|Hexham
+    color: 245 0 0
+    l: Northumberland
+    title: c_northumberland
+  - children:
+    - b_carlisle|Carlisle
+    - b_whitehaven|Whitehaven
+    - b_furness|Furness
+    - b_wigton|Wigton
+    color: 240 25 25
+    l: Cumberland
+    title: c_cumberland
+  - children:
+    - b_durham|Durham
+    - b_hartlepool|Hartlepool
+    - b_darlington|Darlington
+    color: 255 15 15
+    l: Durham
+    title: c_durham
+  color: 0.98 0.9 0.9
+  l: Northumbria
+  title: d_northumberland
+color: 202 26 26
+cul: anglo_saxon
+l: England
+rel: catholic
+title: k_england

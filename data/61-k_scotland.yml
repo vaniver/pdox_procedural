@@ -1,0 +1,150 @@
+﻿children:
+- children:
+  - children:
+    - b_st_johnston|St Johnston
+    - b_coupar_angus|Scone
+    - b_crieff|Crieff
+    - b_dunkeld|Dunkeld
+    - b_aberfeldy|Aberfeldy
+    - b_falkirk|Falkirk
+    color: 220 130 0
+    l: Gowrie
+    title: c_gowrie
+  - children:
+    - b_dunfermline|Dunfermline
+    - b_kircaldy|Kircaldy
+    - b_st_andrews|St. Andrews
+    - b_durness|Durness
+    color: 210 115 5
+    l: Fife
+    title: c_fife
+  - children:
+    - b_stirling|Stirling
+    - b_callander|Callander
+    - b_clackmannan|Clackmannan
+    - b_annan|Annan
+    color: 245 130 0
+    l: Strathearn
+    title: c_strathearn
+  - children:
+    - b_dundee|Dundee
+    - b_kirriemuir|Kirriemuir
+    - b_mar|Mar
+    - b_dumfries|Dumfries
+    color: 225 125 20
+    l: Angus
+    title: c_angus
+  - children:
+    - b_aberdeen|Aberdeen
+    - b_kincardine|Kincardine
+    - b_ballater|Ballater
+    - b_applecross|Applecross
+    color: 230 140 10
+    l: Mearns
+    title: c_mearns
+  color: 220 130 0
+  l: Albany
+  title: d_albany
+- children:
+  - children:
+    - b_elgin|Elgin
+    - b_keith|Keith
+    - b_garioch|Garioch
+    - b_glenelg|Glenelg
+    color: 255 180 60
+    l: Moray
+    title: c_moray
+  - children:
+    - b_inverness|Inverness
+    - b_badenoch|Badenoch
+    - b_glenfinnan|Glenfinnan
+    - b_urquhart|Urquhart
+    color: 240 160 45
+    l: Inverness
+    title: c_inverness
+  - children:
+    - b_dingwall|Dingwall
+    - b_gairloch|Gairloch
+    - b_tain|Tain
+    color: 250 210 85
+    l: Ross
+    title: c_ross
+  - children:
+    - b_banff|Banff
+    - b_mortlach|Mortlach
+    - b_peterhead|Peterhead
+    color: 255 175 75
+    l: Buchan
+    title: c_buchan
+  color: 255 180 60
+  l: Moray
+  title: d_moray
+- children:
+  - children:
+    - b_edinburgh|Edinburgh
+    - b_haddington|Haddington
+    - b_galashiels|Galashiels
+    - b_penicuick|Penicuick
+    color: 185 90 25
+    l: Lothian
+    title: c_lothian
+  - children:
+    - b_dunbar|Dunbar
+    - b_berwick|Berwick
+    - b_linlithgow|Linlithgow
+    - b_queensferry|Queensferry
+    color: 190 75 30
+    l: Dunbar
+    title: c_dunbar
+  - children:
+    - b_kelso|Kelso
+    - b_jedburgh|Jedburgh
+    - b_selkirk|Selkirk
+    color: 198 70 23
+    l: Teviotdale
+    title: c_teviotdale
+  - children:
+    - b_lanark|Lanark
+    - b_cadyou|Cadyou
+    - b_biggar|Biggar
+    color: 195 100 35
+    l: Lanarkshire
+    title: c_lanarkshire
+  color: 195 130 25
+  l: Lothian
+  title: d_lothian
+- children:
+  - children:
+    - b_dumbarton|Dumbarton
+    - b_glasgow|Glasgow
+    - b_meneith|Meneith
+    - b_maybole|Maybole
+    color: 230 150 50
+    l: Lennox
+    title: c_lennox
+  - children:
+    - b_kilcudbrite|Kilcudbrite
+    - b_sanquhar|Sanquhar
+    - b_wigtown|Wigtown
+    - b_girvan|Girvan
+    color: 230 120 65
+    l: Galloway
+    title: c_galloway
+  - children:
+    - b_kyle|Kyle
+    - b_strathgryte|Strathgryte
+    - b_cunningham|Cunningham
+    color: 230 145 50
+    l: Ayrshire
+    title: c_ayrshire
+  color: 230 120 65
+  l: Strathclyde
+  title: d_galloway
+color: 230 140 0
+cul: pictish
+l: Scotland
+rel: catholic
+title: k_scotland
+rough: forest
+tag: SCO
+holy: standrews

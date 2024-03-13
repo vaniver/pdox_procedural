@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - b_tlemcen|Tlemcen
+  - b_muaskar|Muaskar
+  - b_qasr-ibn-sinan|Qasr-ibn-Sinan
+  - b_aintekbalet|Aintekbalet
+  color: 125 201 14
+  l: Tlemcen
+  title: c_tlemcen
+- children:
+  - b_wajda|Wajda
+  - b_saa|Saa
+  - b_debdou|Debdou
+  - b_tafraoua-sebdou|Tafraoua-Sebdou
+  color: 102 171 2
+  l: Wajda
+  title: c_wajda
+- children:
+  - b_oran|Oran
+  - b_marsafarukh|Marsafarukh
+  - b_arzew|Arzew
+  - b_satif|Satif
+  color: 134 227 0
+  l: Orania
+  title: c_orania
+- children:
+  - b_hunyan|Hunyan
+  - b_arsgul|Arsgul
+  - b_nadruma|Nadruma
+  - b_jijel|Jijel
+  color: 108 163 28
+  l: Hunyan
+- children:
+  title: c_hunyan
+  - b_algiers|Algiers
+  - "b_medea|M\xE9d\xE9a"
+  - b_tadallis|Tadallis
+  - b_mattija|Mattija
+  color: 92 148 52
+  l: Algier
+  title: c_algier
+- children:
+  - b_tanas|Tanas
+  - b_sharshal|Sharshal
+  - b_miliyana|Miliyana
+  - b_bejaia|Bejaia
+  color: 70 133 25
+  l: Tanas
+  title: c_tanas
+color: 146 235 16
+l: Tlemcen
+title: d_tlemcen
+cul: butr
+rel: ibadi
+rough: desert
+tag: TLM

@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - b_van|Van
+  - b_berkri|Berkri
+  - b_maku|Maku
+  - b_akhtamar|Akhtamar
+  color: 172 82 55
+  l: Vaspurakan
+  title: c_vaspurakan
+- children:
+  - b_varto|Varto
+  - b_mardali|Mardali
+  - b_khinisi|Khinisi
+  - b_hadamakert|Hadamakert
+  color: 175 60 55
+  l: Turuberan
+  title: c_turuberan
+- children:
+  - b_musch|Musch
+  - b_tatvan|Tatvan
+  - b_khlat|Khlat
+  - b_manzikert|Manzikert
+  color: 150 65 50
+  l: Apahunik
+  title: c_apahunik
+- children:
+  - b_theodosiopolis|Theodosiopolis
+  - b_speri|Speri
+  - b_martyropolis|Martyrpolis
+  - b_arjesh|Arjesh
+  color: 210 40 50
+  l: Theodosiopolis
+  title: c_theodosiopolis
+- children:
+  - b_melitene|Melitene
+  - b_arguvan|Arguvan
+  - b_arsamosata|Arsamosata
+  - b_arca|Arca
+  color: 205 83 71
+  l: Melitene
+  title: c_melitene
+- children:
+  - b_tzimisca|Tzimisca
+  - b_camacha|Camacha
+  - b_koloberd|Koloberd
+  - b_balu|Balu
+  color: 210 67 63
+  l: Mesopotamia
+  title: c_mesopotamia
+color: 172 82 55
+l: Vaspurakan
+title: d_vaspurakan
+cul: armenian
+rel: armenian_apostolic
+rough: desert
+tag: VAS

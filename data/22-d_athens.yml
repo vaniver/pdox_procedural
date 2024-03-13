@@ -1,0 +1,52 @@
+﻿children:
+- children:
+  - b_athens|Athens
+  - b_thebeshellas|Thebes
+  - b_megara|Megara
+  - b_chalkis|Chalkis
+  - b_skopelos|Skopelos
+  - b_oreoi|Oreoi
+  - b_levadia|Levadia
+  color: 206 66 158
+  l: Attica
+  title: c_attica
+- children:
+  - b_patras|Patras
+  - b_vostitsa|Vostitsa
+  - b_andravida|Andravida
+  - b_kalavryta|Kalavryta
+  color: 175 65 200
+  l: Achaia
+  title: c_achaia
+- children:
+  - b_corinth|Corinth
+  - b_nikli|Nikli
+  - b_argos|Argos
+  - b_damala|Damala
+  color: 185 90 220
+  l: Korinthos
+  title: c_korinthos
+- children:
+  - b_karytaina|Karytaina
+  - b_arcadia|Arcadia
+  - b_kalamata|Kalamata
+  - b_modon|Modon
+  color: 220 115 220
+  l: Messenia
+  title: c_messenia
+- children:
+  - b_mistra|Mistra
+  - b_monemvasia|Monemvasia
+  - b_lacedaemonia|Lacedaemonia
+  - b_amfissa|Amfissa
+  color: 195 30 195
+  l: Laconia
+  title: c_laconia
+color: 206 66 158
+l: Athens
+title: d_athens
+cul: greek
+rel: orthodox
+rough: forest
+tag: ATH
+holy: athens

@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - "b_valencia|Val\xE8ncia"
+  - b_murviedro|Murviedro
+  - b_montanejos|Montanejos
+  - b_requena|Requena
+  color: 54 186 96
+  l: Valencia
+  title: c_valencia
+- children:
+  - b_teruel|Teruel
+  - b_maestrazgo|Maestrazgo
+  - b_ademuz|Alpuente
+  - b_cieza|Cieza
+  color: 110 160 115
+  l: Teruel
+  title: c_teruel
+- children:
+  - "b_denia|D\xE9nia"
+  - b_almansa|Alcoy
+  - b_alicante|Alacant
+  - b_albacete|Albacete
+  color: 65 210 130
+  l: Denia
+  title: c_denia
+- children:
+  - b_murcia|Murcia
+  - b_cartagena|Cartagena
+  - b_aguilas|Aguilas
+  - b_caravacadelacruz|Caravaca de la Cruz
+  color: 27 130 60
+  l: Murcia
+  title: c_murcia
+- children:
+  - b_alcaraz|Alcaraz
+  - b_huescar|Cotillas
+  - b_segura|Albacete
+  - b_reolid|Montiel
+  color: 5 115 60
+  l: Alcaraz
+  title: c_alcaraz
+- children:
+  - "b_alarcon|Alarc\xF3n"
+  - b_ventadelmoro|Iniesta
+  - b_valeria|Valeria
+  - b_alcazar|Alcazar
+  color: 0 100 35
+  l: Alarcon
+  title: c_alarcon
+color: 54 186 96
+l: "Val\xE8ncia"
+title: d_valencia
+cul: visigothic
+rel: catholic
+rough: forest
+tag: VAL

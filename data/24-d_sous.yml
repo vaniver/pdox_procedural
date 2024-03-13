@@ -1,0 +1,57 @@
+﻿
+- children:
+  - children:
+    - b_tarudant|Tarudant
+    - b_igilliz|Igilliz
+    - b_sirwan|Sirwan
+    - b_tagawst|Tagawst
+    color: 245 153 115
+    l: Sous
+    title: c_sous
+  - children:
+    - b_agadir|Agadir
+    - b_massa|Massa
+    - b_naffis|Naffis
+    - b_iligh|Iligh
+    color: 209 143 123
+    l: Agadir
+    title: c_agadir
+  - children:
+    - b_ifni|Taroudant
+    - b_nul_lamta|Nul Lamta
+    - b_taghmut|Taghmut
+    - b_assa|Assa
+    color: 232 120 88
+    l: Ifni
+    title: c_ifni
+  - children:
+    - b_tazagourt|Tazagourt
+    - b_al-talha|Al-talha
+    - b_aqqa|Aqqa
+    - b_tagmadart|Tagmadart
+    color: 242 153 121
+    l: Draa
+    title: c_draa
+  - children:
+    - b_tindouf|Tindouf
+    - b_tindouf_road|Tindouf Road
+    - b_iguidi_west|West Iguidi
+    - b_zammour|Zammour
+  color: 119 127 145
+  l: Tindouf
+  title: c_tindouf
+  - children:
+    - b_bir_um-ghrein|Bir Um-Ghrein
+    - b_tiris|Tiris
+    - b_tiris-south|South Tiris
+    - b_sequiet_el-hamra|Sequiet El-Hamra
+  color: 161 157 191
+  l: Tiris
+  title: c_tiris
+color: 222 124 95
+l: Sous
+title: d_sous
+cul: butr
+rel: ashari
+tag: SOU
+rough: desert

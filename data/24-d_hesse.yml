@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - b_kassel|Kassel
+  - b_ziegenhain|Ziegenhain
+  - b_hofgeismar|Hofgeismar
+  - b_munden|Munden
+  color: 180 160 160
+  l: Kassel
+  title: c_kassel
+- children:
+  - b_fulda|Fulda
+  - b_erbach|Erbach
+  - b_hersfeld|Hersfeld
+  - b_lauterbach|Lauterbach
+  color: 195 155 155
+  l: Fulda
+  title: c_fulda
+- children:
+  - b_siegen|Siegen
+  - b_solms|Solms
+  - b_diez|Diez
+  - b_everstein|Everstein
+  color: 180 155 175
+  l: Nassau
+  title: c_nassau
+- children:
+  - b_marburg|Marburg
+  - b_nidda|Nidda
+  - b_budingen|Budingen
+  - b_wetzlar|Wetzlar
+  color: 190 170 170
+  l: Marburg
+  title: c_marburg
+- children:
+  - "b_durne|D\xFCrn"
+  - b_mosbach|Mosbach
+  - b_wertheim|Wertheim
+  - b_weinheim|Weinheim
+  color: 145 155 145
+  l: "D\xFCrn"
+  title: c_durne
+- children:
+  - b_klingenberg|Klingenberg
+  - b_gelnhausen|Gelnhausen
+  - b_rieneck|Rieneck
+  - b_seligenstadt|Seligenstadt
+  color: 175 160 160
+  l: Klingenberg
+  title: c_klingenberg
+color: 180 160 160
+cul: franconian
+l: Hesse
+rel: catholic
+title: d_hesse
+rough: forest
+tag: HES

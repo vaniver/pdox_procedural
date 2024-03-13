@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - b_meissen|Meissen
+  - b_radebeul|Radebeul
+  - b_grossenhain|Grossenhain
+  - b_cottbus|Cottbus
+  color: 215 175 120
+  l: Meissen
+  title: c_meissen
+- children:
+  - b_dresden|Dresden
+  - b_bischofswerda|Bischofswerda
+  - b_freiberg|Freiberg
+  - b_wolkenstein|Wolkenstein
+  color: 210 165 130
+  l: Dresden
+  title: c_dresden
+- children:
+  - b_eilenburg|Eilenburg
+  - b_colditz|Colditz
+  - b_devin|Devin
+  - b_leisning|Leisning
+  color: 230 170 130
+  l: Osterland
+  title: c_osterland
+- children:
+  - b_naumburg|Naumburg
+  - b_altenburg|Altenburg
+  - b_waldenburg|Waldenburg
+  - b_gera|Gera
+  color: 225 180 105
+  l: Naumburg
+  title: c_naumburg
+- children:
+  - b_reichenbach|Reichenbach
+  - b_plauen|Plauen
+  - b_cheb|Cheb
+  - b_rehau|Rehau
+  color: 215 185 125
+  l: Vogtland
+  title: c_vogtland
+- children:
+  - "b_gorlitz|G\xF6rlitz"
+  - b_bautzen|Budissin
+  - b_spremberg|Spremberg
+  - b_kamenz|Kamenz
+  color: 215 160 130
+  l: "G\xF6rlitz"
+  title: c_gorlitz
+color: 215 175 120
+cul: polabian
+l: Meissen
+rel: slavic_pagan
+title: d_meissen
+tag: MES
+rough: forest

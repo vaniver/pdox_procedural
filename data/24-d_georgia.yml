@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - b_tbilisi|Tbilisi
+  - b_dmanisi|Dmanisi
+  - b_rustavi|Rustavi
+  - b_lori|Lori
+  color: 200 195 195
+  l: Tbilisi
+  title: c_tbilisi
+- children:
+  - b_telavi|Telavi
+  - b_nektesi|Nektesi
+  - b_mtskheta|Mtskheta
+  - b_gavazi|Gavazi
+  color: 208 208 190
+  l: Kakheti
+  title: c_kakheti
+- children:
+  - b_zaqatala|Zaqatala
+  - b_ghisi|Ghisi
+  - b_dedoplitskhara|Dedoplitskhara
+  - b_nukhpata|Nukhpata
+  color: 200 215 200
+  l: Hereti
+  title: c_hereti
+- children:
+  - b_tskhumi|Tskhumi
+  - b_nicopsia|Nicopsia
+  - b_bichvinta|Bichvinta
+  - b_anacopia|Anacopia
+  color: 60 70 90
+  l: Abkhazia
+  title: c_abkhazia
+- children:
+  - b_kutaisi|Kutaisi
+  - b_gudakva|Gudakva
+  - b_seti|Seti
+  - b_zugdidi|Zugdidi
+  color: 70 63 88
+  l: Odishi
+  title: c_odishi
+- children:
+  - b_kasriskari|Kasriskari
+  - b_ambrolauri|Ambrolauri
+  - b_kvara|Kvara
+  - b_tsageri|Tsageri
+  color: 90 94 90
+  l: Svaneti
+  title: c_svaneti
+l: Georgia
+title: d_georgia
+color: 200 193 193
+cul: georgian
+rel: orthodox
+rough: desert
+tag: GEO

@@ -1,0 +1,59 @@
+﻿children:
+- children:
+  - b_olomouc|Olomouc
+  - "b_unicov|Uni\u010Dov"
+  - "b_kromeriz|Krom\u011B\u0159\xED\u017E"
+  - b_opava|Opava
+  color: 163 107 41
+  l: Olomouc
+  title: c_olomouc
+- children:
+  - "b_prerov|P\u0159erov"
+  - "b_spytihnev|Spytihn\u011Bv"
+  - "b_hodonin|Hodon\xEDn"
+  - b_veseli|Veseli
+  color: 155 91 27
+  l: "P\u0159erov"
+  title: c_prerov
+- children:
+  - b_brno|Brno
+  - "b_ivancice|Ivan\u010Dice"
+  - "b_zdar|\u017D\u010F\xE1r"
+  - b_jihlava|Jihlava
+  color: 170 125 80
+  l: Brno
+  title: c_brno
+- children:
+  - b_znojmo|Znojmo
+  - "b_bitov|B\xEDtov"
+  - "b_breclav|B\u0159eclav"
+  - b_mikulov|Mikulov
+  color: 160 118 40
+  l: Znojmo
+  title: c_znojmo- children:
+  - b_doudleby|Doudleby
+  - b_netolice|Netolice
+  - "b_rozmberk|Ro\u017Emberk"
+  - b_krumlov|Krumlov
+  color: 140 90 5
+  l: Doudleby
+  title: c_doudleby
+- children:
+  color: 195 65 10
+  l: Boleslav
+  title: c_boleslav
+- children:
+  - b_hradec|Hradec
+  - "b_dvur-chvojno|Dv\u016Fr-Chvojno"
+  - "b_jaromer|Jarom\u011B\u0159"
+  - b_kladzko|Kladsko
+  color: 201 118 11
+  l: Hradec
+  title: c_hradec
+color: 177 111 25
+cul: slovien
+l: Moravia
+rel: catholic
+title: d_moravia
+tag: MOR
+rough: forest

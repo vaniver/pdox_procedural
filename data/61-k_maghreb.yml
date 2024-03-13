@@ -1,0 +1,149 @@
+﻿children:
+- children:
+  - children:
+    - b_marrakesh|Marrakesh
+    - b_aitiyat|Aitiyat
+    - b_aghmat|Aghmat
+    - b_ribat-shakir|Ribat-Shakir
+    - b_boulawan|Boulawan
+    - b_aititab|Ait i Tab
+    color: 138 25 12
+    l: Marrakesh
+    title: c_marrakesh
+  - children:
+    - b_tadla|Tadla
+    - b_wazeqqur|Wazeqqur
+    - b_wawmana|Wawmana
+    - b_afza|Afza
+    color: 150 47 35
+    l: Tadla
+    title: c_tadla
+  - children:
+    - b_mrira|Mrira
+    - b_el_borouj|El Borouj
+    - b_tit-an-wagurramt|Tit-an-Wagurramt
+    - b_dai|Dai
+    color: 156 61 50
+    l: Fazaz
+    title: c_fazaz
+  - children:
+    - b_anfa|Anfa
+    - b_fadala|Fadala
+    - b_azzamur|Azzamur
+    - b_mazaghan|Mazaghan
+    color: 166 17 0
+    l: Tamasna
+    title: c_tamasna
+  - children:
+    - b_asfi|Asfi
+    - b_aghuz|Aghuz
+    - b_igiradyatuf|Igiradyatuf
+    - b_tinmallal|Tinmallal
+    color: 207 66 50
+    l: Asfi
+    title: c_asfi
+  color: 161 29 14
+  l: Marrakesh
+  title: d_marrakesh
+- children:
+  - children:
+    - "b_fes|F\xE8s"
+    - b_wargha|Wargha
+    - b_warzigh|Warzigh
+    - b_al_aliya|Al Aliya
+    color: 209 54 19
+    l: Fes
+    title: c_fes
+  - children:
+    - "b_meknes|Mekn\xE8s"
+    - b_baht|Baht
+    - b_sefrou|Sefrou
+    - b_tagragra|Tagragra
+    color: 240 86 31
+    l: Meknes
+    title: c_meknes
+  - children:
+    - b_taza|Taza
+    - b_nador|Nador
+    - b_subu|Subu
+    color: 255 69 18
+    l: Taza
+    title: c_taza
+  - children:
+    - b_sala|Sala
+    - b_al-basra|Al-basra
+    - b_izerhan|Izerhan
+    color: 252 89 13
+    l: Gharb
+    title: c_gharb
+  color: 255 63 20
+  l: Fes
+  title: d_fes
+- children:
+  - children:
+    - b_sijilmasa|Sijilmasa
+    - b_tafilalt|Tafilalt
+    - b_taouz|Taouz
+    - b_watit|Watit
+    color: 209 102 102
+    l: Sijilmasa
+    title: c_sijilmasa
+  - children:
+    - b_missour|Missour
+    - b_tikoutamine|Tikoutamine
+    - b_el_ksabi|El-Ksabi
+    - b_walila|Walila
+    color: 219 49 2
+    l: Muluya
+    title: c_muluya
+  - children:
+    - b_tudgha|Tudgha
+    - b_tasagdah|Tasagdah
+    - b_warzazat|Warzazat
+    color: 255 94 94
+    l: Tudgha
+    title: c_tudgha
+  - children:
+    - b_ziz|Ziz
+    - b_ghazwan|Ghazwan
+    - b_ribat_al-fath|Ribat al-Fath
+    color: 244 124 133
+    l: Ziz
+    title: c_ziz
+  color: 250 130 130
+  l: Tafilalt
+  title: d_tafilalt
+- children:
+  - children:
+    - b_tangiers|Tangier
+    - b_asila|Asila
+    - b_kasr_al-kabir|Kasr al-Kabir
+    - b_tahlit|Tahlit
+    color: 209 65 46
+    l: Tangiers
+    title: c_tangiers
+  - children:
+    - b_sabta|Sabta
+    - b_tittawan|Tittawan
+    - b_ghumira|Ghumira
+    color: 219 86 68
+    l: Ceuta
+    title: c_ceuta
+  - children:
+    - b_melilla|Melilla
+    - b_nakur|Nakur
+    - b_tasgimut|Tasgimut
+    color: 255 79 56
+    l: Melilla
+    title: c_melilla
+  color: 235 69 47
+  l: Rif
+  title: d_rif
+color: 196 36 18
+cul: maghrebi
+l: Maghreb
+rel: ashari
+title: k_maghreb
+rough: desert
+tag: MOR
+holy: sijilmasa

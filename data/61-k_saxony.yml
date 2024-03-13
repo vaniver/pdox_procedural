@@ -1,0 +1,153 @@
+﻿children:
+- children:
+  - children:
+    - b_diepholz|Diepholz
+    - b_minden|Minden
+    - b_bruchhausen|Bruchhausen
+    - b_hoya|Hoya
+    - b_lippe|Lippe
+    - b_schwalenberg|Schwalenberg
+    color: 205 105 85
+    l: Minden
+    title: c_minden
+  - children:
+    color: 190 110 70
+    l: Lippe
+    title: c_lippe
+  - children:
+    - b_bremen|Bremen
+    - b_verden|Verden
+    - b_zeven|Zeven
+    - b_oldenburg|Oldenburg
+    color: 220 95 95
+    l: Bremen
+    title: c_bremen
+  - children:
+    - "b_wolpe|W\xF6lpe"
+    - b_schauenburg|Schauenburg
+    - b_depenau|Diepenau
+    - b_homburg|Homburg
+    color: 220 85 80
+    l: "W\xF6lpe"
+    title: c_wolpe
+  - children:
+    - b_hannover|Hannover
+    - b_wunsdorf|Wunstorf
+    - b_woldenberg|Woldenberg
+    - b_dassel|Dassel
+    color: 200 75 75
+    l: Hannover
+    title: c_hannover
+  - children:
+    - b_tecklenburg|Tecklenburg
+    - b_papenburg|Papenburg
+    - b_meppen|Meppen
+    - b_bentheim|Bentheim
+    color: 250 170 65
+    l: Tecklenburg
+    title: c_tecklenburg
+  color: 205 105 85
+  l: Angria
+  title: d_angria
+- children:
+  - children:
+    - "b_osnabruck|Osnabr\xFCck"
+    - b_ravensberg|Ravensberg
+    - b_vechta|Vechta
+    - b_cloppenburg|Cloppenburg
+    color: 240 160 90
+    l: "Osnabr\xFCck"
+    title: c_osnabruck
+  - children:
+    - b_paderborn|Paderborn
+    - b_brakel|Brakel
+    - "b_wiedenbruck|Wiedenbr\xFCck"
+    - b_lippstadt|Lippstadt
+    color: 230 180 75
+    l: Paderborn
+    title: c_paderborn
+  - children:
+    - "b_munster|M\xFCnster"
+    - b_warendorf|Warendorf
+    - b_ahlen|Ahlen
+    color: 230 175 110
+    l: "M\xFCnster"
+    title: c_munster
+  - children:
+    - b_waldeck|Waldeck
+    - b_wittenstein|Wittenstein
+    - "b_buren|B\xFCren"
+    color: 240 180 85
+    l: Waldeck
+    title: c_waldeck
+  color: 240 160 90
+  l: Westfalen
+  title: d_westfalen
+- children:
+  - children:
+    - "b_luneburg|L\xFCneburg"
+    - b_uelzen|Uelzen
+    - b_walsrode|Walsrode
+    - b_celle|Celle
+    color: 200 160 125
+    l: "L\xFCneburg"
+    title: c_luneburg
+  - children:
+    - b_hamburg|Hamburg
+    - b_buxtehude|Buxtehude
+    - b_ahrensburg|Ahrensburg
+    - b_brunswick|Brunswick
+    color: 220 170 125
+    l: Hamburg
+    title: c_hamburg
+  - children:
+    - b_dannenberg|Dannenberg
+    - "b_luchow|L\xFCchow"
+    - b_gifhorn|Gifhorn
+    color: 185 175 130
+    l: Dannenberg
+    title: c_dannenberg
+  - children:
+    - b_stendal|Stendal
+    - b_gardelegen|Gardelegen
+    - b_werben|Weben
+    color: 200 180 115
+    l: Stendal
+    title: c_stendal
+  color: 200 160 125
+  l: Ostfalen
+  title: d_ostfalen
+- children:
+  - children:
+    - "b_lubeck|L\xFCbeck"
+    - b_femera|Femera
+    - b_kiel|Kiel
+    - "b_wolfenbuttel|Wolfenb\xFCttel"
+    color: 172 112 112
+    l: "L\xFCbeck"
+    title: c_lubeck
+  - children:
+    - b_stade|Stade
+    - b_bederkesa|Bederkesa
+    - b_cuxhaven|Cuxhaven
+    color: 175 100 115
+    l: Stade
+    title: c_stade
+  - children:
+    - b_ditmarschen|Dithmarschen
+    - "b_neumunster|Neum\xFCnster"
+    - b_itzehoe|Itzehoe
+    color: 165 95 100
+    l: Dithmarschen
+    title: c_ditmarschen
+  color: 172 112 112
+  l: Holstein
+  title: d_holstein
+color: 120 25 25
+cul: saxon
+l: Saxony
+rel: catholic
+title: k_saxony
+rough: forest
+tag: SAX
+holy: paderborn

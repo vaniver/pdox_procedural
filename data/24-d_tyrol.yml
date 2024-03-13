@@ -1,0 +1,54 @@
+﻿children:
+- children:
+  - b_innsbruck|Innsbruck
+  - b_bozen|Meran
+  - b_kufstein|Kufstein
+  - b_brixen|Brixen
+  color: 75 65 75
+  l: Innsbruck
+  title: c_innsbruck
+- children:
+  - b_lienz|Lienz
+  - b_obervallach|Obervellach
+  - b_matrei|Matrei
+  - b_bruneck|Bruneck
+  color: 55 55 70
+  l: Lienz
+  title: c_lienz
+- children:
+  - b_klagenfurt|Klagenfurt
+  - b_sankt_veit|Sankt Veit
+  - b_wolfsberg|Wolfsberg
+  - b_knittelfeld|Knittelfeld
+  color: 100 105 120
+  l: "K\xE4rnten"
+  title: c_karnten
+- children:
+  - b_kammersberg|Kammersberg
+  - b_murau|Murau
+  - b_irdning|Irdning
+  - b_tamsweg|Tamsweg
+  color: 90 95 100
+  l: Kammersberg
+  title: c_kammersberg
+- children:
+  - b_ljubljana|Leibach
+  - b_dobovec|Gurkfeld
+  - b_rudolfswerde|Rudolfswerde
+  - b_ribnica|Rewenitz
+  color: 90 125 115
+  l: Leibach
+  title: c_ljubljana
+- children:
+  - b_villach|Villach
+  - b_feldkirchen|Feldkirchen
+  - b_spittal|Spittal
+  - b_judenburg|Judenburg
+  color: 95 115 120
+  l: Villach
+  title: c_villach
+color: 75 65 75
+cul: carantanian
+l: Tyrol
+rel: catholic
+title: d_tyrol

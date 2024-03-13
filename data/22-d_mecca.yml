@@ -1,0 +1,47 @@
+﻿children:
+- children:
+  - b_makka|Mecca
+  - b_rabigh|Rabigh
+  - b_khulays|Khulays
+  - b_jidda|Jidda
+  - b_usfain|Usfan
+  - b_wadi_tathlith|Wadi Tathlith
+  - b_wadi_ghamid|Wadi Ghamid
+  color: 122 198 5
+  l: Mecca
+  title: c_mecca
+- children:
+  - b_at-taif|At-Ta'if
+  - b_turaba|Turaba
+  - b_tabala-hijaz|Tabala-hijaz
+  - b_aqiq_tamra|Aqiq Tamra
+  - b_dam|Dam
+  color: 121 196 2
+  l: Ta'if
+  title: c_taif
+- children:
+  - b_as-sirayn|As-Sirayn
+  - b_hali|Hali
+  - b_ash-shuqayq|Ash-Shuqayq
+  - b_sarba|Sarba
+  - b_qasr-al-adi|Qasr al-'Adi
+  color: 124 202 7
+  l: Tihama
+  title: c_tihama
+- children:
+  - b_bisha|Bisha
+  - b_jurash|Jurash
+  - b_kuthba|Kuthba
+  - b_falaj|Falaj
+  - b_al-haddar|Al-Haddar
+  color: 116 204 9
+  l: Bisha
+  title: c_bisha
+color: 120 200 5
+cul: bedouin
+l: Mecca
+rel: ashari
+title: d_mecca
+tag: MEC
+rough: desert
+holy: mecca

@@ -1,0 +1,44 @@
+﻿children:
+- children:
+  - b_praha|Prague
+  - "b_vysehrad|Vy\u0161ehrad"
+  - b_beroun|Beroun
+  - "b_melnik|M\u011Bln\xEDk"
+  - "b_slany|Slan\xFD"
+  - b_milevsko|Milevsko
+  - "b_pisek|P\xEDsek"
+  color: 199 114 15
+  l: Praha
+  title: c_praha
+- children:
+  - "b_plzen|Plze\u0148"
+  - "b_stribro|St\u0159\xEDbro"
+  - "b_primda|P\u0159imda"
+  - "b_domazlice|Doma\u017Elice"
+  - "b_prachen|Pr\xE1che\u0148"
+  color: 200 105 5
+  l: "Plze\u0148"
+  title: c_plzen
+- children:
+  - "b_litomerice|Litom\u011B\u0159ice"
+  - "b_bilina|B\xEDlina"
+  - "b_decin|D\u011B\u010D\xEDn"
+  - "b_zitava|\u017Ditava"
+  - b_boleslav|Boleslav
+  color: 215 110 15
+  l: "Litom\u011B\u0159ice"
+  title: c_litomerice
+- children:
+  - "b_zatec|\u017Datec"
+  - "b_kadan|Kada\u0148"
+  - b_sedlec|Sedlec
+  - b_loket|Loket
+  - "b_bezdez|Bezd\u011Bz"
+  color: 197 145 13
+  l: "\u017Datec"
+  title: c_zatec
+color: 195 110 11
+cul: czech
+l: Bohemia
+rel: slavic_pagan
+title: d_bohemia

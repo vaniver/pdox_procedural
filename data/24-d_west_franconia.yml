@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - b_frankfurt|Frankfurt
+  - b_limburg|Limburg
+  - "b_russelsheim|R\xFCsselsheim"
+  - b_hanau|Hanau
+  color: 190 190 190
+  l: Frankfurt
+  title: c_frankfurt
+- children:
+  - b_mainz|Mainz
+  - b_wiesbaden|Wiesbaden
+  - b_katzenelnbogen|Katzenelnbogen
+  - b_boppard|Boppard
+  color: 165 165 180
+  l: Mainz
+  title: c_mainz
+- children:
+  - b_worms|Worms
+  - b_besensheim|Besensheim
+  - b_pirmasens|Pirmasens
+  - b_kronberg|Kronberg
+  color: 150 150 150
+  l: Worms
+  title: c_worms
+- children:
+  - b_speyer|Speyer
+  - b_hockenheim|Hockenheim
+  - b_heidelberg|Heidelberg
+  - b_weissenburg|Weissenburg
+  color: 145 145 160
+  l: Speyer
+  title: c_speyer
+- children:
+  - b_vaihingen|Vaihingen
+  - b_heilbronn|Heilbronn
+  - "b_lowenstein|L\xF6wenstein"
+  - b_veldenz|Veldenz
+  color: 140 140 140
+  l: Vaihingen
+  title: c_vaihingen
+- children:
+  - b_kaiserslautern|Lautern
+  - b_letningen|Leiningen
+  - b_kreusnach|Kreuznach
+  - b_rockenhausen|Rockenhausen
+  color: 145 140 153
+  l: Kaiserslautern
+  title: c_kaiserslautern
+color: 170 170 170
+cul: franconian
+l: West Franconia
+rel: catholic
+title: d_west_franconia
+rough: forest
+tag: WFR

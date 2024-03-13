@@ -1,0 +1,47 @@
+﻿children:
+- children:
+  - b_roma|Rome
+  - b_ostia|Ostia
+  - b_vaticano|Vaticano
+  - b_palo|Palo
+  - b_paterno|Paterno
+  - b_farfa|Farfa
+  - b_rieti|Rieti
+  color: 242 233 156
+  l: Roma
+  title: c_roma
+- children:
+  - b_viterbo|Viterbo
+  - b_sutri|Sutri
+  - b_civitavecchia|Civitavecchia
+  - b_orvieto|Orvieto
+  - b_perugia|Perugia
+  color: 212 203 116
+  l: Viterbo
+  title: c_viterbo
+- children:
+  - b_tivoli|Tivoli
+  - b_velletri|Velletri
+  - b_segni|Segni
+  - b_terracina|Terracina
+  - b_avezzano|Avezzano
+  color: 242 253 136
+  l: Tivoli
+  title: c_tivoli
+- children:
+  - b_lanciano|Lanciano
+  - b_cluieli|Chieti
+  - b_agnone|Agnone
+  - b_teramo|Teramo
+  - b_atri|Atri
+  color: 167 102 103
+  l: Lanciano
+  title: c_lanciano
+color: 254 245 160
+cul: italian
+l: Latium
+rel: catholic
+title: d_latium
+holy: roma
+rough: forest
+tag: PAP

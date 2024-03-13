@@ -1,0 +1,55 @@
+﻿children:
+- children:
+  - b_ani|Ani
+  - b_dlim|Dlim
+  - b_bagaran|Bagaran
+  - b_yerevan|Yerevan
+  color: 203 66 86
+  l: Hayk
+  title: c_hayk
+- children:
+  - b_valashkert|Valashkert
+  - b_bagavan|Bagavan
+  - b_tsalakert|Tsalakert
+  - b_patnos|Patnos
+  color: 195 82 88
+  l: Bagrewand
+  title: c_bagrewand
+- children:
+  - b_kars|Kars
+  - b_zariskat|Zariskat
+  - b_sevuki|Sevuki
+  - b_kumayri|Kumayri
+  color: 189 136 133
+  l: Vanand
+  title: c_vanand
+- children:
+  - b_parnes|Parnes
+  - b_tovuz|Tovuz
+  - b_shamkur|Shamkur
+  - b_gardman|Gardman
+  color: 182 44 78
+  l: Khachen
+  title: c_khachen
+- children:
+  - b_kapan|Kapan
+  - b_goris|Goris
+  - b_jugha|Jugha
+  - b_gandzasar|Gandzasar
+  color: 197 80 107
+  l: Suenik
+  title: c_suenik
+- children:
+  - b_dvin|Dvin
+  - b_naxcivan|Naxcivan
+  - b_garni|Garni
+  - b_ktis|Ktis
+  color: 190 80 105
+  l: Dvin
+  title: c_dvin
+color: 203 86 66
+l: Greater Armenia
+title: d_greater_armenia
+cul: armenian
+rel: armenian_apostolic
+tag: ARM

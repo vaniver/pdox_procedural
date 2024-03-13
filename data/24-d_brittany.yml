@@ -1,0 +1,60 @@
+﻿children:
+- children:
+  - b_vannes|Vannes
+  - "b_porhoet|Porho\xEBt"
+  - b_rohan|Rohan
+  - b_rennes|Rennes
+  color: 145 170 171
+  l: Vannes
+  title: c_vannes
+- children:
+  - b_nantes|Nantes
+  - b_rais|Rais
+  - "b_guerande|Gu\xE9rande"
+  - "b_chateaubriant|Ch\xE2teaubriant"
+  color: 131 145 145
+  l: Nantes
+  title: c_nantes
+- children:
+  - b_quimper|Quimper
+  - b_lorient|Lorient
+  - b_cornouailles|Cornouailles
+  - b_st_pol_de_leon|St Pol de Leon
+  color: 120 161 161
+  l: Cornouaille
+  title: c_cornouaille
+- children:
+  - b_brest|Brest
+  - b_launceston|Launceston
+  - b_tintagel|Tintagel
+  - b_helston|Helston
+  color: 69 97 97
+  l: "L\xE9on"
+  title: c_french_leon
+- children:
+  - b_saint_brieuc|Saint-Brieuc
+  - "b_treguier|Tr\xE9guier"
+  - b_saint_malo|Saint-Malo
+  - b_combourg|Combourg
+  color: 81 133 133
+  l: "Penthi\xE8vre"
+  title: c_penthievre
+- children:
+  color: 137 199 199
+  l: Rennes
+  title: c_rennes
+- children:
+  - b_exeter|Exeter
+  - b_totnes|Totnes
+  - b_okehampton|Okehampton
+  - b_barnstaple|Barnstaple
+  color: 170 60 10
+  l: Devon
+  title: c_devon
+color: 166 190 191
+cul: breton
+l: Brittany
+rel: catholic
+title: d_brittany
+rough: forest
+tag: BRT

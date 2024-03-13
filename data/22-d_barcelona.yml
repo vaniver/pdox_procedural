@@ -1,0 +1,47 @@
+﻿children:
+- children:
+  - b_barcelona|Barcelona
+  - b_sitges|Sitges
+  - b_manresa|Cardona
+  - b_vic|Vic
+  - b_berga|Berga
+  - "b_puigcerda|Puigcerd\xE0"
+  - b_llivia|Llivia
+  color: 156 110 72
+  l: Barcelona
+  title: c_barcelona
+- children:
+  - b_urgell|Urgell
+  - b_seu_d_urgell|Seu d'Urgell
+  - b_andorra|Andorra
+  - "b_balaguer|Ordany\xE1"
+  - b_prades|Prades
+  color: 170 97 92
+  l: Urgell
+  title: c_urgell
+- children:
+  - b_tarragona|Tarragona
+  - b_tortosa|Tortosa
+  - b_maials|Maials
+  - b_lleida|Lleida
+  - b_agramunt|Agramunt
+  color: 155 90 55
+  l: Tarragona
+  title: c_tarragona
+- children:
+  - "b_perpignan|Perpiny\xE0"
+  - b_prades_rossello|Prades
+  - b_roses|Roses
+  - b_girona|Girona
+  - b_loredo|Ullastret
+  color: 176 95 88
+  l: "Rossell\xF3"
+  title: c_rossello
+color: 166 100 72
+cul: catalan
+l: Barcelona
+rel: catholic
+title: d_barcelona
+rough: forest
+TAG: BAR
+holy: barcelona

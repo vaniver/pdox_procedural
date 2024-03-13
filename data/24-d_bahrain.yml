@@ -1,0 +1,54 @@
+﻿children:
+- children:
+  - b_al-qatif|Al-Qatif
+  - b_al-khatt|Al-Khatt
+  - b_al-jubayl|Al-Jubayl
+  - b_thaj|Tha'j
+  color: 18 104 28
+  l: Qatif
+  title: c_qatif
+- children:
+  - b_uwal|Uwal
+  - b_as-samman|As-Samman
+  - b_ziba|Ziba'
+  - b_sirhan|Sirhan
+  color: 22 102 33
+  l: Uwal
+  title: c_uwal
+- children:
+  - b_kazima|Kazima
+  - b_ar-ruqaii|Ar-Ruqai'i
+  - b_hafar|Hafar
+  - b_al-mawiya|Al-Mawiya
+  color: 20 99 30
+  l: Samman
+  title: c_samman
+- children:
+  - b_an-nibaj|An-Nibaj
+  - b_al-khuzaimiya|Al-Khuzaimiya
+  - b_as-sumaina|As-Sumaina
+  - b_madyan|Madyan
+  color: 163 194 4
+  l: Shaqiq
+  title: c_shaqiq
+- children:
+  - b_al_jawf|Al Jawf
+  - b_sakaka|Sakaka
+  - b_al-qara-jawf|Al-Qara
+  - b_quraqir|Quraqir
+  color: 154 253 47
+  l: Al-Jawf
+  title: c_al_jawf
+- children:
+  - b_ath-thalabiya|Ath-Tha'labiya
+  - b_zubala|Zubala
+  - b_lina|Lina
+  - b_bitan|Bitan
+  color: 148 248 49
+  l: Tha'labiya
+  title: c_thalabiya
+color: 80 120 10
+cul: bedouin
+l: Bahrain
+rel: ashari
+title: d_bahrain

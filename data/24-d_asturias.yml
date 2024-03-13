@@ -1,0 +1,54 @@
+﻿children:
+- children:
+  - b_oviedo|Oviedo
+  - b_riano|Riano
+  - b_villaviciosa|Villaviciosa
+  - "b_gijon|Gij\xF3n"
+  color: 207 104 0
+  l: Asturias de Oviedo
+  title: c_asturias_de_oviedo
+- children:
+  - b_pravia|Pravia
+  - b_luarca|Luarca
+  - b_gangasdelnarcea|Cangas del Narcea
+  - b_carballido|Carballido
+  color: 215 85 0
+  l: Pravia
+  title: c_pravia
+- children:
+  - "b_leon|Le\xF3n"
+  - b_sarria|Sarria
+  - b_villablino|Villablino
+  - b_valenciadecampos|Valencia de Campos
+  color: 223 128 31
+  l: Leon
+  title: c_leon
+- children:
+  - b_avila|Avila
+  - b_medinadelcampo|Medina del Campo
+  - b_laadrada|La Adrada
+  - b_sierradegredos|Gredos
+  color: 200 110 50
+  l: Avila
+  title: c_avila
+- children:
+  - b_zamora|Zamora
+  - b_toro|Toro
+  - b_villafafila|Villafafila
+  - b_benavente|Benavente
+  color: 245 125 25
+  l: Zamora
+  title: c_zamora
+- children:
+  - b_bejar|Bejar
+  - b_salamanca|Salamanca
+  - b_ciduadrodrigo|Ciudad Rodrigo
+  - b_alba|Alba
+  color: 195 105 25
+  l: Salamanca
+  title: c_salamanca
+color: 207 104 0
+cul: asturleonese
+l: Asturias
+rel: catholic
+title: d_asturias

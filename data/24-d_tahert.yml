@@ -1,0 +1,60 @@
+﻿children:
+- children:
+- children:
+  - b_tahart|Tahart
+  - b_al_ubbad|Al Ubbad
+  - b_qalaa_bsalama|Qalaa Bsalama
+  - b_askedal|Askedal
+  color: 153 204 75
+  l: Tahert
+  title: c_tahert
+- children:
+  - b_yalala|Yalala
+  - b_qalaa_bhuwara|Qalaa Bhuwara
+  - b_al_gabal|Al Gabal
+  - b_hisn_lawata|Hisn Lawata
+  color: 182 242 92
+  l: Yalala
+  title: c_yalala
+- children:
+  - b_ashir_yashir|Ashir Yashir
+  - b_bousaada|Bousaada
+  - b_ashir_banya|Ashir Banya
+  - b_sersou|Sersou
+  color: 136 191 54
+  l: Ashir
+  title: c_ashir
+- children:
+  - b_figuig|Figuig
+  - b_ainsefra|Ainsefra
+  - b_mecheria|Mecheria
+  - b_al-aghwat|al-Aghwat
+  color: 164 237 57
+  l: Figuig
+  title: c_figuig
+  - b_wargla|Wargla
+  - b_taghyart|Taghyart
+  - b_sadrata|Sadrata
+  - b_karima|Karima
+  color: 100 171 73
+  l: Wargla
+  title: c_wargla
+- children:
+  color: 54 128 27
+  l: Laghwat
+  title: c_laghwat
+- children:
+  - b_ghardaia|Ghardaia
+  - b_al-qulaya|al-Qulaya
+  - "b_tedmait|Tedma\xEFt"
+  - b_tilghemt|Tilghemt
+  color: 88 138 70
+  l: Ghardaia
+  title: c_ghardaia
+color: 180 240 90
+l: Tahert
+title: d_tahert
+cul: butr
+rel: ibadi
+rough: desert
+tag: TAH

@@ -1,0 +1,150 @@
+﻿children:
+- children:
+  - children:
+    - b_damascus|Damascus
+    - b_nawa|Nawa
+    - b_darayya|Darayya
+    - b_zurra|Zurra
+    - b_sarkhad|Sarkhad
+    - b_as-suwaida-hauran|As-Suwaida-Hauran
+    color: 125 255 6
+    l: Damascus
+    title: c_damascus
+  - children:
+    - b_juwair|Juwair
+    - b_al-qastal|Al-Qastal
+    - b_marj-rahit|Marj-Rahit
+    - b_samosata|Samosata
+    color: 128 255 9
+    l: Juwair
+    title: c_juwair
+  - children:
+    - b_baalbak|Baalbak
+    - b_az-zabadani|Az-Zabadani
+    - b_anjar|Anjar
+    - b_bahasna|Bahasna
+    color: 134 255 15
+    l: Baalbek
+    title: c_baalbek
+  - children:
+    - b_hims|Hims
+    - b_rafaniya-krak|Rafaniya-Krak
+    - b_jusiya|Jusiya
+    - b_shayzar|Shayzar
+    color: 93 240 28
+    l: Homs
+    title: c_homs
+  - children:
+    - b_hama|Hama
+    - b_salamiya|Salamiya
+    - b_kafartab|Kafartab
+    - b_masyaf|Masyaf
+    color: 95 242 30
+    l: Hama
+    title: c_hama
+  color: 122 255 3
+  l: Damascus
+  title: d_damascus
+- children:
+  - children:
+    - b_halab|Halab
+    - b_tall_afrin|Tall Afrin
+    - b_azaz|Azaz
+    - b_manbij|Manbij
+    color: 91 238 26
+    l: Aleppo
+    title: c_aleppo
+  - children:
+    - b_edessa|Edessa
+    - b_al-bira|al-Bira
+    - b_ar-rusafa|Ar-Rusafa
+    - b_siffin|Siffin
+    color: 105 165 45
+    l: Edessa
+    title: c_edessa
+  - children:
+    - b_suriya|Suriya
+    - b_khunasira|Khunasira
+    - b_buzaa|Buza'a
+    color: 87 234 22
+    l: Suriya
+    title: c_suriya
+  - children:
+    - b_qinnasrin|Qinnasrin
+    - b_artah|Artah
+    - b_ar-rikha|Ar-Rikha
+    color: 84 220 20
+    l: Qinnasrin
+    title: c_qinnasrin
+  color: 85 232 20
+  l: Aleppo
+  title: d_aleppo
+- children:
+  - children:
+    - b_antiocheia|Antioch
+    - b_as-suwaydiya|As-Suwaydiya
+    - b_latakia|Latakia
+    - b_jabala|Jabala
+    color: 152 69 135
+    l: Antiocheia
+    title: c_antiocheia
+  - children:
+    - b_aintab|Aintab
+    - b_tall_bashir|Tall Bashir
+    - b_jarabulus|Jarabulus
+    - b_duluk-teluch|Duluk-Teluch
+    color: 195 125 55
+    l: Aintab
+    title: c_aintab
+  - children:
+    - b_alexandretta|Alexandretta
+    - b_qurus|Qurus
+    - b_baghras|Baghras
+    color: 112 197 50
+    l: Alexandretta
+    title: c_alexandretta
+  - children:
+    - b_marash|Marash
+    - b_qalat_ar-rum|Qalat Rr-Rum
+    - b_kaisum|Kaisum
+    color: 175 125 35
+    l: Marash
+    title: c_marash
+  color: 142 63 129
+  l: Antioch
+  title: d_antioch
+- children:
+  - children:
+    - b_beirut|Beirut
+    - b_saida|Saida
+    - b_al-qaryatan|Al-Qaryatan
+    - b_judr|Judr
+    color: 77 156 38
+    l: Beirut
+    title: c_beirut
+  - children:
+    - b_tadmur|Tadmur
+    - b_arak|Arak
+    - b_as-sukhna|As-Sukhna
+    - b_dair_ar-ruman|Dair Ar-Ruman
+    color: 89 236 24
+    l: Palmyra
+    title: c_palmyra
+  - children:
+    - b_syrtripolis|Tripolis
+    - b_antartus|Antartus
+    - b_urd|Urd
+    color: 75 154 36
+    l: Tripoli
+    title: c_tripoli
+  color: 71 150 32
+  l: Lebanon
+  title: d_lebanon
+color: 145 130 88
+cul: mashriqi
+l: Syria
+rel: ashari
+title: k_syria
+rough: desert
+tag: SYR
+holy: antioch

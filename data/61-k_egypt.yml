@@ -1,0 +1,150 @@
+﻿children:
+- children:
+  - children:
+    - b_cairo|Cairo
+    - b_quzlum|Quzlum
+    - b_atfih|Atfih
+    - b_hulwan-cairo|Hulwan
+    - b_gizeh|Gizeh
+    - b_abu_ghalib|Abu Ghalib
+    color: 26 214 120
+    l: Cairo
+    title: c_cairo
+  - children:
+    - b_al-fayyum|Al-Fayyum
+    - b_tirsa|Tirsa
+    - b_iqna|Iqna
+    - b_busir|Busir
+    color: 36 156 95
+    l: Fayyum
+    title: c_fayyum
+  - children:
+    - b_rashid|Rashid
+    - b_damanhur|Damanhur
+    - b_ramsis|Ramsis
+    - b_ibyar|Ibyar
+    color: 61 245 114
+    l: Al-Buhaira
+    title: c_al-buhaira
+  - children:
+    - b_minuf|Minuf
+    - b_samannud|Samannud
+    - b_burullus|Burullus
+    - b_nastarawa|Nastarawa
+    color: 9 255 80
+    l: Al-Gharbiya
+    title: c_al-gharbiya
+  - children:
+    - b_dumiyat|Dumiyat
+    - b_daqahla|Daqahla
+    - b_tinnis|Tinnis
+    - b_qalyub|Qalyub
+    color: 12 255 83
+    l: Damietta
+    title: c_damietta
+  color: 32 245 138
+  l: Cairo
+  title: d_cairo
+- children:
+  - children:
+    - b_al-bahriya|Al-Bahriya
+    - b_bawiti|Bawiti
+    - b_al-harra|Al-Harra
+    - b_al-farafra|Al-Farafra
+    color: 45 165 145
+    l: Bahriya
+    title: c_bahriya
+  - children:
+    - b_north_jbl_quzlum|North Jabal Quzlum
+    - b_central_jbl_quzlum|Central Jabal Quzlum
+    - b_south_jbl_quzlum|South Jabal Quzlum
+    - b_um_shashoba|Um Shashoba
+    color: 45 195 130
+    l: Jabal Quzlum
+    title: c_jabal_quzlum
+  - children:
+    - b_mut|Mut
+    - b_tunayda|Tunayda
+    - b_al-qasr-dakhla|Al-Qasr-Dakhla
+    color: 108 217 168
+    l: Dakhla
+    title: c_dakhla
+  - children:
+    - b_kharga|Kharga
+    - b_baris|Baris
+    - b_qusayr|Qusayr
+    color: 39 219 126
+    l: Kharga
+    title: c_kharga
+  color: 40 160 140
+  l: Al-Wahat
+  title: d_al-wahat
+- children:
+  - children:
+    - b_qus|Qus
+    - b_huw|Huw
+    - b_faw|Faw
+    - b_qina|Qina
+    color: 76 194 77
+    l: Qus
+    title: c_qus
+  - children:
+    - b_aswan|Aswan
+    - b_udfu|Udfu
+    - b_zarnikh|Zarnikh
+    - b_aswan-west|West Aswan
+    color: 16 163 17
+    l: Aswan
+    title: c_aswan
+  - children:
+    - b_al-bahnasa|Al-Bahnasa
+    - b_ahnas|Ahnas
+    - b_ihrit|Ihrit
+    color: 50 173 51
+    l: Bahnasa
+    title: c_bahnasa
+  - children:
+    - b_al-ushmunain|Al-Ushmunain
+    - b_ansina|Ansina
+    - b_manfalut|Manfalut
+    color: 72 176 73
+    l: Ushmun
+    title: c_ushmun
+  color: 85 217 87
+  l: Al-Said
+  title: d_al-said
+- children:
+  - children:
+    - b_at-tur|At-Tur
+    - b_stcatherine|Saint Catherine
+    - b_faran|Faran
+    - b_qalat_jundi|Qalat Jundi
+    color: 143 201 8
+    l: Sinai
+    title: c_sinai
+  - children:
+    - b_farama|Farama
+    - b_warrada|Warrada
+    - b_al-arish|Al-Arish
+    - b_faqus|Faqus
+    color: 141 198 5
+    l: Farama
+    title: c_farama
+  - children:
+    - b_firaun|Firaun
+    - b_dahab|Dahab
+    - b_tih|Tih
+    color: 145 203 10
+    l: Firaun
+    title: c_firaun
+  color: 88 99 2
+  l: Sinai
+  title: d_sinai
+color: 10 255 80
+cul: butr
+l: Egypt
+rel: ashari
+title: k_egypt
+rough: desert
+holy: sinai
+tag: EGY

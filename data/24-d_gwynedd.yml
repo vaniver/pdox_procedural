@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - b_cardigan|Aberteifi
+  - b_aberystwyth|Aberystwyth
+  - b_llandrindod|Llandrindod
+  - b_rhayader|Rhaeadr Gwy
+  color: 110 10 0
+  l: Ceredigion
+  title: c_cardiganshire
+- children:
+  - b_dolgellau|Harlech
+  - b_corwen|Corwen
+  - b_welshpool|Mathrafal
+  - b_newtown|Machynlleth
+  color: 105 20 20
+  l: Merionnydd
+  title: c_merioneth
+- children:
+  - b_caernarfon|Eryri
+  - b_llyn|Llyn
+  - b_llandudno|Llandudno
+  - b_casnewydd|Caerllion
+  color: 90 25 0
+  l: Eryri
+  title: c_caernarfonshire
+- children:
+  - b_yns_mon|Aberffraw
+  - b_holyhead|Caer Gybi
+  - b_carmarthen|Caerfyrddin
+  - b_llandovery|Llanymddyfri
+  color: 85 0 0
+  l: "Ynys M\xF4n"
+  title: c_anglesey
+- children:
+  - b_denbigh|Dinbych
+  - b_wrexham|Tegeingl
+  - b_ruthin|Rhuthun
+  - b_monmouth|Trefynwy
+  color: 125 0 10
+  l: Perfeddwlad
+  title: c_denbighshire
+- children:
+  - b_hereford|Hereford
+  - b_wigmore|Wigmore
+  - b_clifford|Clifford
+  color: 110 45 35
+  l: Herefordshire
+  title: c_hereford
+color: 100 0 0
+l: Gwynedd
+title: d_gwynedd
+color: 135 25 3
+cul: welsh
+rel: catholic
+rough: forest
+tag: GWY

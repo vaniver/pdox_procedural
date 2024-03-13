@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - "b_wurzburg|W\xFCrzburg"
+  - b_hochberg|Hochberg
+  - b_hammelburg|Hammelburg
+  - b_coburg|Coburg
+  color: 255 255 255
+  l: "W\xFCrzburg"
+  title: c_wurzburg
+- children:
+  - b_ansbach|Ansbach
+  - b_uffenheim|Uffenheim
+  - b_trubending|Trubending
+  - b_lichtenfels|Lichtenfels
+  color: 220 220 240
+  l: Ansbach
+  title: c_ansbach
+- children:
+  - b_mergentheim|Mergentheim
+  - b_weinsberg|Weinsberg
+  - b_hall|Hall
+  - b_nordlingen|Nordlingen
+  color: 245 245 245
+  l: Hohenlohe
+  title: c_hohenlohe
+- children:
+  - "b_nurnberg|N\xFCrnberg"
+  - b_riedfeld|Riedfeld
+  - b_abenberg|Abenberg
+  - b_dillingen|Dillingen
+  color: 240 240 255
+  l: "N\xFCrnberg"
+  title: c_nurnberg
+- children:
+  - b_bamberg|Bamberg
+  - b_greiffenst|Greiffenst
+  - b_casel|Casel
+  - b_iphofen|Iphofen
+  color: 240 240 250
+  l: Bamberg
+  title: c_bamberg
+- children:
+  - b_wiltberg|Wiltberg
+  - b_schweinfurt|Schweinfurt
+  - b_henneberg|Henneberg
+  - b_crailsheim|Crailsheim
+  color: 255 245 245
+  l: Wiltberg
+  title: c_wiltberg
+color: 245 245 255
+cul: franconian
+l: East Franconia
+rel: catholic
+title: d_east_franconia
+rough: forest
+tag: EFR

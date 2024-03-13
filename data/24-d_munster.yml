@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - b_limerick|Limerick
+  - b_nenagh|Nenagh
+  - b_roscrea|Roscrea
+  - b_kilmallock|Kilmallock
+  color: 3 128 0
+  l: Thomond
+  title: c_thomond
+- children:
+  - b_waterford|Waterford
+  - b_emly|Emly
+  - b_clonmel|Clonmel
+  - b_uisneach|Uisneach
+  color: 0 80 20
+  l: Ormond
+  title: c_ormond
+- children:
+  - b_tralee|Tralee
+  - b_cork|Cork
+  - b_kinsale|Kinsale
+  - b_baltimore|Baltimore
+  color: 10 137 35
+  l: Desmond
+  title: c_desmond
+- children:
+  - b_wexford|Wexford
+  - b_enniscorthy|Enniscorthy
+  - b_ferns|Ferns
+  - b_carlow|Carlow
+  color: 68 156 28
+  l: Leinster
+  title: c_leinster
+- children:
+  - b_gowran|Gowran
+  - b_kilkenny|Kilkenny
+  - b_athy|Athy
+  - b_carrick|Carrick
+  color: 93 166 15
+  l: Ossory
+  title: c_ossory
+- children:
+  - b_ennis|Ennis
+  - b_kincora|Kincora
+  - b_athlone|Athlone
+  - b_birr|Birr
+  color: 32 115 30
+  l: Ennis
+  title: c_ennis
+color: 16 157 12
+l: Munster
+title: d_munster
+cul: irish
+rel: insular_celtic
+rough: forest
+tag: MUN

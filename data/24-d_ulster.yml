@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - b_downpatrick|Downpatrick
+  - b_slemish|Slemish
+  - b_carrickfergus|Carrickfergus
+  - b_bangor|Bangor
+  color: 25 230 35
+  l: Ulster
+  title: c_ulster
+- children:
+  - b_dundalk|Dundalk
+  - b_armagh|Armagh
+  - b_ardee|Ardee
+  - b_clogher|Clogher
+  color: 30 180 45
+  l: Oriel
+  title: c_oriel
+- children:
+  - b_donegal|Donegal
+  - b_raphoe|Raphoe
+  - b_fahan|Fahan
+  - b_derry|Derry
+  color: 66 157 22
+  l: Ailech
+  title: c_ailech
+- children:
+  - b_galway|Galway
+  - b_athenry|Athenry
+  - b_tuam|Tuam
+  - b_da_chainoc|Da Chainoc
+  color: 45 230 70
+  l: Hy Many
+  title: c_connacht
+- children:
+  - b_cruachu|Cruachu
+  - b_castlebar|Castlebar
+  - b_sligo|Sligo
+  - b_killala|Killala
+  color: 15 190 70
+  l: Mayo
+  title: c_mayo
+- children:
+  - b_dromahair|Dromahair
+  - b_belcoo|Belcoo
+  - b_longford|Longford
+  - b_cavan|Cavan
+  color: 95 221 121
+  l: Breifne
+  title: c_breifne
+color: 5 222 31
+l: Ulster
+title: d_ulster
+cul: irish
+rel: insular_celtic
+rough: forest
+tag: ULS

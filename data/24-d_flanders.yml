@@ -1,0 +1,42 @@
+﻿children:
+- children:
+  - b_bruges|Bruges
+  - b_gent|Gent
+  - b_roeselare|Roeselare
+  color: 65 95 180
+  l: Brugge
+  title: c_brugge
+- children:
+  - b_ypres|Ypres
+  - b_veurne|Veurne
+  - b_dunkirk|Dunkerque
+  color: 78 94 185
+  l: Yperen
+  title: c_yperen
+- children:
+  - b_calais|Calais
+  - b_grevelines|Gravelines
+  - b_saint_omer|Saint-Omer
+  color: 80 90 170
+  l: "Gu\xEEnes"
+  title: c_guines
+- children:
+  - b_lille|Lille
+  - b_courtrai|Courtrai
+  - b_aire|Aire
+  color: 75 115 205
+  l: Lille
+  title: c_lille
+- children:
+  - b_boulogne|Boulogne
+  - b_montreuil_sur_mer|Montreuil-sur-Mer
+  - b_abbeville|Abbeville
+  - b_hesdin|Hesdin
+  color: 78 103 165
+  l: Boulogne
+  title: c_boulogne
+color: 65 95 180
+cul: ''
+l: Flanders
+rel: ''
+title: d_flanders

@@ -1,0 +1,150 @@
+﻿children:
+- children:
+  - children:
+    - b_tunis|Tunis
+    - b_zaghwan|Zaghwan
+    - b_qartajana|Qartajana
+    - b_nabeul|Nabeul
+    - b_silyana|Silyana
+    - b_mahdiya|Mahdiya
+    color: 96 128 224
+    l: Tunis
+    title: c_tunis
+  - children:
+    - b_banzart|Banzart
+    - b_tabarqa|Tabarqa
+    - b_mansa'l-kharaz|Mansa'l-Kharaz
+    - b_monastir|Monastir
+    color: 77 117 240
+    l: Satfura
+    title: c_satfura
+  - children:
+    - b_baja_medjerda|Baja Medjerda
+    - b_siqqabanariya|Siqqabanariya
+    - b_al_aribus|Al Aribus
+    - b_susa|Susa
+    color: 123 148 227
+    l: Medjerda
+    title: c_medjerda
+  - children:
+    - b_constantine|Constantine
+    - b_qasr-al-ifriqi|Qasr-al-Ifriqi
+    - b_tijis|Tijis
+    - b_tifash|Tifash
+    color: 78 77 162
+    l: Constantine
+    title: c_constantine
+  - children:
+    - b_annaba|Annaba
+    - b_qalama|Qalama
+    - b_izan|Izan
+    - b_taburshiq|Taburshiq
+    color: 72 83 169
+    l: Annaba
+    title: c_annaba
+  color: 121 153 247
+  l: Tunis
+  title: d_tunis
+- children:
+  - children:
+    - b_kairouan|Kairouan
+    - b_jalula|Jalula
+    - b_sabiba|Sabiba
+    - b_raqqada|Raqqada
+    color: 47 78 135
+    l: Kairwan
+    title: c_kairwan
+  - children:
+    - b_tabassa|Tabassa
+    - b_madila|Madila
+    - b_maydara|Maydara
+    - b_maskiyana|Maskiyana
+    color: 52 86 177
+    l: Tabassa
+    title: c_tabassa
+  - children:
+    - b_al-qasrayn|Al-Qasrayn
+    - b_qafsa|Qafsa
+    - b_tala|Tala
+    color: 55 96 173
+    l: West Qamuda
+    title: c_west_qamuda
+  - children:
+    - b_sfax|Sfax
+    - b_el_jem|El Jem
+    - b_slakta|Slakta
+    color: 25 47 117
+    l: Sfax
+    title: c_sfax
+  color: 60 98 170
+  l: Kairouan
+  title: d_kairouan
+- children:
+  - children:
+    - b_libtripoli|Tripoli
+    - b_sabratha|Sabratha
+    - b_tamazda|Tamazda
+    - b_tiri|Tiri
+    color: 45 116 179
+    l: Tripolitana
+    title: c_tripolitana
+  - children:
+    - b_zuwara|Zuwara
+    - b_djado_jafara|Djado
+    - b_nalut|Nalut
+    - b_fursata|Fursata
+    color: 71 129 181
+    l: Jafara
+    title: c_jafara
+  - children:
+    - b_jerba|Jerba
+    - b_jarjis|Jarjis
+    - b_bughrara|Bughrara
+    color: 8 108 196
+    l: Djerba
+    title: c_djerba
+  - children:
+    - b_gabes|Gabes
+    - b_al_hamma|Al Hamma
+    - b_al_abbasiya|Al Abbasiya
+    color: 21 56 163
+    l: Gabes
+    title: c_gabes
+  color: 52 136 209
+  l: Tripolitania
+  title: d_tripolitania
+- children:
+  - children:
+    - b_syrte|Syrte
+    - b_al_aghaila|Al Aghaila
+    - b_ajadabiya|Ajadabiya
+    - b_mansuriya|Mansuriya
+    color: 43 45 161
+    l: Syrte
+    title: c_syrte
+  - children:
+    - b_labda|Labda
+    - b_tawurgha|Tawurgha
+    - b_misurata|Misurata
+    - b_bir_amir|Bir Amir
+    color: 54 56 133
+    l: Labda
+    title: c_labda
+  - children:
+    - b_waddan|Waddan
+    - b_tajrift|Tajrift
+    - b_tinnai|Tinnai
+    color: 17 20 150
+    l: Waddan
+    title: c_waddan
+  color: 53 55 189
+  l: Syrte
+  title: d_syrte
+color: 67 96 179
+cul: baranis
+l: Africa
+rel: ibadi
+title: k_africa
+tag: TUN
+rough: desert
+holy: tunis

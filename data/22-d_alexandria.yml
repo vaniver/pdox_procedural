@@ -1,0 +1,46 @@
+﻿children:
+- children:
+  - b_alexandria|Alexandria
+  - b_al-hamam|Al-Hamam
+  - b_wadi_natrun|Wadi Natrun
+  - b_sullum|Sullum
+  - b_qasr_ash-shams|Qasr Ash-Shams
+  - b_kanais_al-hadid|Kanais Al-Hadid
+  - b_qara|Qara
+  color: 102 221 136
+  l: Alexandria
+  title: c_alexandria
+- children:
+  - b_siwa|Siwa
+  - b_ain_al-gharbi|Ain Al-Gharbi
+  - b_awjila|Awjila
+  - b_jalu|Jalu
+  - b_jakharrad|Jakharrad
+  color: 106 225 140
+  l: Siwa
+  title: c_siwa
+- children:
+  - b_barqa-al-marj|Barqa-Al-Marj
+  - b_wadi_masus|Wadi Masus
+  - b_jabal_al-gharbi|Jabal Al-Gharbi
+  - b_benghazi|Benghazi
+  - b_bilbays|Bilbays
+  color: 34 152 65
+  l: Barqa
+  title: c_barqa
+- children:
+  - b_derna|Derna
+  - b_wadi_makhil|Wadi Makhil
+  - b_marawa|Marawa
+  - b_tobruk|Tobruk
+  - b_bawit|Bawit
+  color: 38 156 69
+  l: Derna
+  title: c_derna
+color: 100 219 134
+cul: butr
+l: Alexandria
+rel: ashari
+title: d_alexandria
+rough: desert
+tag: ALX
