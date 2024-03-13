@@ -141,7 +141,10 @@ children:
   l: Granada
   title: d_granada
 color: 31 138 40
-cul: ''
+cul: andalusian
 l: Andalusia
-rel: ''
+rel: mullawadi
 title: k_andalusia
+tag: AND
+rough: desert
+holy: cordoba

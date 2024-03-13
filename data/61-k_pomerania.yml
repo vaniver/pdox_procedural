@@ -129,11 +129,6 @@
     color: 121 140 121
     l: Nordmark
     title: d_ostmark
-color: 145 130 40
-cul: ''
-l: Pomerania
-rel: ''
-title: k_pomerania
   d_nordmark:
     children:
       c_mecklenburg:
@@ -164,3 +159,11 @@ title: k_pomerania
     color: 162 160 110
     l: Veletia
     title: d_nordmark
+color: 145 130 40
+cul: polabian
+l: Pomerania
+rel: slavic_pagan
+title: k_pomerania
+rough: forest
+tag: POM
+holy: rugen

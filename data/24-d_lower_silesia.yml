@@ -1,0 +1,54 @@
+children:
+- children:
+  - b_breslau|Breslau
+  - b_bardo|Bardo
+  - b_miliez|Milicz
+  - "b_olesnica|Ole\u015Bnica"
+  color: 218 37 15
+  l: Breslau
+  title: c_breslau
+- children:
+  - b_grunberg|Grunberg
+  - b_gubin|Gubin
+  - b_crossen|Krosno
+  - b_sprottau|Sprottau
+  color: 210 85 30
+  l: Grunberg
+  title: c_grunberg
+- children:
+  - b_opole|Opole
+  - b_kreuzburg|Kreuzburg
+  - b_strehlitz|Strehlitz
+  - b_lubliniec|Lubliniec
+  color: 180 20 100
+  l: Opole
+  title: c_opole
+- children:
+  - b_nysa|Nysa
+  - "b_glogowek|Glog\xF3wek"
+  - b_frankenstein|Frankenstein
+  - "b_ratibor|Ratibo\u0159"
+  color: 175 85 105
+  l: Nysa
+  title: c_nysa
+- children:
+  - b_legnica|Legnica
+  - "b_glogow|G\u0142og\xF3w"
+  - "b_sadowel|S\u0105dowel"
+  - b_schweibus|Schweibus
+  color: 225 80 40
+  l: Legnica
+  title: c_legnica
+- children:
+  - "b_przemkow|Przemk\xF3w"
+  - "b_wlen|Wle\u0144"
+  - "b_swiny|\u015Awiny"
+  - b_siedlischo|Siedlisko
+  color: 195 75 60
+  l: "Przemk\xF3w"
+  title: c_przemkow
+color: 230 60 20
+l: Silesia
+title: d_lower_silesia
+tag: SIL
+rough: forest

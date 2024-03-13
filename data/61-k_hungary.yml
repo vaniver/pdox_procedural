@@ -140,7 +140,10 @@ children:
   l: Gyor
   title: d_gyor
 color: 250 120 90
-cul: ''
+cul: hungarian
 l: Hungary
-rel: ''
+rel: catholic
 title: k_hungary
+rough: forest
+tag: HUN
+holy: esztergom

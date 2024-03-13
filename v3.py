@@ -432,7 +432,7 @@ def create_journals(file_dir, base_dir):
 def create_mod(file_dir, config, pid_from_cube, rid_from_pid, pids_from_rid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid, region_trees, tag_from_pid, straits):
     """Creates the V3 mod files in file_dir, given the basic data."""
     # Get some conversion data.
-    with open(os.path.join("data", "conversion_v3.yaml"), 'r', encoding="utf_8_sig") as inf:
+    with open(os.path.join("data", "conversion_v3.yml"), 'r', encoding="utf_8_sig") as inf:
         conv = yaml.load(inf, yaml.Loader)
         culture_conv = conv.get("culture", {})
         religion_conv = conv.get("religion", {})

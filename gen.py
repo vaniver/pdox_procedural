@@ -185,6 +185,49 @@ class RegionTree:
                     break
         return result, last_pid, last_rid, last_srid
 
+    @classmethod
+    def from_dict(cls, contents, last_pid=1, last_rid=1, last_srid=1):
+        """Given a dictionary of region details, recursively create a RegionTree. Also returns pid/rid/srid and localization dictionary."""
+        localization = {}
+        children = contents.get("children", [])
+        result_children = []
+        if len(children) > 0 and isinstance(children[0], dict):
+            for child in children:
+                result, last_pid, last_rid, last_srid, child_localization = cls.from_dict(child, last_pid, last_rid, last_srid)
+                result_children.append(result)
+                localization.update(child_localization)
+        else:
+            for child in children:
+                title, local = child.split("|")
+                localization[title] = local
+                result_children.append(title)
+                last_pid += 1
+        title = contents["title"]  # This should break if it's not there
+        color = tuple([x.strip() for x in contents["color"].split(" ")])  # TODO: Maybe just use color as a string instead of a tuple?
+        depth = DEPTH_MAP[title[0]]
+        if depth == 2:
+            last_rid += 1
+        elif depth == 1:
+            last_srid += 1
+        if "l" in contents:
+            localization[title] = contents["l"]
+        culture = contents.get("cul", None)
+        religion = contents.get("rel", None)
+        holy_site = contents.get("holy", None)
+        tag = contents.get("tag", None)
+        rough = contents.get("rough", "forest")
+        result = cls(title=title, color=color, tag=tag, culture=culture, religion=religion, rough=rough, holy_site=holy_site, capital_rid=last_rid)
+        return result, last_pid, last_rid, last_srid, localization
+            
+
+    @classmethod
+    def from_yml(cls, filename, last_pid=1, last_rid=1, last_srid=1):
+        """Processes a .yml file to create a dictionary, which then is run thru from_dict. Also returns localization dictionary."""
+        with open(filename) as inf:
+            contents = yaml.load(filename, yaml.Loader)
+        return cls.from_dict(filename, last_pid, last_rid, last_srid)
+        
+
 
 def assemble_culrels(region_trees):
     """Create lists of cultures and religions that are present in region_trees, which is a list of RegionTrees."""
@@ -482,16 +525,16 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
         assert len(empires) == 1
         assert len(centers) == num_c
         assert len(borders) == num_b  # Changed this from >= to == so that we can use CONTINENT_LISTS elsewhere to determine which characters to spawn. If we want to randomize them, we'll have to do it in making the config.
-        region_tree, last_pid, last_rid, last_srid = RegionTree.from_csv(os.path.join("data", empires[0])+".csv", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+        region_tree, last_pid, last_rid, last_srid = RegionTree.from_yml(os.path.join("data", empires[0])+".csv", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
         region_tree.children[0].capital_pid = last_pid  # The interstitial kingdom has its capital in another file, and so this needs to be assigned here.
         random.shuffle(kingdoms)
         random.shuffle(centers)
         random.shuffle(borders)
         for title in centers[:num_c] + borders[:num_b]:
-            rt, last_pid, last_rid, last_srid = RegionTree.from_csv(os.path.join("data", title)+".csv", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+            rt, last_pid, last_rid, last_srid = RegionTree.from_yml(os.path.join("data", title)+".csv", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
             region_tree.children[0].children.append(rt) # The empires come with an interstitial kingdom to add all of these duchies to.
         for title in kingdoms:
-            rt, last_pid, last_rid, last_srid = RegionTree.from_csv(os.path.join("data", title)+".csv", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+            rt, last_pid, last_rid, last_srid = RegionTree.from_yml(os.path.join("data", title)+".csv", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
             region_tree.children.append(rt)
         region_trees.append(region_tree)
         candidates = compute_func(chunks, cids, num_k)
@@ -919,7 +962,7 @@ def create_data(config):
 
 
 if __name__ == "__main__":
-    with open("config.yaml", 'r') as inf:
+    with open("config.yml", 'r') as inf:
         config = yaml.load(inf, yaml.Loader)
     buffer = {}
     for k,v in config.items():  # We should compute the sizes of the templates here rather than making the user do it.

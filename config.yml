@@ -10,33 +10,33 @@ BASE_V3_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Victoria 3\\gam
 BASE_HOI4_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Hearts of Iron IV"
 CONTINENT_LISTS:
 - - e_islam
-  - k_egypt
-  - k_yemen
-  - k_syria
-  - c_mecca
-  - b_bahrain
-  - b_najd
-  - b_shammar
+  - 61-k_egypt
+  - 61-k_yemen
+  - 61-k_syria
+  - 22-d_mecca
+  - 24-d_bahrain
+  - 24-d_najd
+  - 24-d_shammar
 - - e_europe
-  - k_east_francia
-  - k_france
-  - k_bavaria
-  - k_aquitaine
-  - c_latium
-  - c_lombardia
-  - b_alsace
-  - b_toscana
-  - b_genoa
-  - b_capua
-  - b_west_franconia
+  - 61-k_east_francia
+  - 61-k_france
+  - 61-k_bavaria
+  - 61-k_aquitaine
+  - 22-d_latium
+  - 22-d_lombardia
+  - 24-d_alsace
+  - 24-d_toscana
+  - 24-d_genoa
+  - 24-d_capua
+  - 24-d_west_franconia
 - - e_eeurope
-  - k_norway
-  - k_burgundy
-  - k_hungary
-  - c_kiev
-  - b_silesia
-  - b_bohemia
-  - b_amdo
+  - 61-k_norway
+  - 61-k_burgundy
+  - 61-k_hungary
+  - 22-d_kiev
+  - 24-d_silesia
+  - 24-d_bohemia
+  - 24-d_amdo
 n_x: 171
 n_y: 57
 max_x: 5632

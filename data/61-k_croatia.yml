@@ -141,7 +141,10 @@ children:
   l: Lower Bosnia
   title: d_lower_bosna
 color: 122 46 58
-cul: ''
+cul: croatian
 l: Croatia
-rel: ''
+rel: orthodox
 title: k_croatia
+rough: forest
+tag: CRO
+holy: ragusa

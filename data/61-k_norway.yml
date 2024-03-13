@@ -1,0 +1,177 @@
+﻿children:
+- children:
+  - children:
+    - "b_nidaros|Ni\xF0ar\xF3ss"
+    - b_eynafylki|Eynafylki
+    - b_verdala|Verdalr
+    - b_hitrar|Hitrar
+    - b_raumsdali|Raumsdalr
+    - "b_northri_more|Nor\xF0rm\xE6rr"
+    color: 130 22 85
+    l: "\xDEr\xE1ndheimr"
+    title: c_trandheim
+  - children:
+    - "b_firdafylki|\xDAlfasund"
+    - "b_jolster|Sto\xF0reimr"
+    - "b_sunnmore|Sunnm\xE6rr"
+    - "b_voss|V\xF6rs"
+    color: 170 55 75
+    l: "Fir\xF0afylki"
+    title: c_firdafylki
+  - children:
+    - "b_bjorgvin|Bj\xF6rgyn"
+    - "b_northrihordalandi|Nor\xF0rh\xF6r\xF0aland"
+    - "b_sunnhordalandi|Sunnh\xF6r\xF0aland"
+    - "b_hardanger|Har\xF0angr"
+    color: 170 85 45
+    l: "H\xF6r\xF0aland"
+    title: c_hordalandi
+  - children:
+    - "b_jatharr|Ja\xF0arr"
+    - "b_ryfylki|R\xFDgjarfylki"
+    - "b_haugelandi|\xD6gvaldsnes"
+    - "b_fjarlandi|S\xFDrstr\xF6nd"
+    color: 170 100 30
+    l: Rogaland
+    title: c_rogalandi
+  - children:
+    - "b_sognfylki|L\xFAsakaupangr"
+    - b_stolsheimen|Hof
+    - b_bremanger|Ruslar
+    - b_dale|Drifeyjar
+    color: 185 75 60
+    l: Sogn
+    title: c_sogn
+  color: 150 30 80
+  l: "\xDEr\xE6ndal\xF6g"
+  title: d_trandalog
+- children:
+  - children:
+    - "b_oslosyslar|\xD3sl\xF3"
+    - b_austfold|Stangir
+    - b_borgarsyslar|Sarpsborg
+    - "b_romerriki|Raumar\xEDki"
+    color: 190 25 40
+    l: "Vingulm\xF6rk"
+    title: c_vingulmork
+  - children:
+    - "b_tunsberg|T\xFAnsberg"
+    - "b_skiringssal|Sk\xEDringssalr"
+    - b_drafn|Drafn
+    - "b_ringariki|Hr\xEDngar\xEDki"
+    color: 205 5 60
+    l: Vestfold
+    title: c_vestfold
+  - children:
+    - b_bagahus|Konungahella
+    - "b_ranariki|R\xE1nariki"
+    - b_uddevalla|Uddevalla
+    color: 220 4 40
+    l: Elfinn
+    title: c_raniriki
+  - children:
+    - "b_telemark|R\xFDgjarbit"
+    - b_heddall|Grenland
+    - "b_numedall|\xDEelam\xF6rk"
+    color: 205 50 60
+    l: "\xDEelam\xF6rk"
+    title: c_telemark
+  color: 220 4 40
+  l: "V\xEDkin"
+  title: d_viken
+- children:
+  - children:
+    - b_froso|Freysey
+    - b_graftavallen|Undursey
+    - "b_skalstugan|\xC1nn"
+    - "b_krokar|St\xF3rs\xE6r"
+    color: 75 20 70
+    l: Jamtaland
+    title: c_jamtfir
+  - children:
+    - b_helgum|Helgum
+    - b_indal|Inndalr
+    - "b_finnforsar|Finnf\xF6rsar"
+    - "b_follinge|F\xF6ling"
+    color: 45 0 50
+    l: Helgum
+    title: c_helgum
+  - children:
+    - "b_morarna|M\xF3rar"
+    - "b_ostavall|Eystriv\xF6llr"
+    - b_ragunda|Rafunda
+    color: 65 0 70
+    l: "M\xF3rar"
+    title: c_morarna
+  - children:
+    - "b_tanna|Tenn\xE1"
+    - "b_storsjo|Hei\xF0v\xEDk"
+    - b_sveg|Sveg
+    color: 65 20 80
+    l: Herdalr
+    title: c_harjadalen
+  color: 75 20 70
+  l: Jamtaland
+  title: d_jamtland
+- children:
+  - children:
+    - b_hedmork|Hamarr
+    - b_valdres|Valdres
+    - b_stange|Stange
+    - b_gauldala|Gauldalr
+    color: 80 30 30
+    l: "Hei\xF0m\xF6rk"
+    title: c_hedmork
+  - children:
+    - b_suthri_gudbrandsdali|Steig
+    - "b_northri_gudbrandsdali|Har\xF0kinn"
+    - b_dovre|Dofrafjall
+    - b_orkdala|Orkadalr
+    color: 95 20 30
+    l: "Gu\xF0brandsdalir"
+    title: c_gudbrandsdalir
+  - children:
+    - "b_northri_eystridali|Nor\xF0r Eystridalr"
+    - "b_suthri_eystridali|Su\xF0r Eystridalr"
+    - "b_stjordala|Stj\xF3rdalr"
+    color: 85 45 30
+    l: Eystridalir
+    title: c_eystridalir
+  color: 80 30 30
+  l: "Uppl\xF6nd"
+  title: d_dalir
+- children:
+  - children:
+    - "b_vastvagborg|V\xE1gar"
+    - b_bjarkoy|Bjarkey
+    - b_vagan|Leirnes
+    - b_torgar|Torgar
+    color: 210 150 255
+    l: "L\xF3f\xF3tr"
+    title: c_vastvag
+  - children:
+    - "b_bothin|Bo\xF0in"
+    - "b_rodoy|Rau\xF0ey"
+    - "b_aarborte|Ra\xF0und"
+    - b_sandnes|Sandnes
+    color: 225 160 225
+    l: "Bo\xF0in"
+    title: c_bothin
+  - children:
+    - b_utan_namdal|Ytri Naumudalr
+    - b_innan_namdal|Innri Naumudalr
+    - b_grong|Granungar
+    color: 215 140 200
+    l: "Naumd\xE6lafylki"
+    title: c_namdalfylki
+  color: 210 150 255
+  l: "H\xE1logaland"
+  title: d_halogaland
+color: 130 4 40
+cul: norwegian
+l: Norway
+rel: asatru
+title: k_norway
+tag: NOR
+rough: forest
+holy: hedmork

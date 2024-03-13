@@ -473,11 +473,10 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
     for cont_ind, cont_list in enumerate(config["CONTINENT_LISTS"]):
         bookmark_buffer += "bm_1000_" + region_trees[cont_ind].title + " {\n\tstart_date=1000.1.1\n\tis_playable = yes\n\tgroup = bm_group_1000\n\n\tweight = {\n\t\tvalue = 0\n\t}\n\n"
         for region in cont_list:
-            with open(os.path.join("data", region[:2] + "template.yaml"),'r') as inf:
+            rtype, region = region.split("-")
+            with open(os.path.join("data", rtype + "_template.yml"),'r') as inf:
                 template = yaml.load(inf, yaml.Loader)
             # Somehow grab the appropriate region_tree
-            if region.startswith("c") or region.startswith("b"):  # This is sort of a hack; I should figure out a better way to point to centers and borders.
-                region = "d" + region[1:]
             region_tree_search = [y for y in [x.find_by_title(region) for x in region_trees] if y is not None]  # This feels super dumb
             if len(region_tree_search) == 0:  # This is a special title.
                 with open(os.path.join(file_dir, "history", "titles", region+".txt"),'w', encoding='utf_8_sig') as outf:
