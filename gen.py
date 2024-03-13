@@ -468,7 +468,7 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
     if weight_from_cube is None:
         weight_from_cube = {cub: random.randint(1,8) for cub in valid_cubes(n_x,n_y)}
     if num_centers is None:
-        num_centers = len(weight_from_cube) // (4 * config["KINGDOM_SIZE"])
+        num_centers = len(weight_from_cube) // (3 * config["KINGDOM_SIZE"])
     centers, chunks, cids = create_chunks(weight_from_cube, num_centers)
     ind = -1
     for cind, cont_list in enumerate(config["CONTINENT_LISTS"]):

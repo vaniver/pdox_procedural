@@ -1,0 +1,147 @@
+children:
+- children:
+  - children:
+    - b_toulon|Toulon
+    - b_dragugnian|Draguignan
+    - b_castellane|Castellane
+    - b_marseille|Marseille
+    - b_aix|Aix
+    - b_digne|Digne
+    color: 165 50 105
+    l: Provence
+    title: c_provence
+  - children:
+    - b_forcalquier|Forcalquier
+    - b_apt|Apt
+    - b_embrun|Embrun
+    - "b_briancon|Brian\xE7on"
+    color: 165 20 65
+    l: Forcalquier
+    title: c_forcalquier
+  - children:
+    - b_nice|Nice
+    - b_grasse|Grasse
+    - b_barcelonnette|Barcelonnette
+    - b_puget|Puget
+    color: 195 75 90
+    l: Nice
+    title: c_nice
+  - children:
+    - b_arles|Arles
+    - b_orange|Orange
+    - b_avignon|Avignon
+    - b_vaison|Vaison
+    color: 180 30 70
+    l: Venaissin
+    title: c_venaissin
+  - children:
+    - b_monteil|Monteil
+    - b_die|Die
+    - b_valence|Valence
+    - b_gap|Gap
+    color: 195 70 95
+    l: Valentinois
+    title: c_valentinois
+  color: 145 37 67
+  l: Provence
+  title: d_provence
+- children:
+  - children:
+    - b_lyon|Lyon
+    - b_villars|Villars
+    - b_beaujeu|Beaujeu
+    - b_ivrea|Ivrea
+    color: 95 6 70
+    l: Lyon
+    title: c_lyon
+  - children:
+    - b_grenoble|Grenoble
+    - b_vienne|Vienne
+    - b_chartreuse|Paladru
+    - b_romans|Romans
+    color: 120 10 80
+    l: Viennois
+    title: c_viennois
+  - children:
+    - b_feurs|Feurs
+    - b_montbrison|Montbrison
+    - b_roanne|Roanne
+    color: 166 28 127
+    l: Forez
+    title: c_forez
+  - children:
+    - b_viviers|Viviers
+    - b_annonay|Annonay
+    - "b_neuchatel|Neuch\xE2tel"
+    color: 195 70 95
+    l: Viviers
+    title: c_viviers
+  color: 115 26 90
+  l: Viennois
+  title: d_dauphine
+- children:
+  - children:
+    - "b_moutiers|Mo\xFBtiers"
+    - b_saint_michel_de_maurienne|Saint-Michel-de-Maurienne
+    - "b_chambery|Chamb\xE9ry"
+    - b_belley|Belley
+    color: 81 8 14
+    l: Savoie
+    title: c_savoie
+  - children:
+    - b_geneva|Geneva
+    - b_annecy|Annecy
+    - b_thonon_les_bains|Thonon-les-Bains
+    - b_faucigny|Faucigny
+    color: 175 40 65
+    l: Geneva
+    title: c_geneva
+  - children:
+    - b_biel|Biel
+    - b_lucerne|Lucerne
+    - b_martigny|Martigny
+    color: 150 70 15
+    l: Aargau
+    title: c_aargau
+  - children:
+    - b_bern|Bern
+    - b_lausanne|Lausanne
+    - b_thun|Thun
+    color: 139 30 10
+    l: Bern
+    title: c_bern
+  color: 101 8 34
+  l: Savoy
+  title: d_savoie
+- children:
+  - children:
+    - "b_besancon|Besan\xE7on"
+    - b_vesoul|Vesoul
+    - b_morteau|Morteau
+    - b_gy|Gy
+    color: 139 10 38
+    l: Besancon
+    title: c_besancon
+  - children:
+    - b_dole|Dole
+    - b_quingey|Quingey
+    - b_lons_le_saunier|Lons-le-Saunier
+    - b_salins|Salins
+    color: 170 35 70
+    l: Dole
+    title: c_dole
+  - children:
+    - b_bourg|Bourg
+    - b_champagnole|Champagnole
+    - b_ornans|Ornans
+    color: 199 82 112
+    l: Bresse
+    title: c_bresse
+  color: 159 20 58
+  l: Upper Burgundy
+  title: d_upper_burgundy
+color: 134 0 37
+cul: occitan
+l: Burgundy
+rel: catholic
+title: k_burgundy

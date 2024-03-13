@@ -1,0 +1,146 @@
+children:
+- children:
+  - children:
+    - "b_visegrad_hun|Vi\u0161egrad"
+    - b_pest|Pest
+    - "b_cegled|Cegl\xE9d"
+    - "b_kecskemet|Kecskem\xE9t"
+    - b_esztergom|Esztergom
+    - "b_beny|B\xE9ny"
+    color: 245 125 95
+    l: Visegrad
+    title: c_visegrad
+  - children:
+    - b_hewes|Heves
+    - b_tur|Tur
+    - b_szolnok|Szolnok
+    - "b_gyongospata|Gy\xF6ngy\xF6spata"
+    color: 255 140 100
+    l: Heves
+    title: c_hewes
+  - children:
+    - "b_komarom|Kom\xE1rom"
+    - "b_batorkeszi|B\xE1torkeszi"
+    - b_eger|Eger
+    - "b_kesmark|Ke\u017Emarok"
+    color: 245 95 85
+    l: "Kom\xE1rom"
+    title: c_komarom
+  - children:
+    - "b_szekesfehervar|Sz\xE9kesfeh\xE9rv\xE1r"
+    - "b_csakvar|Cs\xE1kv\xE1r"
+    - b_kalocsa|Kalocsa
+    - "b_spis|Spi\u0161"
+    color: 240 122 75
+    l: "Sz\xE9kesfeh\xE9rv\xE1r"
+    title: c_szekesfehervar
+  - children:
+    - "b_trenscen|Tren\u010D\xEDn"
+    - "b_puho|Puh\xF3"
+    - b_zsolna|Zsolna
+    - "b_turoc|Tur\xF3c"
+    color: 205 85 100
+    l: "Tren\u010D\xEDn"
+    title: c_trenscen
+  color: 245 125 95
+  l: Visegrad
+  title: d_visegrad
+- children:
+  - children:
+    - "b_ungvar|Ungv\xE1r"
+    - b_nagyberezna|Nagyberezna
+    - "b_saris|\u0160ari\u0161"
+    - b_barfta|Barfta
+    color: 146 25 15
+    l: "Ungv\xE1r"
+    title: c_ungvar
+  - children:
+    - "b_zemplen|Zempl\xE9n"
+    - b_szerencs|Szerencs
+    - b_zynna|Zynna
+    - b_toporo|Toporo
+    color: 155 30 30
+    l: "Zempl\xE9n"
+    title: c_zemplen
+  - children:
+    - "b_abauj|Aba\xFAj"
+    - b_kassa|Kassa
+    - b_torna|Torna
+    color: 190 10 10
+    l: Abauj
+    title: c_abauj
+  - children:
+    - b_borsod|Borsod
+    - b_miskolc|Miskolc
+    - "b_szendro|Szendr\u0151"
+    color: 135 50 50
+    l: Borsod
+    title: c_borsod
+  color: 156 15 15
+  l: "Ungv\xE1r"
+  title: d_ungvar
+- children:
+  - children:
+    - b_nyitra|Nitra
+    - b_pecsen|Pecsen
+    - b_bajmoc|Bajmoc
+    - "b_sasvar|Sasv\xE1r"
+    color: 228 62 90
+    l: Nitra
+    title: c_nyitra
+  - children:
+    - b_hont|Hont
+    - "b_nograd|N\xF3gr\xE1d"
+    - b_balassagyarmat|Balassagyarmat
+    - b_koporna|Koporna
+    color: 210 55 100
+    l: Hont
+    title: c_hont
+  - children:
+    - b_bars|Bars
+    - b_komorcbanya|Komorcbanya
+    - b_losonc|Losonc
+    color: 240 40 100
+    l: Bars
+    title: c_bars
+  - children:
+    - b_gemer|Gemer
+    - b_murany|Murany
+    - b_rimaszombat|Rimaszombat
+    color: 230 37 69
+    l: Gemer
+    title: c_gemer
+  color: 228 62 90
+  l: Nitra
+  title: d_nyitra
+- children:
+  - children:
+    - "b_gyor|Gy\xF6r"
+    - b_moson|Moson
+    - "b_vasvar|Vasv\xE1r"
+    - "b_kormend|K\xF6rmend"
+    color: 208 109 107
+    l: Gyor
+    title: c_gyor
+  - children:
+    - b_sopron|Sopron
+    - "b_kapuvar|Kapuv\xE1r"
+    - "b_koszeg|K\xF6szeg"
+    color: 255 150 150
+    l: Sopron
+    title: c_sopron
+  - children:
+    - "b_veszprem|Veszpr\xE9m"
+    - b_zirc|Zirc
+    - "b_vasarhely|V\xE1s\xE1rhely"
+    color: 240 150 130
+    l: "Veszpr\xE9m"
+    title: c_veszprem
+  color: 208 109 107
+  l: Gyor
+  title: d_gyor
+color: 250 120 90
+cul: ''
+l: Hungary
+rel: ''
+title: k_hungary

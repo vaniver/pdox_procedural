@@ -1,0 +1,146 @@
+children:
+- children:
+  - children:
+    - b_regensburg|Regensburg
+    - b_tegernheim|Tegernheim
+    - b_abensberg|Abensberg
+    - b_leonsberg|Leonsberg
+    - b_eschenlohe|Eschenlohe
+    - "b_tolz|T\xF6lz"
+    color: 80 90 90
+    l: Regensburg
+    title: c_regensburg
+  - children:
+    - b_falkenstein|Falkenstein
+    - b_marquardstein|Marquardstein
+    - b_geisenhausen|Geisenhausen
+    - b_erding|Erding
+    color: 70 80 80
+    l: Falkenstein
+    title: c_falkenstein
+  - children:
+    - b_ingolstadt|Ingolstadt
+    - "b_munchsmunster|M\xFCnchsm\xFCnster"
+    - "b_niederschonenfeld|Niedersch\xF6nenfeld"
+    - b_rothenburg|Rothenburg
+    color: 80 80 95
+    l: Ingolstadt
+    title: c_ingolstadt
+  - children:
+    - "b_munchen|M\xFCnchen"
+    - b_aheim|Aheim
+    - b_wolfratshausen|Wolfratshausen
+    - "b_ilmunster|Ilmm\xFCnster"
+    color: 75 75 75
+    l: "M\xFCnchen"
+    title: c_munchen
+  - children:
+    - b_passau|Passau
+    - b_waldkirchen|Waldkirchen
+    - "b_scharding|Sch\xE4rding"
+    - b_deggendorf|Deggendorf
+    color: 80 80 80
+    l: Passau
+    title: c_passau
+  color: 80 90 90
+  l: Bavaria
+  title: d_bavaria
+- children:
+  - children:
+    - b_augsburg|Augsburg
+    - b_friedberg|Friedberg
+    - b_lechrain|Lechrain
+    - b_kaufbeuren|Kaufbeuren
+    color: 50 50 50
+    l: Augsburg
+    title: c_augsburg
+  - children:
+    - b_ravensburg|Ravensburg
+    - b_bregenz|Bregenz
+    - b_burgau|Burgau
+    - b_kirchberg|Kirchenberg
+    color: 65 60 65
+    l: Ravensburg
+    title: c_ravensburg
+  - children:
+    - b_schongau|Schongau
+    - b_peiting|Peiting
+    - b_hohenschwangau|Hohenschwangau
+    color: 45 40 45
+    l: Alpsee
+    title: c_alpsee
+  - children:
+    - b_kempten|Kempten
+    - b_marsetten|Marsetten
+    - b_memmingen|Memmingen
+    color: 25 25 25
+    l: Kempten
+    title: c_kempten
+  color: 50 50 50
+  l: Augsburg
+  title: d_augsburg
+- children:
+  - children:
+    - b_salzburg|Salzburg
+    - b_braunau|Braunau
+    - b_traunstein|Traunstein
+    - b_laufen|Laufen
+    color: 110 110 110
+    l: Salzburg
+    title: c_salzburg
+  - children:
+    - b_berchtesgaden|Berchtesgaden
+    - b_laukental|Leukental
+    - "b_kitzbuhel|Kitzb\xFChel"
+    - b_hallein|Hallein
+    color: 115 105 115
+    l: Berchtesgaden
+    title: c_berchtesgaden
+  - children:
+    - b_hallstatt|Hallstatt
+    - b_liezen|Liezen
+    - b_wels|Wels
+    color: 105 105 115
+    l: Hallstatt
+    title: c_hallstatt
+  - children:
+    - b_schaumberg|Schaumberg
+    - b_strasswalchen|Strasswalchen
+    - b_ried|Ried
+    color: 120 120 120
+    l: Schaumberg
+    title: c_schaumberg
+  color: 110 110 110
+  l: Salzburg
+  title: d_salzburg
+- children:
+  - children:
+    - b_eichtstad|Eichstadt
+    - b_hirschberg|Hirschberg
+    - b_neue_weissenburg|Neue Weissenburg
+    - b_neumarkt|Neumarkt
+    color: 110 100 85
+    l: "Eichst\xE4tt"
+    title: c_eichstadt
+  - children:
+    - b_hohenburg|Hohenburg
+    - b_cham|Cham
+    - b_wenzenbach|Wenzenbach
+    color: 120 105 70
+    l: Hohenburg
+    title: c_hohenburg
+  - children:
+    - b_parsberg|Parsberg
+    - b_lengenfeld|Lengenfeld
+    - b_sulzbach|Sulzbach
+    color: 100 90 70
+    l: Parsberg
+    title: c_parsberg
+  color: 110 100 85
+  l: Nordgau
+  title: d_nordgau
+color: 70 80 80
+cul: bavarian
+l: Bavaria
+rel: catholic
+title: k_bavaria

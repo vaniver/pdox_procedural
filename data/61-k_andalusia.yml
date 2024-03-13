@@ -1,0 +1,147 @@
+children:
+- children:
+  - children:
+    - b_cordoba|Cordoba
+    - b_cantillana|Cantillana
+    - b_guadiato|Guadiato
+    - b_pedroche|Pedroche
+    - b_alarcos|Alarcos
+    - "b_almader|Almad\xE9n"
+    color: 60 180 12
+    l: Cordoba
+    title: c_cordoba
+  - children:
+    - "b_jaen|Ja\xE9n"
+    - "b_andujar|And\xFAjar"
+    - b_ubeda|Ubeda
+    - b_moura|Moura
+    color: 65 155 40
+    l: "Ja\xE9n"
+    title: c_andujar
+  - children:
+    - b_calatrava|Calatrava
+    - "b_tomelloso|Valdepe\xF1as"
+    - b_mentesa|Mentesa
+    - b_serpa|Serpa
+    color: 25 205 20
+    l: Calatrava
+    title: c_calatrava
+  - children:
+    - b_malagon|Malagon
+    - b_cabaneros|Cabaneros
+    - b_lajara|La Jara
+    - b_lapueblademontalban|La Puebla de Montalban
+    color: 195 165 10
+    l: Malagon
+    title: c_malagon
+  - children:
+    - b_ucles|Ucles
+    - b_mora|Mora
+    - "b_ocana|Oca\xF1a"
+    - b_quintanar|Quintanar
+    color: 190 130 20
+    l: "Ucl\xE9s"
+    title: c_mora
+  color: 60 180 12
+  l: Cordoba
+  title: d_cordoba
+- children:
+  - children:
+    - b_sevilla|Seville
+    - b_carmona|Carmona
+    - b_almonte|Almonte
+    - "b_triana|Aznalc\xF3llar"
+    color: 150 218 21
+    l: Sevilla
+    title: c_sevilla
+  - children:
+    - b_niebla|Niebla
+    - b_huelva|Huelva
+    - b_ayamonte|Ayamonte
+    - b_zafra|Aracena
+    color: 180 200 0
+    l: Niebla
+    title: c_niebla
+  - children:
+    - b_algeciras|Algeciras
+    - b_arcos|Arcos
+    - b_moron|Moron
+    color: 130 175 0
+    l: Algeciras
+    title: c_algeciras
+  - children:
+    - "b_cadiz|C\xE1diz"
+    - b_tarifa|Tarifa
+    - "b_jerez|Jer\xE9z"
+    color: 175 235 15
+    l: Cadiz
+    title: c_cadiz
+  color: 150 218 21
+  l: Seville
+  title: d_sevilla
+- children:
+  - children:
+    - b_toledo|Toledo
+    - b_maqueda|Maqueda
+    - b_talavera|Talavera
+    - b_huete|Huete
+    color: 212 151 12
+    l: Toledo
+    title: c_toledo
+  - children:
+    - b_madrid|Madrid
+    - b_gudalajara|Gudalajara
+    - b_villarejodesalvanes|Villarejo de Salvanes
+    - b_arganda|Arganda
+    color: 230 185 15
+    l: Madrid
+    title: c_madrid
+  - children:
+    - b_molina|Molina
+    - b_medinaceli|Medinaceli
+    - "b_siguenza|Sig\xFCenza"
+    color: 195 125 10
+    l: Molina
+    title: c_molina
+  - children:
+    - b_cuenca|Cuenca
+    - "b_altotajo|Hu\xE9lamo"
+    - b_zurita|Zorita
+    color: 210 165 40
+    l: Cuenca
+    title: c_cuenca
+  color: 212 151 12
+  l: Toledo
+  title: d_toledo
+- children:
+  - children:
+    - b_granada|Granada
+    - b_quesada|Huescar
+    - b_guadiz|Guadix
+    - b_cabra|Cabra
+    color: 40 150 40
+    l: Granada
+    title: c_granada
+  - children:
+    - b_malaga|Malaga
+    - b_nerja|Nerja
+    - b_antequera|Antequera
+    - b_motril|Motril
+    color: 20 130 20
+    l: Malaga
+    title: c_malaga
+  - children:
+    - "b_almeria|Almer\xEDa"
+    - b_lorca|Lorca
+    - b_baza|Baza
+    color: 65 110 40
+    l: Almeria
+    title: c_almeria
+  color: 40 150 40
+  l: Granada
+  title: d_granada
+color: 31 138 40
+cul: ''
+l: Andalusia
+rel: ''
+title: k_andalusia

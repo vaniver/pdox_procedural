@@ -1,0 +1,147 @@
+children:
+- children:
+  - children:
+    - "b_angouleme|Angoul\xEAme"
+    - b_saint_junien|Saint-Junien
+    - b_cognac|Cognac
+    - b_pardiac|Pardiac
+    - b_agen|Agen
+    - b_agenais|Agenais
+    color: 43 24 226
+    l: "Angoul\xEAme"
+    title: c_angouleme
+  - children:
+    - b_la_rochelle|La Rochelle
+    - b_taillebourg|Taillebourg
+    - b_tarbes|Tarbes
+    - b_la_tremouille|La Tremouille
+    color: 35 20 200
+    l: Aunis
+    title: c_aunis
+  - children:
+    - b_limoges|Limoges
+    - "b_chalus|Ch\xE2lus"
+    - b_ventadour|Ventadour
+    - b_turenne|Turenne
+    color: 35 10 255
+    l: Limousin
+    title: c_limousin
+  - children:
+    - "b_perigueux|P\xE9rigueux"
+    - b_nontron|Nontron
+    - b_montignac|Montignac
+    - b_bergerac|Bergerac
+    color: 35 10 215
+    l: "P\xE9rigord"
+    title: c_perigord
+  - children:
+    - b_saintonge|Saintonge
+    - b_jonzac|Jonzac
+    - b_royan|Royan
+    - b_saintes|Saintes
+    color: 60 40 250
+    l: Saintonge
+    title: c_saintonge
+  color: 43 24 226
+  l: Aquitaine
+  title: d_aquitaine
+- children:
+  - children:
+    - b_bordeaux|Bordeaux
+    - "b_medoc|M\xE9doc"
+    - b_blaye|Blaye
+    - b_fronsac|Fronsac
+    color: 81 30 243
+    l: Bordeaux
+    title: c_bordeaux
+  - children:
+    - b_albret|Albret
+    - b_tartas|Tartas
+    - b_la_teste_de_buch|La Teste-de-Buch
+    - b_langon|Langon
+    color: 80 50 190
+    l: Albret
+    title: c_albret
+  - children:
+    - b_bayonne|Bayonne
+    - b_dax|Dax
+    - b_mimizan|Mimizan
+    color: 105 45 245
+    l: Labourd
+    title: c_labourd
+  - children:
+    - b_marsan|Marsan
+    - b_bazadais|Bazadais
+    - b_gabardan|Gabardan
+    color: 100 35 225
+    l: Marsan
+    title: c_marsan
+  color: 81 30 243
+  l: Gascogne
+  title: d_gascogne
+- children:
+  - children:
+    - b_poitiers|Poitiers
+    - b_ruffec|Ruffec
+    - "b_chatellerault|Ch\xE2tellerault"
+    - b_loudun|Loudun
+    color: 50 50 130
+    l: Poitiers
+    title: c_poitiers
+  - children:
+    - b_thouars|Thouars
+    - b_parthenay|Parthenay
+    - b_bressuire|Bressuire
+    - b_fontenay|Fontenay
+    color: 35 35 130
+    l: Thouars
+    title: c_thouars
+  - children:
+    - b_lusignan|Lusignan
+    - b_melle|Melle
+    - b_niort|Niort
+    color: 30 30 105
+    l: Lusignan
+    title: c_lusignan
+  - children:
+    - b_montaigu|Montaigu
+    - b_talmont|Talmont
+    - "b_maulevrier|Maul\xE9vrier"
+    color: 55 60 150
+    l: Montaigu
+    title: c_montaigu
+  color: 50 50 130
+  l: Poitiers
+  title: d_poitou
+- children:
+  - children:
+    - b_armagnac|Armagnac
+    - b_lectoure|Lectoure
+    - b_lomagne|Lomagne
+    - "b_fesensac|F\xE9zensac"
+    color: 145 30 175
+    l: Armagnac
+    title: c_armagnac
+  - children:
+    - b_bertrand_de_comminges|Saint-Bertrand
+    - b_saint_lizier|Saint-Lizier
+    - b_astarac|Astarac
+    - b_muret|Muret
+    color: 175 55 165
+    l: Comminges
+    title: c_comminges
+  - children:
+    - b_pau|Pau
+    - b_tursan|Tursan
+    - b_oloron|Oloron
+    color: 155 50 150
+    l: "B\xE9arn"
+    title: c_bearn
+  color: 145 30 175
+  l: Armagnac
+  title: d_armagnac
+color: 101 50 253
+cul: occitan
+l: Aquitaine
+rel: catholic
+title: k_aquitaine

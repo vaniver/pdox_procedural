@@ -1,0 +1,147 @@
+children:
+- children:
+  - children:
+    - b_paris|Paris
+    - b_saint_denis|Saint-Denis
+    - b_montreuil|Montreuil
+    - b_versailles|Versailles
+    - "b_montlhery|Montlh\xE9ry"
+    - "b_etampes|\xC9tampes"
+    color: 24 52 226
+    l: Isle de France
+    title: c_ile_de_france
+  - children:
+    - b_amiens|Amiens
+    - b_corbie|Corbie
+    - "b_peronne|P\xE9ronne"
+    - b_saint_quentin|Saint-Quentin
+    color: 18 76 240
+    l: Amiens
+    title: c_amiens
+  - children:
+    - b_beaumont|Beaumont
+    - b_mantes|Mantes
+    - b_beauvais|Beauvais
+    - b_montfort|Montfort
+    color: 35 65 230
+    l: Beaumont
+    title: c_beaumont
+  - children:
+    - b_senlis|Senlis
+    - "b_crepy|Cr\xE9py"
+    - b_coucy|Coucy
+    - b_clermont|Clermont
+    color: 15 40 210
+    l: Valois
+    title: c_valois
+  - children:
+    - b_marle|Marle
+    - b_roucy|Roucy
+    - b_laon|Laon
+    - b_noyon|Noyon
+    color: 20 50 220
+    l: Vermandois
+    title: c_vermandois
+  color: 24 52 226
+  l: Valois
+  title: d_valois
+- children:
+  - children:
+    - "b_orleans|Orl\xE9ans"
+    - b_beaugency|Beaugency
+    - b_olivet|Olivet
+    - b_vierzon|Vierzon
+    color: 10 16 243
+    l: "Orl\xE9ans"
+    title: c_orleans
+  - children:
+    - b_dreux|Dreux
+    - b_chartres|Chartres
+    - b_perche|Mortagne
+    - b_nogent_le_rotrou|Nogent-le-Rotrou
+    color: 23 38 255
+    l: Chartres
+    title: c_chartres
+  - children:
+    - b_montargis|Montargis
+    - b_coutenay|Courtenay
+    - "b_chateau_renard|Ch\xE2teau Renard"
+    color: 7 15 240
+    l: Montargis
+    title: c_montargis
+  - children:
+    - b_sancerre|Sancerre
+    - b_sully_sur_loire|Sully-sur-Loire
+    - b_herry|Herry
+    color: 5 30 175
+    l: Sancerre
+    title: c_sancerre
+  color: 10 16 243
+  l: Orleans
+  title: d_orleans
+- children:
+  - children:
+    - b_reims|Reims
+    - "b_epernay|\xC9pernay"
+    - "b_chatillon|Ch\xE2tillon"
+    - "b_chateau_thierry|Ch\xE2teau-Thierry"
+    color: 7 60 160
+    l: Reims
+    title: c_reims
+  - children:
+    - b_rethel|Rethel
+    - "b_grandpre|Grandpr\xE9"
+    - "b_mezieres|M\xE9zi\xE8res"
+    - b_romigny|Romigny
+    color: 4 70 170
+    l: Rethel
+    title: c_rethel
+  - children:
+    - "b_chalons|Ch\xE2lons"
+    - b_saint_dizier|Saint-Dizier
+    - b_vitry_en_perthois|Vitry-en-Perthois
+    color: 7 60 120
+    l: Chalons
+    title: c_chalons
+  - children:
+    - b_sens|Sens
+    - b_nogent|Nogent
+    - b_aube|Aube
+    color: 20 80 145
+    l: Sens
+    title: c_sens
+  color: 7 60 160
+  l: Champagne
+  title: d_champagne
+- children:
+  - children:
+    - b_angers|Angers
+    - "b_luigne|Luign\xE9"
+    - "b_la_fleche|La Fl\xE8che"
+    - b_le_lude|Le Lude
+    color: 5 95 235
+    l: Anjou
+    title: c_anjou
+  - children:
+    - b_le_mans|Le Mans
+    - b_courcillon|Courcillon
+    - b_sarthe|Ballon
+    - b_craon|Craon
+    color: 15 80 205
+    l: Maine
+    title: c_maine
+  - children:
+    - "b_sable|Sabl\xE9"
+    - b_mayenne|Mayenne
+    - b_laval|Laval
+    color: 10 110 250
+    l: "Sabl\xE9"
+    title: c_sable
+  color: 5 95 235
+  l: Anjou
+  title: d_anjou
+color: 15 27 187
+cul: french
+l: France
+rel: catholic
+title: k_france

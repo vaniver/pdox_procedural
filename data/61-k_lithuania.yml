@@ -1,0 +1,147 @@
+children:
+- children:
+  - children:
+    - b_kernave|Kernave
+    - b_vilnius|Vilnius
+    - b_vilkmerge|Vilkmerge
+    - b_kreva|Kreva
+    - b_gulbene|Gulbene
+    - b_allenstein|Alnasteini
+    color: 140 28 28
+    l: Kernave
+    title: c_kernave
+  - children:
+    - b_braslau|Braslau
+    - b_utena|Utena
+    - b_valkininkai|Valkininkai
+    - b_ortelsburg|Sctino
+    color: 90 10 10
+    l: Braslau
+    title: c_braslau
+  - children:
+    - b_trakai|Trakai
+    - b_kaunas|Kaunas
+    - b_merkine|Merkine
+    - b_aliten|Aliten
+    color: 100 28 28
+    l: Trakai
+    title: c_trakai
+  - children:
+    - "b_panemune|Panem\xFCne"
+    - b_vilkaviskis|Vilkaviskis
+    - b_suvalkai|Suvalkai
+    - b_sejny|Sejny
+    color: 115 45 45
+    l: Yatvyagi
+    title: c_yatvyagi
+  - children:
+    - b_lotzen|Rins
+    - b_lyck|Luks
+    - b_angerburg|Anger
+    - b_niedenburg|Nidzia
+    color: 175 85 105
+    l: Sudovian
+    title: c_angerburg
+  color: 81 0 0
+  l: Lithuania
+  title: d_lithuanians
+- children:
+  - children:
+    - b_uxkull|Jurmala
+    - b_dobele|Dobele
+    - b_mitau|Mitau
+    - b_neuenburg|Neuenburg
+    color: 200 40 40
+    l: Zemigalians
+    title: c_zemigalians
+  - children:
+    - b_grobin|Grobin
+    - b_bandava|Bandava
+    - b_duvzare|Duvzare
+    - b_ceklis|Ceklis
+    color: 160 35 35
+    l: Grobin
+    title: c_grobin
+  - children:
+    - b_selpils|Selpils
+    - b_oknist|Oknist
+    - b_bauska|Bauska
+    color: 192 14 14
+    l: Selpils
+    title: c_selpils
+  - children:
+    - b_piltene|Piltene
+    - b_dundaga|Dundaga
+    - b_kandava|Kandava
+    color: 182 24 24
+    l: Vanemane
+    title: c_vanemane
+  color: 182 16 16
+  l: Courland
+  title: d_courland
+- children:
+  - children:
+    - b_raseiniai|Raseiniai
+    - b_jurbarkas|Jurbarkas
+    - b_veliuona|Veliuona
+    - b_kedainiai|Kedainiai
+    color: 166 81 81
+    l: Raseiniai
+    title: c_raseiniai
+  - children:
+    - b_memel|Memel
+    - b_taurage|Taurage
+    - b_ragnit|Ragnit
+    - b_tilsit|Tilsit
+    color: 166 85 85
+    l: Memel
+    title: c_memel
+  - children:
+    - b_palanga|Palanga
+    - b_medeniken|Medeniken
+    - b_telsiai|Telsiai
+    color: 150 95 95
+    l: Palanga
+    title: c_palanga
+  - children:
+    - b_siauliai|Siauliai
+    - b_upyte|Upyte
+    - b_birzai|Birzai
+    color: 165 105 105
+    l: Siauliai
+    title: c_siauliai
+  color: 150 70 70
+  l: Samogitia
+  title: d_samogitia
+- children:
+  - children:
+    - b_valmiera|Valmiera
+    - b_venden|Venden
+    - b_rauna|Rauna
+    - b_aluksne|Aluksne
+    color: 100 30 40
+    l: Talava
+    title: c_talava
+  - children:
+    - b_jersika|Jersika
+    - b_jekabpils|Jekabpils
+    - b_daugavpils|Daugavpils
+    - b_rezekne|Rezekne
+    color: 90 35 35
+    l: Jersika
+    title: c_jersika
+  - children:
+    - b_kokenois|Kokenois
+    - b_cesvaine|Cesvaine
+    - b_lennewarden|Lennewarden
+    color: 100 50 50
+    l: Kokenois
+    title: c_kokenois
+  color: 110 35 35
+  l: Latigalians
+  title: d_latgalians
+color: 90 10 0
+cul: lithuanian
+l: Lithuania
+rel: baltic_pagan
+title: k_lithuania

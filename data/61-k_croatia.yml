@@ -1,0 +1,147 @@
+children:
+- children:
+  - children:
+    - b_zadar|Zadar
+    - b_nin|Nin
+    - b_biograd|Biograd
+    - b_obrovac|Obrovac
+    - b_cres|Cres
+    - b_krk|Krk
+    color: 162 53 53
+    l: Zadar
+    title: c_zadar
+  - children:
+    - b_kaseg|Kaseg
+    - b_bag|Bag
+    - b_udbina|Udbina
+    - "b_dreznik|Dre\u017Enik"
+    color: 95 25 40
+    l: Lika
+    title: c_lika
+  - children:
+    - "b_modrus|Modru\u0161"
+    - b_okic|Okic
+    - b_dubovac|Dubovac
+    - b_topusko|Topusko
+    color: 90 40 60
+    l: "Modru\u0161"
+    title: c_modrus
+  - children:
+    - b_knin|Knin
+    - b_split|Split
+    - b_bribir|Bribir
+    - "b_sibenik|\u0160ibenik"
+    color: 168 76 44
+    l: Knin
+    title: c_knin
+  - children:
+    - b_senj|Senj
+    - b_brinje|Brinje
+    - b_rijeka|Rijeka
+    - b_solin|Solin
+    color: 115 40 52
+    l: Gacka
+    title: c_gacka
+  color: 115 40 52
+  l: Croatia
+  title: d_croatia
+- children:
+  - children:
+    - b_zagreb|Zagreb
+    - b_cazma|Cazma
+    - b_samobor|Samobor
+    - b_sisak|Sisak
+    color: 130 30 60
+    l: Zagreb
+    title: c_zagreb
+  - children:
+    - b_krapina|Krapina
+    - b_krizevci|Krizevci
+    - b_koprivnica|Koprivnica
+    - b_verevce|Verevce
+    color: 160 20 50
+    l: Zagorje
+    title: c_zagorje
+  - children:
+    - "b_pozega|Po\u017Eega"
+    - b_kutina|Kutina
+    - b_brod|Brod
+    color: 120 30 45
+    l: "Po\u017Eega"
+    title: c_pozega
+  - children:
+    - b_vakovo|Vakovo
+    - b_osijek|Osijek
+    - b_orahovica|Orahovica
+    color: 190 60 95
+    l: "Vukov\xE1r"
+    title: c_vukovar
+  color: 130 30 60
+  l: Slavonia
+  title: d_slavonia
+- children:
+  - children:
+    - b_visoki|Visoki
+    - b_prozor|Prozor
+    - b_vranduk|Vranduk
+    - b_bobovac|Bobovac
+    color: 194 105 125
+    l: Rama
+    title: c_rama
+  - children:
+    - b_jajce|Jajce
+    - "b_kljucnasani|Klju\u010D na Sani"
+    - b_greben|Greben
+    - b_sokol|Sokol
+    color: 175 90 115
+    l: Donji Kraji
+    title: c_donjikraji
+  - children:
+    - b_bihac|Bihac
+    - b_krupa|Krupa
+    - b_pset|Pset
+    color: 135 55 65
+    l: Pset
+    title: c_pset
+  - children:
+    - b_vhrbosna|Vrhbosna
+    - b_srebrenica|Srebrenica
+    - b_rogatica|Rogatica
+    color: 150 105 125
+    l: Vrhbosna
+    title: c_vhrbosna
+  color: 194 115 115
+  l: Upper Bosnia
+  title: d_bosna
+- children:
+  - children:
+    - b_soli|Soli
+    - b_bijeljina|Bijeljina
+    - b_zvornik|Zvornik
+    - "b_vodicevo|Vodi\u010Devo"
+    color: 170 80 125
+    l: Soli
+    title: c_soli
+  - children:
+    - b_srebrenik|Srebrenik
+    - b_usora|Doboj
+    - b_maglaj|Maglaj
+    - b_tolisa|Tolisa
+    color: 170 70 100
+    l: Usora
+    title: c_usora
+  - children:
+    - b_banjaluka|Banja Luka
+    - "b_gradiska|Gradi\u0161ka"
+    - "b_glaz|Gla\u017E"
+    color: 125 20 90
+    l: Vrbas
+    title: c_vrbas
+  color: 180 85 120
+  l: Lower Bosnia
+  title: d_lower_bosna
+color: 122 46 58
+cul: ''
+l: Croatia
+rel: ''
+title: k_croatia

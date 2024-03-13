@@ -1,0 +1,148 @@
+children:
+- children:
+  - children:
+    - "b_krakow|Krak\xF3w"
+    - b_olsztyn|Olsztyn
+    - "b_czestochowa|Cz\u0119stochowa"
+    - "b_dabrowa_gorn|D\u0105browa G\xF3rnicza"
+    - "b_wislica|Wi\u015Blica"
+    - "b_jedrzejow|J\u0119drzej\xF3w"
+    color: 137 6 20
+    l: "Krak\xF3w"
+    title: c_krakowska
+  - children:
+    - b_lublin|Lublin
+    - b_parczew|Parczew
+    - b_goraj|Goraj
+    - "b_urzedow|Urz\u0119d\xF3w"
+    color: 147 40 2
+    l: Lublin
+    title: c_lubelska
+  - children:
+    - b_radom|Radom
+    - b_opoczno|Opoczno
+    - "b_ilza|I\u0142\u017Ca"
+    - "b_szydlowiec|Szyd\u0142owiec"
+    color: 150 30 5
+    l: Radom
+    title: c_radomska
+  - children:
+    - "b_sacz|S\u0105cz"
+    - b_pilzno|Pilzno
+    - b_nowytarg|Nowy Targ
+    - b_bochnia|Bochnia
+    color: 117 6 2
+    l: "S\u0105cz"
+    title: c_sacz
+  - children:
+    - b_sandomierz|Sandomierz
+    - "b_opatow|Opat\xF3w"
+    - b_kielce|Kielce
+    - "b_olesnica_MPL|Ole\u015Bnica"
+    color: 147 16 2
+    l: Sandomierz
+    title: c_sandomierska
+  color: 137 6 20
+  l: Vistulania
+  title: d_lesser_poland
+- children:
+  - children:
+    - "b_plock|P\u0142ock"
+    - "b_wyszgorod|Wyszogr\xF3d"
+    - "b_zawkrze|Szre\u0144sk"
+    - "b_ciechanow|Ciechan\xF3w"
+    color: 127 30 2
+    l: "P\u0142ock"
+    title: c_plocka
+  - children:
+    - b_czersk|Czersk
+    - b_warszawa|Warszawa
+    - b_liw|Liw
+    - "b_brodno|Br\xF3dno"
+    color: 150 40 25
+    l: Czersk
+    title: c_czerska
+  - children:
+    - b_gostynin|Gostynin
+    - b_rawa|Rawa
+    - b_sochaczew|Sochaczew
+    color: 137 30 18
+    l: Gostynin
+    title: c_gostyninska
+  - children:
+    - "b_lomza|\u0141om\u017Ca"
+    - b_wizna|Wizna
+    - b_kolno|Kolno
+    color: 127 0 70
+    l: "\u0141om\u017Ca"
+    title: c_lomzynska
+  color: 125 46 36
+  l: Mazovia
+  title: d_mazovia
+- children:
+  - children:
+    - "b_poznan|Pozna\u0144"
+    - "b_miedzyrzecz|Mi\u0119dzyrzecz"
+    - "b_czarnkow|Czarnk\xF3w"
+    - b_wronki|Wronki
+    - b_wolsztyn|Wolsztyn
+    color: 140 13 13
+    l: "Pozna\u0144"
+    title: c_poznanska
+  - children:
+    - b_gniezno|Gniezno
+    - "b_sroda|\u015Aroda"
+    - b_pyzdry|Pyzdry
+    - b_konin|Konin
+    color: 150 15 10
+    l: Gniezno
+    title: c_gnieznienska
+  - children:
+    - b_wschowa|Wschowa
+    - "b_koscian|Ko\u015Bcian"
+    - "b_srem|\u015Arem"
+    color: 135 30 30
+    l: Wschowa
+    title: c_wschowska
+  - children:
+    - b_kalisz|Kalisz
+    - "b_kozmin|Ko\u017Amin"
+    - b_turek|Turek
+    color: 160 6 20
+    l: Kalisz
+    title: c_kaliska
+  color: 140 13 13
+  l: Polania
+  title: d_wielkopolska
+- children:
+  - children:
+    - b_kruszwica|Kruszwica
+    - "b_wloclawek|W\u0142oc\u0142awek"
+    - "b_inowroclaw|Inowroc\u0142aw"
+    - b_bydgoszcz|Bydgoszcz
+    color: 190 75 50
+    l: Kujawy
+    title: c_kujawy
+  - children:
+    - b_sieradz|Sieradz
+    - "b_piotrkow|Piotrk\xF3w"
+    - "b_przedborz|Przedb\xF3rz"
+    - b_radomsko|Radomsko
+    color: 210 75 10
+    l: Sieradz
+    title: c_sieradzka
+  - children:
+    - "b_leczyca|\u0141\u0119czyca"
+    - "b_lodz|\u0141\xF3d\u017A"
+    - "b_klodawa|K\u0142odawa"
+    color: 210 50 10
+    l: "\u0141\u0119czyca"
+    title: c_leczycka
+  color: 190 75 50
+  l: Kuyavia
+  title: d_kuyavia
+color: 150 23 23
+cul: polish
+l: Poland
+rel: slavic_pagan
+title: k_poland

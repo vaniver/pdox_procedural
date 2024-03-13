@@ -1,0 +1,44 @@
+children:
+- children:
+  - b_elblag|Truso
+  - b_marienburg|Malbork
+  - b_graudenz|Kwedis
+  - b_wislana|Weiksla
+  - "b_kulm|Che\u0142mno"
+  - "b_torun|Toru\u0144"
+  - "b_briesen|W\u0105brze\u017Ano"
+  color: 205 105 105
+  l: Pomesania
+  title: c_malbork
+- children:
+  - b_lautenburg|Lecbarg
+  - b_bartenstein|Lyna
+  - b_insterburg|Isrutis
+  - b_rastenburg|Aestia
+  - b_osterode|Drweca
+  color: 230 165 165
+  l: Bartia
+  title: c_bartenstein
+- children:
+  - b_konigsberg|Twangste
+  - b_labiau|Kaup
+  - b_laukitten|Pokarwis
+  - b_paterswalde|Tapiau
+  - b_ostlandsberg|Velowe
+  color: 200 105 130
+  l: Sambia
+  title: c_konigsberg
+- children:
+  - b_wormditt|Wormedeten
+  - b_mohrungen|Maurin
+  - b_braunsberg|Brus
+  - b_eylau|Ylavia
+  - b_brodnica|Lubavia
+  color: 255 110 155
+  l: Warmia
+  title: c_wormditt
+color: 200 100 100
+cul: prussian
+l: Prussia
+rel: baltic_religion
+title: d_prussia
