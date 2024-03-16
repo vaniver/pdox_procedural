@@ -39,8 +39,8 @@ CONTINENT_LISTS:
   - 24-d_tyrol
 n_x: 171
 n_y: 57
-max_x: 5632
-max_y: 2048
+max_x: 8192
+max_y: 4096
 RELIGION_DIR: "data"
 GUARANTEED_INNOS:
 - tribal

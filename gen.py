@@ -835,15 +835,23 @@ def create_data(config):
     #TODO: Assigning sea provinces should 1) look for major inland seas, like the med, 2) use more regular things that are faster for the deep ocean
     sid_from_cube, rid_from_sid, srid_from_sid = assign_sea_zones(sea_cubes, config, province_centers=sea_centers, region_centers=sea_region_centers, style=config.get("SEA_PROVINCE_STYLE", "even"))
     pid_from_cube.update({k:v + last_pid for k,v in sid_from_cube.items()})
+    sea_region = {"ocean": []}  # TODO: multiple oceans
     for k, sid in sid_from_cube.items():
         pid = sid + last_pid
         pid_from_cube[k] = pid
-        pid_from_title[f"s_{sid}"] = pid
-        name_from_pid[pid] = f"s_{sid}"
+        sea_title = f"s_{sid}"
+        pid_from_title[sea_title] = pid
+        name_from_pid[pid] = sea_title
     for sid, rid in rid_from_sid.items():
         rid_from_pid[sid + last_pid] = rid + last_rid
         srid_from_pid[sid + last_pid] = srid_from_sid[sid] + last_srid
-        name_from_rid[rid + last_rid] = "s_" + str(rid + last_rid)
+        sea_title = "s_" + str(rid + last_rid)
+        name_from_rid[rid + last_rid] = sea_title
+        if sea_title in sea_region:
+            sea_region[sea_title].append(sid + last_pid)
+        else:
+            sea_region[sea_title] = [sid + last_pid]
+            sea_region["ocean"].append(sea_title)
         terr_from_pid[sid + last_pid] = BaseTerrain.ocean
     last_pid += max(sid_from_cube.values())
     last_rid += max(rid_from_sid.values())
@@ -959,7 +967,7 @@ def create_data(config):
         type_from_pid[pid_from_cube[k]] = "sea"
     for k in lakes:
         type_from_pid[k] = "lake"
-    return continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid
+    return continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region
 
 
 if __name__ == "__main__":
@@ -981,7 +989,7 @@ if __name__ == "__main__":
     config["max_x"] = config.get("max_x", config.get("box_width", 10)*(config["n_x"]*3-3))
     config["max_y"] = config.get("max_y", config.get("box_height", 17)*(config["n_y"]*2-2))
 
-    continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid = create_data(config)
+    continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region = create_data(config)
     cultures, religions = assemble_culrels(region_trees=region_trees)  # Not obvious this should be here instead of just derived later?
     rgb_from_pid = create_colors(pid_from_cube)
     pids_from_rid = {}
@@ -1033,6 +1041,7 @@ if __name__ == "__main__":
             river_edges=river_edges,
             river_vertices=river_vertices,
             straits=straits,
+            sea_region=sea_region,
         )
     if "EU4" in config["MOD_OUTPUTS"]:
         eu4.create_mod(

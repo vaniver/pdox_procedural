@@ -16,6 +16,7 @@ USED_MASKS = {
     BaseTerrain.desert: "desert_01",
     BaseTerrain.marsh: "wetlands_02",
     BaseTerrain.jungle: "forest_jungle_01",
+    BaseTerrain.ocean: "beach_02",
 }
 
 class CK3Map(BasicMap):
@@ -25,7 +26,7 @@ class CK3Map(BasicMap):
 
     def prov_extra(self, rgb_from_pid, pid_from_cube, name_from_pid):
         """Creates definition.csv"""
-        with open(os.path.join(self.file_dir, self.map_dir, "definition.csv"), 'w', encoding="utf_8_sig") as outf:
+        with open(os.path.join(self.file_dir, self.map_dir, "definition.csv"), 'w') as outf:
             outf.write("0;0;0;0;x;x;\n")
             for pid in sorted(name_from_pid.keys()):
                 name = name_from_pid[pid]
@@ -34,7 +35,7 @@ class CK3Map(BasicMap):
 
     def height_extra(self):
         """Uses height_from_cube to generate a simple heightmap."""
-        with open(os.path.join(self.file_dir, self.map_dir, 'heightmap.heightmap'), 'w', encoding="utf_8_sig") as outf:
+        with open(os.path.join(self.file_dir, self.map_dir, 'heightmap.heightmap'), 'w') as outf:
             outf.write("heightmap_file=\"map_data/packed_heightmap.png\"\n")
             outf.write("indirection_file=\"map_data/indirection_heightmap.png\"\n")
             outf.write(f"original_heightmap_size={{ {self.max_x} {self.max_y} }}\n")
@@ -115,8 +116,8 @@ def create_adjacencies(file_dir, straits, pid_from_cube, name_from_pid, closest_
     with open(os.path.join(file_dir, "map_data", "adjacencies.csv"), 'w', encoding="utf_8_sig") as outf:
         outf.write("From;To;Type;Through;start_x;start_y;stop_x;stop_y;Comment\n")
         for strait in straits:
-            buffer = list(strait)
             fr, to = strait[0], strait[1]
+            buffer = [pid_from_cube[fr], pid_from_cube[to], strait[2]]
             if fr.sub(to).mag() == 1:
                 buffer.insert(2,"river_large")
             else:
@@ -167,9 +168,10 @@ def create_coa(file_dir, base_dir, custom_dir, title_list):
     print(f"After processing coats of arms, there were {len(title_list)} titles without coas.")
 
 
-def create_geographical_regions(file_dir, regions, all_material_types = None, no_material_types=None, all_animal_types=None, no_animal_types=None):
+def create_geographical_regions(file_dir, regions, sea_region, all_material_types = None, no_material_types=None, all_animal_types=None, no_animal_types=None):
     """Create the geographical_regions/geographical_region.txt file.
     regions is a list of RegionTrees.
+    sea_regions is a dictionary, of title: province_list or title: title_list
     This includes a bunch of material / animal things which could maybe be customized--but for now I'm going to leave this to the end user."""
     if all_material_types is None:
         all_material_types = ["wood_elm", "wood_walnut", "wood_maple", "woods_pine_and_fir", "woods_yew", "woods_dogwood", "woods_hazel", "cloth_linen", "hsb_deer_antler", "hsb_boar_tusk", "hsb_seashell",]
@@ -196,6 +198,12 @@ def create_geographical_regions(file_dir, regions, all_material_types = None, no
             outf.write(" ".join([x for x in region.all_ck3_titles() if x[0] == 'd']))
             outf.write("\n\t}\n}\n")
         all_regions = " ".join(all_regions)
+        for sregion, parts in sea_region.items():
+            if isinstance(parts[0], int):
+                outf.write(sregion + " = {\n\tprovinces = {\n\t\t" + " ".join([str(part) for part in parts]) + "\n\t}\n}\n")
+            else:
+                outf.write(sregion + " = {\n\tregions = {\n" + "\n".join(["\t\t" + part for part in parts]) + "\n\t}\n}\n")
+        outf.write("\n")
         for material in all_material_types:
             outf.write("material_"+material+" = {\n\tregions = {\n\t\t"+all_regions+"\n\t}\n}\n")
         for material in no_material_types:
@@ -519,7 +527,10 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
                         with open(src_path, encoding="utf_8_sig") as book_inf:
                             with open(os.path.join(file_dir, "common", "bookmark_portraits", bookmark_name + ".txt"), 'w', encoding="utf_8_sig") as book_outf:
                                 for line in book_inf.readlines():
-                                    book_outf.write(line)
+                                    if "bookmark_adventurers" in line:
+                                        book_outf.write(bookmark_name + "={\n")
+                                    else:
+                                        book_outf.write(line)
                     else:
                         dynasty_buffer += f"{did+doffset} = {{\n"
                         if len(prefix) > 0:
@@ -628,7 +639,7 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     shared = "version = \"0.0.1\"\n"
     shared += "tags = {\n\t\"Total Conversion\"\n}\n"
     shared += "name = \"{}\"\n".format(mod_disp_name)
-    shared += "supported_version = \"1.11.5\"\n"
+    shared += "supported_version = \"1.12.2\"\n"
     outer = "path = \"mod/{}\"\n".format(mod_name)
     
     replace_paths = [
@@ -644,7 +655,7 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     return os.path.join(file_dir, mod_name)
 
 
-def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, pid_from_title, name_from_pid, region_trees, cultures, religions, impassable, river_edges, river_vertices, straits):
+def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, pid_from_title, name_from_pid, region_trees, cultures, religions, impassable, river_edges, river_vertices, straits, sea_region):
     """Creates the CK3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
@@ -665,14 +676,15 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     # Determine major rivers and impassable mountain boundaries (done here b/c it affects provinces also)
     # Make map
     ck3map = CK3Map(file_dir, max_x=config["max_x"], max_y=config["max_y"], n_x=config["n_x"], n_y=config["n_y"])
-    ck3map.create_provinces(rgb_from_pid, pid_from_cube, ".png", name_from_pid=name_from_pid)
+    title_from_pid = {pid: title for title, pid in pid_from_title.items()}
+    ck3map.create_provinces(rgb_from_pid, pid_from_cube, ".png", name_from_pid=title_from_pid)
     ck3map.create_heightmap(height_from_vertex=height_from_vertex, file_ext=".png")
     ck3map.create_rivers(height_from_vertex, river_edges, river_vertices, base_loc=config["BASE_CK3_DIR"], file_ext=".png")
     ck3map.create_positions(name_from_pid, pid_from_cube)
     ck3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], terr_from_cube=terr_from_cube)
     ck3map.update_defines(base_dir=config["BASE_CK3_DIR"])
     create_adjacencies(file_dir=file_dir, straits=straits, pid_from_cube=pid_from_cube, name_from_pid=name_from_pid, closest_xy=lambda fr, to: closest_xy(fr, to, ck3map.box_height, ck3map.box_width))
-    create_geographical_regions(file_dir, region_trees)
+    create_geographical_regions(file_dir, region_trees, sea_region)
     if len(impassable) > 0:
         sea_min = max(impassable) + 1
     else:
