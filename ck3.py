@@ -25,7 +25,7 @@ class CK3Map(BasicMap):
 
     def prov_extra(self, rgb_from_pid, pid_from_cube, name_from_pid):
         """Creates definition.csv"""
-        with open(os.path.join(self.file_dir, self.map_dir, "definition.csv"), 'w') as outf:
+        with open(os.path.join(self.file_dir, self.map_dir, "definition.csv"), 'w', encoding="utf_8_sig") as outf:
             outf.write("0;0;0;0;x;x;\n")
             for pid in sorted(name_from_pid.keys()):
                 name = name_from_pid[pid]
@@ -34,7 +34,7 @@ class CK3Map(BasicMap):
 
     def height_extra(self):
         """Uses height_from_cube to generate a simple heightmap."""
-        with open(os.path.join(self.file_dir, self.map_dir, 'heightmap.heightmap'), 'w') as outf:
+        with open(os.path.join(self.file_dir, self.map_dir, 'heightmap.heightmap'), 'w', encoding="utf_8_sig") as outf:
             outf.write("heightmap_file=\"map_data/packed_heightmap.png\"\n")
             outf.write("indirection_file=\"map_data/indirection_heightmap.png\"\n")
             outf.write(f"original_heightmap_size={{ {self.max_x} {self.max_y} }}\n")
@@ -61,7 +61,7 @@ class CK3Map(BasicMap):
         """Create positions.txt"""
         ox = self.box_width // 3
         oy = self.box_height // 3
-        with open(os.path.join(self.file_dir, self.map_dir, "positions.txt"), 'w') as outf:
+        with open(os.path.join(self.file_dir, self.map_dir, "positions.txt"), 'w', encoding="utf_8_sig") as outf:
             for pid, name in name_from_pid.items():
                 cube = [k for k,v in pid_from_cube.items() if v == pid]
                 if len(cube) == 0:
@@ -101,7 +101,7 @@ def create_terrain_file(file_dir, terr_from_pid):
     """Writes out common/province_terrain."""
     # Masks were historically wrapped into create_heightmap, and should maybe be again.
     os.makedirs(os.path.join(file_dir, "common", "province_terrain"), exist_ok=True)
-    with open(os.path.join(file_dir, "common", "province_terrain", "00_province_terrain.txt"), 'w') as outf:
+    with open(os.path.join(file_dir, "common", "province_terrain", "00_province_terrain.txt"), 'w', encoding="utf_8_sig") as outf:
         outf.write("default_land=plains\ndefault_sea=sea\ndefault_coastal_sea=coastal_sea\n")
         for pid, terr in terr_from_pid.items():
             if terr == BaseTerrain.ocean:
@@ -112,7 +112,7 @@ def create_terrain_file(file_dir, terr_from_pid):
 def create_adjacencies(file_dir, straits, pid_from_cube, name_from_pid, closest_xy = None):
     """straits is a list of (cube, cube, pid) tuples (from, to, pid of the water region it passes thru).
     This function will create the adjacencies file (including some calculations about type and positioning)."""
-    with open(os.path.join(file_dir, "map_data", "adjacencies.csv"), 'w') as outf:
+    with open(os.path.join(file_dir, "map_data", "adjacencies.csv"), 'w', encoding="utf_8_sig") as outf:
         outf.write("From;To;Type;Through;start_x;start_y;stop_x;stop_y;Comment\n")
         for strait in straits:
             buffer = list(strait)
@@ -135,7 +135,7 @@ def create_climate(file_dir):
     """Creates the climate file."""
     # TODO: Actually determine climate from location / terrain / etc.
     os.makedirs(os.path.join(file_dir, "map_data"), exist_ok=True)
-    with open(os.path.join(file_dir, "map_data","climate.txt"),'w') as outf:
+    with open(os.path.join(file_dir, "map_data", "climate.txt"),'w', encoding="utf_8_sig") as outf:
         outf.write("mild_winter = {\n}\nnormal_winter = {\n}\nsevere_winter = {\n}\n")
 
 def create_coa(file_dir, base_dir, custom_dir, title_list):
@@ -327,6 +327,7 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
     """
     os.makedirs(os.path.join(file_dir, "common", "bookmarks", "bookmarks"), exist_ok=True)
     os.makedirs(os.path.join(file_dir, "common", "bookmarks", "groups"), exist_ok=True)
+    os.makedirs(os.path.join(file_dir, "common", "bookmark_portraits"), exist_ok=True)
     os.makedirs(os.path.join(file_dir, "common", "dynasties"), exist_ok=True)
     os.makedirs(os.path.join(file_dir, "common", "dynasty_houses"), exist_ok=True)
     os.makedirs(os.path.join(file_dir, "history", "characters"), exist_ok=True)
@@ -334,10 +335,10 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
     os.makedirs(os.path.join(file_dir, "history", "provinces"), exist_ok=True)
     os.makedirs(os.path.join(file_dir, "history", "titles"), exist_ok=True)
     os.makedirs(os.path.join(file_dir, "history", "wars"), exist_ok=True)
-    with open(os.path.join(file_dir, "history","wars","00_wars.txt"), 'w') as outf:
+    with open(os.path.join(file_dir, "history","wars","00_wars.txt"), 'w', encoding="utf_8_sig") as outf:
         outf.write("\n")
     os.makedirs(os.path.join(file_dir, "history", "province_mapping"), exist_ok=True)
-    with open(os.path.join(file_dir, "history","province_mapping","00_world.txt"), 'w') as outf:
+    with open(os.path.join(file_dir, "history","province_mapping","00_world.txt"), 'w', encoding="utf_8_sig") as outf:
         outf.write("\n")
 
     # For each culture and religion, pull up some basic data that we'll use.
@@ -497,7 +498,6 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
                         name = "ERROR"
                     outf.write(character(cid=cid, name=name, religion=religion, culture=culture, **others, dynasty=dynasty))
                 for dyn, did in template["dynasties"].items():  # Leaving dyn b/c we might want to importance-sample somehow, or pick a location name
-                    # if len(dyn_names_from_cul[culture])
                     random.shuffle(dyn_names_from_cul[culture])
                     dyn_name = dyn_names_from_cul[culture].pop()
                     prefix = ""
@@ -511,7 +511,15 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
                         if len(prefix) > 0:
                             player_buffer += f"\tprefix={prefix}\n"
                         player_buffer += f"\tname={dyn_name}\n\tculture=\"{culture}\"\n}}\n"
-                        bookmark_buffer += f"\tcharacter = {{\n\t\tname=\"bookmark_{titles[0]}\"\n\t\tdynasty={did+doffset}\n\t\ttype = male\n\t\ttitle = {titles[1]}\n\t\tgovernment = feudal_government\n\t\tculture = {culture}\n\t\treligion = {religion}\n\t\thistory_id = {coffset}\n\t\tposition = {{ {doffset * 5} 400 }}\n\t\tanimation = personality_bold\n\t}}\n\n"
+                        bookmark_name = "bookmark_" + titles[0]
+                        bookmark_buffer += f"\tcharacter = {{\n\t\tname=\"{bookmark_name}\"\n\t\tdynasty={did+doffset}\n\t\ttype = male\n\t\ttitle = {titles[1]}\n\t\tgovernment = feudal_government\n\t\tculture = {culture}\n\t\treligion = {religion}\n\t\thistory_id = {coffset}\n\t\tposition = {{ {doffset * 5} 400 }}\n\t\tanimation = personality_bold\n\t}}\n\n"
+                        src_path = os.path.join("data", "common", "bookmark_portraits", bookmark_name + ".txt")
+                        if not os.path.exists(src_path):
+                            src_path = os.path.join(base_dir, "common", "bookmark_portraits", "bookmark_adventurers_jarl_haesteinn.txt")
+                        with open(src_path, encoding="utf_8_sig") as book_inf:
+                            with open(os.path.join(file_dir, "common", "bookmark_portraits", bookmark_name + ".txt"), 'w', encoding="utf_8_sig") as book_outf:
+                                for line in book_inf.readlines():
+                                    book_outf.write(line)
                     else:
                         dynasty_buffer += f"{did+doffset} = {{\n"
                         if len(prefix) > 0:
@@ -542,7 +550,8 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
             with open(os.path.join(file_dir, "history", "titles", region+".txt"),'w', encoding='utf_8_sig') as outf:
                 outf.write(title_buf)
             doffset += len(template["dynasties"]) + 1
-            coffset += max([char["cid"] for char in template["chars"].values()]) + 1
+            if len(template["chars"]) > 0:
+                coffset += max([char["cid"] for char in template["chars"].values()]) + 1
     with open(os.path.join(file_dir, "common", "bookmarks", "bookmarks", "00_bookmarks.txt"),'w', encoding='utf_8_sig') as outf:
         outf.write(bookmark_buffer)
     with open(os.path.join(file_dir, "common", "bookmarks", "groups", "00_bookmark_groups.txt"),'w', encoding='utf_8_sig') as outf:
@@ -591,7 +600,7 @@ def create_religion(file_dir, base_dir, religions, holy_sites, custom_dir=None):
                             outf.write(line)
     with open(os.path.join(file_dir, "common", "religion", "holy_sites", "00_holy_sites.txt"), 'w', encoding='utf_8_sig') as outf:
         holy_site_locs = [os.path.join(base_dir, "common", "religion", "holy_sites", "00_holy_sites.txt")]
-        if custom_dir is not None and os.path.exists(os.path.join(custom_dir, "common","religion","holy_sites")):
+        if custom_dir is not None and os.path.exists(os.path.join(custom_dir, "common", "religion", "holy_sites")):
             holy_site_locs.insert(0, os.path.join(custom_dir, "common", "religion", "holy_sites", "00_holy_sites.txt"))
         for inf_loc in holy_site_locs:
             with open(inf_loc, 'r', encoding='utf_8_sig') as inf:
@@ -611,7 +620,7 @@ def create_religion(file_dir, base_dir, religions, holy_sites, custom_dir=None):
                         outf.write("\n")
                         copying = False
         for holy_site in holy_sites:
-            print(holy_site)  # These are the ones that didn't get found.
+            print("holy site " + holy_site + " not found!")  # These are the ones that didn't get found.
 
 
 def create_dot_mod(file_dir, mod_name, mod_disp_name):
@@ -628,9 +637,9 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
         ]
     shared += "replace_path = \"" + "\"\nreplace_path = \"".join(replace_paths)+"\""
     os.makedirs(os.path.join(file_dir, mod_name), exist_ok=True)
-    with open(os.path.join(file_dir,"{}.mod".format(mod_name)),'w') as f:
+    with open(os.path.join(file_dir,"{}.mod".format(mod_name)),'w', encoding="utf_8_sig") as f:
         f.write(shared + outer)
-    with open(os.path.join(file_dir, mod_name, "descriptor.mod".format(mod_name)),'w') as f:
+    with open(os.path.join(file_dir, mod_name, "descriptor.mod".format(mod_name)),'w', encoding="utf_8_sig") as f:
         f.write(shared)
     return os.path.join(file_dir, mod_name)
 

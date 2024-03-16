@@ -126,6 +126,7 @@ children:
     - b_sopron|Sopron
     - "b_kapuvar|Kapuv\xE1r"
     - "b_koszeg|K\xF6szeg"
+    - "b_szentgotthard|Szentgotth\xE1rd"
     color: 255 150 150
     l: Sopron
     title: c_sopron

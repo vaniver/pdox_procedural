@@ -30,8 +30,8 @@
   - b_jijel|Jijel
   color: 108 163 28
   l: Hunyan
-- children:
   title: c_hunyan
+- children:
   - b_algiers|Algiers
   - "b_medea|M\xE9d\xE9a"
   - b_tadallis|Tadallis

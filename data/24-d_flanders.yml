@@ -3,6 +3,7 @@
   - b_bruges|Bruges
   - b_gent|Gent
   - b_roeselare|Roeselare
+  - b_lille|Lille
   color: 65 95 180
   l: Brugge
   title: c_brugge
@@ -10,6 +11,7 @@
   - b_ypres|Ypres
   - b_veurne|Veurne
   - b_dunkirk|Dunkerque
+  - b_courtrai|Courtrai
   color: 78 94 185
   l: Yperen
   title: c_yperen
@@ -17,26 +19,36 @@
   - b_calais|Calais
   - b_grevelines|Gravelines
   - b_saint_omer|Saint-Omer
+  - b_aire|Aire
   color: 80 90 170
   l: "Gu\xEEnes"
   title: c_guines
 - children:
-  - b_lille|Lille
-  - b_courtrai|Courtrai
-  - b_aire|Aire
-  color: 75 115 205
-  l: Lille
-  title: c_lille
+  - b_leuven|Leuven
+  - b_brussels|Brussels
+  - b_turnhout|Turnhout
+  - b_mons|Mons
+  color: 110 85 125
+  l: Brabant
+  title: c_brabant
 - children:
-  - b_boulogne|Boulogne
-  - b_montreuil_sur_mer|Montreuil-sur-Mer
-  - b_abbeville|Abbeville
-  - b_hesdin|Hesdin
-  color: 78 103 165
-  l: Boulogne
-  title: c_boulogne
+  - b_antwerpen|Antwerpen
+  - b_rosendaal|Rosendaal
+  - b_breda|Breda
+  - b_tournai|Tournai
+  color: 125 85 110
+  l: Antwerpen
+  title: c_antwerpen
+- children:
+  - b_cambrai|Cambrai
+  - b_malboden|Malboden
+  - b_valenciennes|Valenciennes
+  - b_ath|Ath
+  color: 95 80 135
+  l: Cambray
+  title: c_cambray
 color: 65 95 180
-cul: ''
+cul: dutch
 l: Flanders
-rel: ''
+rel: catholic
 title: d_flanders

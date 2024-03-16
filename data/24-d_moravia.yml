@@ -30,7 +30,8 @@
   - b_mikulov|Mikulov
   color: 160 118 40
   l: Znojmo
-  title: c_znojmo- children:
+  title: c_znojmo
+- children:
   - b_doudleby|Doudleby
   - b_netolice|Netolice
   - "b_rozmberk|Ro\u017Emberk"
@@ -38,10 +39,6 @@
   color: 140 90 5
   l: Doudleby
   title: c_doudleby
-- children:
-  color: 195 65 10
-  l: Boleslav
-  title: c_boleslav
 - children:
   - b_hradec|Hradec
   - "b_dvur-chvojno|Dv\u016Fr-Chvojno"

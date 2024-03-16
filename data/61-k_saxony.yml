@@ -11,10 +11,6 @@
     l: Minden
     title: c_minden
   - children:
-    color: 190 110 70
-    l: Lippe
-    title: c_lippe
-  - children:
     - b_bremen|Bremen
     - b_verden|Verden
     - b_zeven|Zeven
@@ -130,6 +126,7 @@
     - b_stade|Stade
     - b_bederkesa|Bederkesa
     - b_cuxhaven|Cuxhaven
+    - b_twistringen|Twistringen
     color: 175 100 115
     l: Stade
     title: c_stade

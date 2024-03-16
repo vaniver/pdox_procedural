@@ -191,17 +191,17 @@ class RegionTree:
         localization = {}
         children = contents.get("children", [])
         result_children = []
-        if len(children) > 0 and isinstance(children[0], dict):
-            for child in children:
-                result, last_pid, last_rid, last_srid, child_localization = cls.from_dict(child, last_pid, last_rid, last_srid)
-                result_children.append(result)
-                localization.update(child_localization)
-        else:
+        if len(children) > 0 and isinstance(children[0], str):
             for child in children:
                 title, local = child.split("|")
                 localization[title] = local
                 result_children.append(title)
                 last_pid += 1
+        else:
+            for child in children:
+                result, last_pid, last_rid, last_srid, child_localization = cls.from_dict(child, last_pid, last_rid, last_srid)
+                result_children.append(result)
+                localization.update(child_localization)
         title = contents["title"]  # This should break if it's not there
         color = tuple([x.strip() for x in contents["color"].split(" ")])  # TODO: Maybe just use color as a string instead of a tuple?
         depth = DEPTH_MAP[title[0]]
@@ -216,16 +216,16 @@ class RegionTree:
         holy_site = contents.get("holy", None)
         tag = contents.get("tag", None)
         rough = contents.get("rough", "forest")
-        result = cls(title=title, color=color, tag=tag, culture=culture, religion=religion, rough=rough, holy_site=holy_site, capital_rid=last_rid)
+        result = cls(title=title, color=color, tag=tag, culture=culture, religion=religion, rough=rough, holy_site=holy_site, capital_rid=last_rid, children=result_children)
         return result, last_pid, last_rid, last_srid, localization
             
 
     @classmethod
     def from_yml(cls, filename, last_pid=1, last_rid=1, last_srid=1):
         """Processes a .yml file to create a dictionary, which then is run thru from_dict. Also returns localization dictionary."""
-        with open(filename) as inf:
-            contents = yaml.load(filename, yaml.Loader)
-        return cls.from_dict(filename, last_pid, last_rid, last_srid)
+        with open(filename, encoding='utf_8_sig') as inf:
+            contents = yaml.load(inf, yaml.Loader)
+        return cls.from_dict(contents, last_pid, last_rid, last_srid)
         
 
 
@@ -516,32 +516,34 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
     ind = -1
     for cind, cont_list in enumerate(config["CONTINENT_LISTS"]):
         empires = [x for x in cont_list if x[0] == "e"]
-        kingdoms =[x for x in cont_list if x[0] == "k"]
-        centers = [x for x in cont_list if x[0] == "c"]
-        borders = [x for x in cont_list if x[0] == "b"]
+        kingdoms =[x for x in cont_list if x[:2] == "61"]  # TODO: configure these instead of hardcode them
+        centers = [x for x in cont_list if x[:2] == "22"]
+        borders = [x for x in cont_list if x[:2] == "24"]
         num_k = len(kingdoms)
         num_c = num_k - 2
         num_b = num_k * 2 - 3
         assert len(empires) == 1
         assert len(centers) == num_c
         assert len(borders) == num_b  # Changed this from >= to == so that we can use CONTINENT_LISTS elsewhere to determine which characters to spawn. If we want to randomize them, we'll have to do it in making the config.
-        region_tree, last_pid, last_rid, last_srid = RegionTree.from_yml(os.path.join("data", empires[0])+".csv", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+        region_tree, last_pid, last_rid, last_srid, l_from_title = RegionTree.from_yml(os.path.join("data", empires[0])+".yml", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
         region_tree.children[0].capital_pid = last_pid  # The interstitial kingdom has its capital in another file, and so this needs to be assigned here.
         random.shuffle(kingdoms)
         random.shuffle(centers)
         random.shuffle(borders)
         for title in centers[:num_c] + borders[:num_b]:
-            rt, last_pid, last_rid, last_srid = RegionTree.from_yml(os.path.join("data", title)+".csv", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+            rt, last_pid, last_rid, last_srid, local = RegionTree.from_yml(os.path.join("data", title)+".yml", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+            l_from_title.update(local)
             region_tree.children[0].children.append(rt) # The empires come with an interstitial kingdom to add all of these duchies to.
         for title in kingdoms:
-            rt, last_pid, last_rid, last_srid = RegionTree.from_yml(os.path.join("data", title)+".csv", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+            rt, last_pid, last_rid, last_srid, local = RegionTree.from_yml(os.path.join("data", title)+".yml", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+            l_from_title.update(local)
             region_tree.children.append(rt)
         region_trees.append(region_tree)
         candidates = compute_func(chunks, cids, num_k)
         all_sea_centers = []
         while len(continents) <= cind:
             ind += 1
-            print(ind, len(candidates))
+            print("Continent attempt: " + str(ind))
             subweights = {k:v for k,v in weight_from_cube.items() if any([k in chunks[cid].members for cid in candidates[ind][0]])}
             try:
                 continent, terr_template, sea_centers = create_triangular_continent(subweights, chunks, candidates[ind], config)
@@ -555,7 +557,7 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
                     centers, chunks, cids = create_chunks(weight_from_cube, num_centers)
                     candidates = compute_func(chunks, cids, num_k)
                     ind = -1
-    return continents, terr_templates, region_trees, all_sea_centers, last_pid, last_rid, last_srid
+    return continents, terr_templates, region_trees, all_sea_centers, last_pid, last_rid, last_srid, l_from_title,
 
 
 def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], min_province_distance=2, style="random"):
@@ -747,7 +749,7 @@ def create_data(config):
     last_cid = 1  # county_id. They 1-index instead of 0-indexing.
     last_rid = 1  # region_id. They 1-index instead of 0-indexing.
     last_srid = 1  # strategic_region_id. They 1-index instead of 0-indexing.
-    continents, terr_templates, region_trees, sea_centers, last_pid, last_rid, last_srid = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", None), last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+    continents, terr_templates, region_trees, sea_centers, last_pid, last_rid, last_srid, name_from_title = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", None), last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
     m_x = config["n_x"]//2
     m_y = -(config["n_y"]+config["n_x"]//2)//2
     continents, sea_region_centers = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
@@ -762,7 +764,6 @@ def create_data(config):
     land_cubes = set()
     sea_cubes = set()
     terr_from_cube = {}
-    name_from_title = {}  # TODO: Import this from localization or w/e
     name_from_pid = {}
     name_from_cid = {}
     name_from_rid = {}

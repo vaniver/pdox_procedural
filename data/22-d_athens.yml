@@ -11,18 +11,11 @@
   l: Attica
   title: c_attica
 - children:
-  - b_patras|Patras
-  - b_vostitsa|Vostitsa
-  - b_andravida|Andravida
-  - b_kalavryta|Kalavryta
-  color: 175 65 200
-  l: Achaia
-  title: c_achaia
-- children:
   - b_corinth|Corinth
   - b_nikli|Nikli
   - b_argos|Argos
   - b_damala|Damala
+  - b_patras|Patras
   color: 185 90 220
   l: Korinthos
   title: c_korinthos
@@ -31,6 +24,7 @@
   - b_arcadia|Arcadia
   - b_kalamata|Kalamata
   - b_modon|Modon
+  - b_vostitsa|Vostitsa
   color: 220 115 220
   l: Messenia
   title: c_messenia
@@ -39,6 +33,7 @@
   - b_monemvasia|Monemvasia
   - b_lacedaemonia|Lacedaemonia
   - b_amfissa|Amfissa
+  - b_andravida|Andravida
   color: 195 30 195
   l: Laconia
   title: c_laconia

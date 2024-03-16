@@ -1,0 +1,44 @@
+﻿children:
+- children:
+  - b_amsterdam|Amsterdam
+  - b_delft|Delft
+  - b_rotterdam|Rotterdam
+  - b_dort|Dort
+  - b_middelburg|Middelburg
+  - b_bergen_op_zoom|Bergen op Zoom
+  - b_brielle|Brielle
+  color: 235 85 30
+  l: Holland
+  title: c_holland
+- children:
+  - b_haarlem|Haarlem
+  - b_edam|Edam
+  - b_medemblik|Medemblik
+  - b_aalkmar|Alkmaar
+  - b_utrecth|Utrecht
+  color: 245 99 50
+  l: Westfriesland
+  title: c_westfriesland
+- children:
+  - b_leeuwarden|Leeuwarden
+  - b_staveren|Staveren
+  - b_harlingen|Harlingen
+  - b_wadeilannen|Waddeneilanden
+  - b_amersfoort|Amersfoort
+  color: 175 70 20
+  l: Frisia
+  title: c_frisia
+- children:
+  - b_zwolle|Zwolle
+  - b_kampen|Kampen
+  - b_ommen|Ommen
+  - b_almelo|Almelo
+  - b_coevorden|Coevorden
+  color: 180 120 10
+  l: Oversticht
+  title: c_oversticht
+color: 235 80 30
+cul: dutch
+l: Holland
+rel: catholic
+title: d_holland

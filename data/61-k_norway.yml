@@ -140,33 +140,6 @@
   color: 80 30 30
   l: "Uppl\xF6nd"
   title: d_dalir
-- children:
-  - children:
-    - "b_vastvagborg|V\xE1gar"
-    - b_bjarkoy|Bjarkey
-    - b_vagan|Leirnes
-    - b_torgar|Torgar
-    color: 210 150 255
-    l: "L\xF3f\xF3tr"
-    title: c_vastvag
-  - children:
-    - "b_bothin|Bo\xF0in"
-    - "b_rodoy|Rau\xF0ey"
-    - "b_aarborte|Ra\xF0und"
-    - b_sandnes|Sandnes
-    color: 225 160 225
-    l: "Bo\xF0in"
-    title: c_bothin
-  - children:
-    - b_utan_namdal|Ytri Naumudalr
-    - b_innan_namdal|Innri Naumudalr
-    - b_grong|Granungar
-    color: 215 140 200
-    l: "Naumd\xE6lafylki"
-    title: c_namdalfylki
-  color: 210 150 255
-  l: "H\xE1logaland"
-  title: d_halogaland
 color: 130 4 40
 cul: norwegian
 l: Norway

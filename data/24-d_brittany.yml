@@ -40,10 +40,6 @@
   l: "Penthi\xE8vre"
   title: c_penthievre
 - children:
-  color: 137 199 199
-  l: Rennes
-  title: c_rennes
-- children:
   - b_exeter|Exeter
   - b_totnes|Totnes
   - b_okehampton|Okehampton

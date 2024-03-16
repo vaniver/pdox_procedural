@@ -1,6 +1,5 @@
 ﻿children:
 - children:
-- children:
   - b_tahart|Tahart
   - b_al_ubbad|Al Ubbad
   - b_qalaa_bsalama|Qalaa Bsalama
@@ -32,6 +31,7 @@
   color: 164 237 57
   l: Figuig
   title: c_figuig
+- children:
   - b_wargla|Wargla
   - b_taghyart|Taghyart
   - b_sadrata|Sadrata
@@ -39,10 +39,6 @@
   color: 100 171 73
   l: Wargla
   title: c_wargla
-- children:
-  color: 54 128 27
-  l: Laghwat
-  title: c_laghwat
 - children:
   - b_ghardaia|Ghardaia
   - b_al-qulaya|al-Qulaya

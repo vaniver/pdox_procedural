@@ -11,10 +11,6 @@
   l: Wien
   title: c_vienna
 - children:
-  color: 191 182 182
-  l: Hohenau
-  title: c_hohenau
-- children:
   - "b_sankt_polten|Sankt P\xF6lten"
   - b_mariazell|Mariazell
   - b_wieselburg|Wieselburg
@@ -32,10 +28,6 @@
   color: 200 195 160
   l: Freistadt
   title: c_freistadt
-- children:
-  color: 170 160 160
-  l: Amstetten
-  title: c_amstetten
 - children:
   - b_krems|Krems
   - b_wild|Raabs

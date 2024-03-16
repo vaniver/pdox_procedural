@@ -1,169 +1,147 @@
 ﻿children:
-  d_pommerania:
-    children:
-      c_stettin:
-        children:
-        - b_szczecin
-        - b_ucramund
-        - b_gryfino
-        - b_cammin
-        - b_dramberg
-        - b_belgard
-        color: 91 163 48
-        l: Szczecin
-        title: c_stettin
-      c_kolobrzeg:
-        children:
-        - b_swinoujscie
-        - b_kolobrzeg
-        - b_stargad
-        - b_lobez
-        color: 121 163 58
-        l: Wolin
-        title: c_kolobrzeg
-      c_landsberg:
-        children:
-        - b_landsberg
-        - b_driesen
-        - b_arnswalde
-        - b_kreuz
-        color: 115 145 30
-        l: Santok
-        title: c_landsberg
-      c_pila:
-        children:
-        - b_walcz
-        - b_pila
-        - b_szczecinek
-        - b_stralsund
-        color: 115 160 40
-        l: "Wa\u0142cz"
-        title: c_pila
-      c_soldin:
-        children:
-        - b_soldin
-        - b_kostschin
-        - b_wolgast
-        - b_griefswald
-        color: 65 130 30
-        l: Cedynia
-        title: c_soldin
-    color: 111 143 51
-    l: Pomerania
-    title: d_pommerania
-  d_pomerelia:
-    children:
-      c_danzig:
-        children:
-        - b_gdansk
-        - b_sopot
-        - b_wladyslawowo
-        - b_trsow
-        color: 75 125 75
-        l: "Gda\u0144sk"
-        title: c_danzig
-      c_berent:
-        children:
-        - b_schwetz
-        - b_berent
-        - b_tuchowna
-        - b_konitz
-        color: 90 115 80
-        l: "\u015Awiecie"
-        title: c_berent
-      c_miastko:
-        children:
-        - b_hammerstein
-        - b_miastko
-        - b_bytow
-        color: 105 125 80
-        l: Szczytno
-        title: c_miastko
-      c_slupsk:
-        children:
-        - b_slupsk
-        - b_koszalin
-        - b_lebno
-        color: 75 130 90
-        l: "S\u0142upsk"
-        title: c_slupsk
-    color: 80 130 80
-    l: Pomerelia
-    title: d_pomerelia
-  d_ostmark:
-    children:
-      c_brandenburg:
-        children:
-        - b_brandenburg
-        - b_potsdam
-        - b_lehnin
-        - b_tangermunde
-        color: 115 135 115
-        l: Brandenburg
-        title: c_brandenburg
-      c_prenzlau:
-        children:
-        - b_prenzlau
-        - b_templin
-        - b_schwedt
-        - b_eberswalde
-        color: 115 160 115
-        l: Prenzlau
-        title: c_prenzlau
-      c_berlin:
-        children:
-        - b_berlin
-        - b_botzow
-        - b_rosenfelde
-        color: 80 110 80
-        l: Berlin
-        title: c_berlin
-      c_ruppin:
-        children:
-        - b_ruppin
-        - b_lindow
-        - b_nowen
-        color: 90 100 65
-        l: Ruppin
-        title: c_ruppin
-    color: 121 140 121
-    l: Nordmark
-    title: d_ostmark
-  d_nordmark:
-    children:
-      c_mecklenburg:
-        children:
-        - b_wismar
-        - b_ratzeburg
-        - b_schwerin
-        - b_parchim
-        color: 165 165 115
-        l: Mecklenburg
-        title: c_mecklenburg
-      c_werle:
-        children:
-        - b_werle
-        - b_neubrandenburg
-        - b_neustrelitz
-        color: 170 185 140
-        l: Werle
-        title: c_werle
-      c_rostock:
-        children:
-        - b_rostock
-        - b_gustrow
-        - b_rugen
-        color: 145 162 132
-        l: Rostock
-        title: c_rostock
-    color: 162 160 110
-    l: Veletia
-    title: d_nordmark
+- children:
+  - children:
+    - b_szczecin|Szczecin
+    - b_ucramund|Wkra
+    - b_gryfino|Pyrzyce
+    - "b_cammin|Ko\u0142obrzeg"
+    - b_dramberg|Czaplinek
+    - "b_belgard|Bia\u0142ogard"
+    color: 91 163 48
+    l: Szczecin
+    title: c_stettin
+  - children:
+    - b_swinoujscie|Wolin
+    - "b_kolobrzeg|Kamie\u0144"
+    - "b_stargad|Goleni\xF3w"
+    - b_lobez|Nowogard
+    color: 121 163 58
+    l: Wolin
+    title: c_kolobrzeg
+  - children:
+    - b_landsberg|Santok
+    - "b_driesen|Wiele\u0144"
+    - b_arnswalde|Stargard
+    - b_kreuz|Choszczno
+    color: 115 145 30
+    l: Santok
+    title: c_landsberg
+  - children:
+    - "b_walcz|Wa\u0142cz"
+    - "b_pila|Pi\u0142a"
+    - b_szczecinek|Szczecinek
+    - b_stralsund|Stralsund
+    color: 115 160 40
+    l: "Wa\u0142cz"
+    title: c_pila
+  - children:
+    - b_soldin|Cedynia
+    - b_kostschin|Kostrzyn
+    - b_wolgast|Wolgast
+    - b_griefswald|Greifswald
+    color: 65 130 30
+    l: Cedynia
+    title: c_soldin
+  color: 111 143 51
+  l: Pomerania
+  title: d_pommerania
+- children:
+  - children:
+    - "b_gdansk|Gda\u0144sk"
+    - b_sopot|Sopot
+    - b_wladyslawowo|Puck
+    - b_trsow|Tczew
+    color: 75 125 75
+    l: "Gda\u0144sk"
+    title: c_danzig
+  - children:
+    - "b_schwetz|\u015Awiecie"
+    - "b_berent|Ko\u015Bcierzyna"
+    - b_tuchowna|Starogard
+    - b_konitz|Chojnice
+    color: 90 115 80
+    l: "\u015Awiecie"
+    title: c_berent
+  - children:
+    - b_hammerstein|Szczytno
+    - b_miastko|Miastko
+    - "b_bytow|Byt\xF3w"
+    color: 105 125 80
+    l: Szczytno
+    title: c_miastko
+  - children:
+    - "b_slupsk|S\u0142upsk"
+    - b_koszalin|Koszalin
+    - "b_lebno|L\u0119bork"
+    color: 75 130 90
+    l: "S\u0142upsk"
+    title: c_slupsk
+  color: 80 130 80
+  l: Pomerelia
+  title: d_pomerelia
+- children:
+  - children:
+    - b_brandenburg|Brandenburg
+    - b_potsdam|Potsdam
+    - b_lehnin|Lehnin
+    - "b_tangermunde|Tangerm\xFCnde"
+    color: 115 135 115
+    l: Brandenburg
+    title: c_brandenburg
+  - children:
+    - b_prenzlau|Prenzlau
+    - b_templin|Templin
+    - b_schwedt|Schwedt
+    - b_eberswalde|Eberswalde
+    color: 115 160 115
+    l: Prenzlau
+    title: c_prenzlau
+  - children:
+    - b_berlin|Berlin
+    - b_botzow|Botzow
+    - b_rosenfelde|Rosenfelde
+    color: 80 110 80
+    l: Berlin
+    title: c_berlin
+  - children:
+    - b_ruppin|Ruppin
+    - b_lindow|Lindow
+    - b_nowen|Nowen
+    color: 90 100 65
+    l: Ruppin
+    title: c_ruppin
+  color: 121 140 121
+  l: Nordmark
+  title: d_ostmark
+- children:
+  - children:
+    - b_wismar|Wismar
+    - b_ratzeburg|Ratzeburg
+    - b_schwerin|Schwerin
+    - b_parchim|Parchim
+    color: 165 165 115
+    l: Mecklenburg
+    title: c_mecklenburg
+  - children:
+    - b_werle|Werle
+    - b_neubrandenburg|Neubrandenburg
+    - b_neustrelitz|Neustrelitz
+    - b_havelberg|Havelberg
+    color: 170 185 140
+    l: Werle
+    title: c_werle
+  - children:
+    - b_rostock|Rostock
+    - "b_gustrow|G\xFCstrow"
+    - "b_rugen|R\xFCgen"
+    color: 145 162 132
+    l: Rostock
+    title: c_rostock
+  color: 162 160 110
+  l: Veletia
+  title: d_nordmark
 color: 145 130 40
-cul: polabian
+cul: pommeranian
 l: Pomerania
 rel: slavic_pagan
 title: k_pomerania
-rough: forest
-tag: POM
-holy: rugen
