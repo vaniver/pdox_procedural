@@ -304,6 +304,24 @@ class Edge:
                     Edge(self.cube.add(Cube(1, 0, -1)), 0, 1),
                     ]
 
+    def vertices(self):
+        """Returns the two vertices this edge travels between, in from-to order."""
+        if self.dir == 1:
+            if self.rot == 0:
+                return (Vertex(self.cube.add(Cube(-1,0,1)), 1), Vertex(self.cube.add(Cube(1,-1,0)), -1))
+            elif self.rot == 1:
+                return (Vertex(self.cube.add(Cube(1,-1,0)), -1), Vertex(self.cube, 1),)
+            else:  # self.rot == 2
+                return (Vertex(self.cube, 1), Vertex(self.cube.add(Cube(1,0,-1)), -1))
+        else:  # self.dir == -1 or None
+            if self.rot == 0:
+                return (Vertex(self.cube.add(Cube(1,-1,0)), -1), Vertex(self.cube.add(Cube(-1,0,1)), 1))
+            elif self.rot == 1:
+                return (Vertex(self.cube, 1), Vertex(self.cube.add(Cube(1,-1,0)), -1))
+            else:  # self.rot == 2
+                return (Vertex(self.cube.add(Cube(1,0,-1)), -1), Vertex(self.cube, 1))
+
+
     def __str__(self):
         return str(self.cube.x)+", "+str(self.cube.y)+", "+str(self.cube.z)+"; "+str(self.rot)+str(self.dir)
 
@@ -337,6 +355,28 @@ class Edge:
                 return cls(k1, 2, dir=dir)
             else:
                 return cls(k1, 1, dir=dir)
+            
+    @classmethod
+    def from_vertices(cls, v1, v2):
+        """Given an adjacent pair of vertices, return the edge from v1 to v2."""
+        assert v1.rot == -v2.rot
+        delta = v1.cube.sub(v2.cube)
+        if v1.rot == 1:
+            if delta == Cube(-2, 1, 1):
+                return cls(v1.cube.add(Cube(1,0,-1)), 0, 1)
+            elif delta == Cube(-1, 1, 0):
+                return cls(v1.cube, 1, -1)
+            elif delta == Cube(-1, 0, 1):
+                return cls(v1.cube, 2, 1)
+            raise ValueError
+        else:
+            if delta == Cube(2, -1, -1):
+                return cls(v1.cube.add(Cube(-1,1,0)), 0, -1)
+            elif delta == Cube(1, 0, -1):
+                return cls(v1.cube.add(Cube(-1,0,1)), 2, -1)
+            elif delta == Cube(1, -1, 0):
+                return cls(v1.cube.add(Cube(-1,1,0)), 1, 1)
+            raise ValueError    
 
 
 class Vertex:
@@ -375,6 +415,23 @@ class Vertex:
                 Vertex(self.cube.add(Cube(1,-1,0)),0),
                 Vertex(self.cube.add(Cube(1,-1,0)),-1),
                 ]
+        
+    def edge_vertices(self):
+        """Returns an empty list if it's the central vertex, or the three adjacency vertices paired with the edge between them (from this one to that one)."""
+        if self.rot == 0:
+            return []
+        elif self.rot == -1:
+            return [
+                (Vertex(self.cube.add(Cube(-2,1,1)),1), Edge(self.cube.add(Cube(-1,1,0)), 0, -1)),
+                (Vertex(self.cube.add(Cube(-1,1,0)),1), Edge(self.cube.add(Cube(-1,1,0)), 1, 1)),
+                (Vertex(self.cube.add(Cube(-1,0,1)),1), Edge(self.cube.add(Cube(-1,0,1)), 2, -1)),
+                ]
+        else:  # self.rot == 1
+            return [
+                (Vertex(self.cube.add(Cube(1,0,-1)),-1), Edge(self.cube, 2, 1)),
+                (Vertex(self.cube.add(Cube(2,-1,-1)),-1), Edge(self.cube.add(Cube(1,0,-1)), 0, 1)),
+                (Vertex(self.cube.add(Cube(1,-1,0)),-1), Edge(self.cube, 1, -1)),
+                ]
 
     def down_pair(self):
         """Returns the two vertices above this vertex in a triangle pointing down as a tuple."""
@@ -393,6 +450,15 @@ class Vertex:
             return (Vertex(self.cube.add(Cube(-1,0,1)),0), Vertex(self.cube.add(Cube(-1,0,1)),1))
         else:  # self.rot == 1
             return (Vertex(self.cube.add(Cube(1,-1,0)),-1), Vertex(self.cube.add(Cube(1,-1,0)),0))
+
+    def trio(self):
+        """Returns the three cubes adjacent to this vertex as a list; returns an empty list for central vertices."""
+        if self.rot == 1:
+            return [self.cube, self.cube.add(Cube(1,0,-1)), self.cube.add(Cube(1,-1,0))]
+        elif self.rot == -1:
+            return [self.cube, self.cube.add(Cube(-1,0,1)), self.cube.add(Cube(-1,1,0))]
+        else:
+            return []
 
     def __str__(self):
         return str(self.cube.x)+", "+str(self.cube.y)+", "+str(self.cube.z)+"; "+str(self.rot)
