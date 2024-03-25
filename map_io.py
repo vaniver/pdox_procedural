@@ -29,6 +29,10 @@ def xy_from_cube(cube, box_width, box_height):
     return start_x, start_y
 
 
+def subset_from_minmax(min_x, max_x, min_y, max_y):
+    """Returns the valid cubes between min_x and max_x / min_y and max_y, inclusive."""
+    pass
+
 def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_from_vertex={}, mode='RGB', default="black", palette=None, four_corners=False):
     """Draw a hex map with size (max_x,max_y) with colors from rgb_from_ijk, rgb_from_vertex, and rgb_from_edge. mode determines the image type, and also the correct format for rgb (which should be shared by everything).
     There will be n_x hexes horizontally and n_y hexes vertically.
@@ -51,11 +55,11 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_f
     pix = img.load()
     for ijk, rgb in rgb_from_ijk.items():
         hor = ijk[0]
-        if hor >= n_x:
+        if hor >= n_x or hor < 0:
             print(ijk, rgb, "out of bounds!")
             continue
         ver = - ijk[1] - hor // 2 - hor % 2
-        if ver >= n_y - hor % 2:
+        if ver >= n_y - hor % 2 or ver < 0:
             print(ijk, rgb, "out of bounds!")
             continue
         start_x = (3 * hor - 2) * box_width

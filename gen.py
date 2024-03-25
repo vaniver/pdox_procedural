@@ -628,7 +628,7 @@ def arrange_inner_sea(continents, inner_sea_center, angles=[2,4,0]):
     moved_continents = []
     sea_region_centers = [inner_sea_center]
     longest_dim = 0
-    offs = [Cube(0,0,0),Cube(0,0,0),Cube(0,0,0)]  # These are hardcoded for the 1945 seed.
+    offs = [Cube(-2,4,-2), Cube(0,0,0), Cube(-5,4,1)]  # These are hardcoded for the 1945 seed.
     for ind,continent in enumerate(continents):
         ac = Area(ind, continent)  # Area has unordered membership, which is why we have to construct the dict again later. Continent should probably be a Tile (old code w/ ordered membership).
         off1 = ac.calc_average()
@@ -923,14 +923,14 @@ def create_data(config):
                 l += land_height_from_cube[k] + random.randint(a,b) + random.randint(a,b)
             else:
                 l -= 2
-        height_from_vertex[Vertex(cube, -1)] = l + WATER_HEIGHT
+        height_from_vertex[Vertex(cube, 1)] = max(1,l) + WATER_HEIGHT
         for k in [cube.add(Cube(1,-1,0)), cube.add(Cube(1,0,-1))]:
             if k in land_height_from_cube:
                 a,b = TERRAIN_HEIGHT[terr_from_cube[k]]
                 r += land_height_from_cube[k] + random.randint(a,b) + random.randint(a,b)
             else:
                 r -= 2
-        height_from_vertex[Vertex(cube, 1)] = r + WATER_HEIGHT
+        height_from_vertex[Vertex(cube, -1)] = max(1,r) + WATER_HEIGHT
     a,b = TERRAIN_HEIGHT[BaseTerrain.ocean]
     base_water = WATER_HEIGHT * 4 // 5
     for cube, depth in water_depth_from_cube.items():
@@ -938,27 +938,79 @@ def create_data(config):
             continue
         height_from_vertex[Vertex(cube, 0)] = max(0, base_water - 3 * depth * depth + sum([random.randint(a,b) for _ in range(4)]))
         vl = Vertex(cube, -1)
-        if vl not in height_from_vertex:
+        if vl not in height_from_vertex:  # Why did I think I needed to check this?
             l = base_water - depth * depth + random.randint(a,b) + random.randint(a,b)
+            coast = False
             for k in [cube.add(Cube(-1,1,0)), cube.add(Cube(-1,0,1))]:
                 if k in water_depth_from_cube:
                     l += random.randint(a,b) - water_depth_from_cube[k] * water_depth_from_cube[k]
                 else:
-                    l += 2
-            height_from_vertex[vl] = min(max(0, l), WATER_HEIGHT - 1)
+                    coast = True
+            if coast:
+                height_from_vertex[vl] = WATER_HEIGHT + 1
+            else:
+                height_from_vertex[vl] = min(max(0, l), WATER_HEIGHT - 1)
+        else:
+            print("it was a real check.")
         vr = Vertex(cube, 1)
         if vr not in height_from_vertex:
             r = base_water - depth * depth + random.randint(a,b) + random.randint(a,b)
+            coast = False
             for k in [cube.add(Cube(1,-1,0)), cube.add(Cube(1,0,-1))]:
                 if k in water_depth_from_cube:
                     r += random.randint(a,b) - water_depth_from_cube[k] * water_depth_from_cube[k]
                 else:
-                    r += 2
-            height_from_vertex[vr] = min(max(0, r), WATER_HEIGHT - 1)
+                    coast = True
+            if coast:
+                height_from_vertex[vr] = WATER_HEIGHT + 1
+            else:
+                height_from_vertex[vr] = min(max(0, r), WATER_HEIGHT - 1)
+        else:
+            print("it was a real check.")
     print(f"Heightmap heights range from {min(height_from_vertex.values())} to {max(height_from_vertex.values())}.")
     # Create rivers
-    river_edges = {Edge(Cube(3,-2,-1),0): (4,1)}
-    river_vertices = {Vertex(Cube(2,-2,0),1): 0}
+    # Determine the coastal vertices
+    coastal_vertices = set()
+    for cube in [k for k,v in land_height_from_cube.items() if v == 0]:
+        nbrs = sorted(cube.neighbors())
+        for ind0 in range(0,6):
+            if nbrs[ind0] not in land_height_from_cube:
+                for v in Edge.from_pair(cube, nbrs[ind0]).vertices():
+                    coastal_vertices.add(v)
+    # TODO: better river creation
+    mouths = []
+    for v in coastal_vertices:
+        for ov, e in v.edge_vertices():
+            if ov not in coastal_vertices and height_from_vertex[ov] >= WATER_HEIGHT:
+                mouths.append((v, e))
+    river_edges = {}
+    river_vertices = {}
+    vs = set()
+    for m in random.sample(mouths, k=len(mouths)//20):
+        edges = [m[1]]
+        if m[0] in vs:
+            continue
+        vs.add(m[0])
+        evs = m[1].vertices()
+        nextv = evs[1] if evs[0] == m[0] else evs[0]
+        if nextv in coastal_vertices:
+            continue
+        vs.add(nextv)
+        new_h = 255
+        max_h = max([height_from_vertex[v] for v in vs])
+        while new_h >= max_h:
+            new_h, v, e = sorted([(height_from_vertex[v], v, e) for v, e in nextv.edge_vertices()], key=lambda x: x[0])[-1]
+            if new_h >= max_h and v not in vs and v not in coastal_vertices:
+                max_h = new_h
+                vs.add(v)
+                edges.append(e)
+                nextv = v
+            else:
+                river_vertices[nextv] = 0
+                new_h = 0
+        edges.reverse()
+        for ind, e in enumerate(edges):
+            river_edges[e] = (min(12, 4 + ind),1)
     type_from_pid = {}
     lakes = []  # This should be pids, not cubes
     for k in land_cubes:

@@ -45,7 +45,8 @@ class CK3Map(BasicMap):
 
     def create_terrain_masks(self, file_dir, base_dir, terr_from_cube):
         """Creates all the terrain masks; just fills each cube.
-        terr_from_cube is a map from cube to BaseTerrain."""
+        terr_from_cube is a map from cube to BaseTerrain.
+        Also creates flatmap.dds and colormap.dds."""
         os.makedirs(os.path.join(file_dir, "gfx", "map", "terrain"), exist_ok=True)
         for mask in os.listdir(os.path.join(base_dir, "gfx", "map", "terrain")):
             if "mask.png" not in mask:
@@ -57,6 +58,27 @@ class CK3Map(BasicMap):
                 terrain = [k for k,v in USED_MASKS.items() if v == mask_name][0]
                 rgb_from_cube = {k.tuple(): 128 for k,v in terr_from_cube.items() if v == terrain}
                 create_hex_map(rgb_from_ijk=rgb_from_cube, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(file_dir, "gfx", "map", "terrain", mask))
+        create_hex_map(rgb_from_ijk={}, max_x=self.max_x // 4, max_y=self.max_y // 4, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(127, 127, 127)).save(os.path.join(file_dir, "gfx", "map", "terrain", "colormap.dds"))
+        rgb_from_cube = {k.tuple(): (120, 120, 100) if v == BaseTerrain.ocean else (170,160,140) for k,v in terr_from_cube.items()}
+        create_hex_map(rgb_from_ijk=rgb_from_cube, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='RGB', default="black").save(os.path.join(file_dir, "gfx", "map", "terrain", "flatmap.dds"))
+
+    def create_flowmap(self, file_dir, terr_from_cube):
+        os.makedirs(os.path.join(file_dir, "gfx", "map", "water"), exist_ok=True)
+        rgb_from_ijk = {}
+        for cube, terr in terr_from_cube.items():
+            if terr == BaseTerrain.ocean:
+                flow = 33 * random.randint(0,2)
+                rgb_from_ijk[cube.tuple()] = (flow, flow, flow)
+            else:
+                rgb_from_ijk[cube.tuple()] = (255, 255, 255)
+        create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x // 8, max_y=self.max_y // 8, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(0, 0, 0)).save(os.path.join(file_dir, "gfx", "map", "water", "foam_map.dds"))
+        # TODO: Port over flowmap code
+        create_hex_map(rgb_from_ijk={}, max_x=self.max_x // 4, max_y=self.max_y // 4, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(126,130,255)).save(os.path.join(file_dir, "gfx", "map", "water", "flowmap.dds"))
+
+    def surround_mask(self, file_dir, surround_cubes = {}):
+        os.makedirs(os.path.join(file_dir, "gfx", "map", "surround_map"), exist_ok=True)
+        create_hex_map(rgb_from_ijk={k.tuple(): v for k,v in surround_cubes.items()}, max_x=self.max_x // 8, max_y=self.max_y // 8, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(255, 255, 0)).save(os.path.join(file_dir, "gfx", "map", "surround_map", "surround_fade.dds"))
+        create_hex_map(rgb_from_ijk={k.tuple(): (255,255,255) for k in surround_cubes}, max_x=self.max_x // 2, max_y=self.max_y // 2, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(0, 0, 0)).save(os.path.join(file_dir, "gfx", "map", "surround_map", "surround_mask.dds"))
 
     def create_positions(self, name_from_pid, pid_from_cube):
         """Create positions.txt"""
@@ -97,6 +119,27 @@ class CK3Map(BasicMap):
                     else:
                         outf.write(line)
         # TODO: Confirm that I don't need to update 00_graphics.txt, mostly CAMERA_START.
+    
+    def create_bookmarks(self, file_dir, terr_from_cube, bookmark_groups, ):
+        """terr_from_cube is used to determine where is land and where is sea; bookmark_groups is a list of tuples:
+        group_name, char_name_from_grp, bounds, color_from_grp, edge_color_from_grp, grp_from_cube, grp_from_edge"""
+        os.makedirs(os.path.join(file_dir, "gfx", "interface", "bookmarks"), exist_ok=True)
+        for group_name, char_name_from_grp, bounds, color_from_grp, edge_color_from_grp, grp_from_cube, grp_from_edge in bookmark_groups:
+            # Base picture (everyone has background, darker border)
+            rgb_from_ijk = {}
+            for cube in subset_from_minmax(*bounds):
+                if cube in grp_from_cube:
+                    rgb_from_ijk[cube.tuple] = color_from_grp[grp_from_cube[cube]]
+                elif terr_from_cube[cube] == BaseTerrain.ocean:
+                    rgb_from_ijk[cube.tuple()] = (90, 90, 80)
+                else:
+                    rgb_from_ijk[cube.tuple()] = (160, 150, 125)
+            rgb_from_edge = {edge: edge_color_from_grp[grp] for edge, grp in grp_from_edge.items()}
+            create_hex_map(rgb_from_ijk=rgb_from_ijk, rgb_from_edge=rgb_from_edge, max_x=1920, max_y=1080, n_x=bounds[1] - bounds[0], n_y=bounds[3] - bounds[2], mode='RGB', default="black").save(os.path.join(file_dir, "gfx", "interface", "bookmarks", group_name + ".dds"))
+            for grp, char_name in char_name_from_grp.items():
+                rgb_from_ijk = {cube: (*color_from_grp[grp], 127) for cube, gg in grp_from_cube.items() if grp == gg}
+                rgb_from_edge = {edge: (255,255,255,255) for edge, gg in grp_from_edge.items() if grp == gg}
+                create_hex_map(rgb_from_ijk=rgb_from_ijk, rgb_from_edge=rgb_from_edge, max_x=1920, max_y=1080, n_x=bounds[1] - bounds[0], n_y=bounds[3] - bounds[2], mode='RGBA', default=(255,255,255,0)).save(os.path.join(file_dir, "gfx", "interface", "bookmarks", group_name + "_" + char_name + ".dds"))
 
 def create_terrain_file(file_dir, terr_from_pid):
     """Writes out common/province_terrain."""
@@ -478,8 +521,10 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
     dynasty_buffer = ""
     player_buffer = ""
     bookmark_buffer = ""
+    bookmark_pictures = []
     # bookmark_group_buffer = ""  # This one is only used if you have multiple start dates; the continents are bookmarks and kingdoms are characters inside a single bookmark.
     for cont_ind, cont_list in enumerate(config["CONTINENT_LISTS"]):
+        bookmark_pictures.append(["bm_1000_" + region_trees[cont_ind].title])
         bookmark_buffer += "bm_1000_" + region_trees[cont_ind].title + " {\n\tstart_date=1000.1.1\n\tis_playable = yes\n\tgroup = bm_group_1000\n\n\tweight = {\n\t\tvalue = 0\n\t}\n\n"
         for region in cont_list:
             rtype, region = region.split("-")
@@ -573,6 +618,7 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
         outf.write(player_buffer)
     with open(os.path.join(file_dir, "common", "dynasty_houses", "00_dynasty_houses.txt"),'w', encoding='utf_8_sig') as outf:
         outf.write("\n")
+    return 
 
 
 def create_default_map(file_dir, impassable, sea_min, sea_max):
@@ -680,8 +726,11 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     ck3map.create_provinces(rgb_from_pid, pid_from_cube, ".png", name_from_pid=title_from_pid)
     ck3map.create_heightmap(height_from_vertex=height_from_vertex, file_ext=".png")
     ck3map.create_rivers(height_from_vertex, river_edges, river_vertices, base_loc=config["BASE_CK3_DIR"], file_ext=".png")
+    ck3map.create_flowmap(file_dir=file_dir, terr_from_cube=terr_from_cube)
     ck3map.create_positions(name_from_pid, pid_from_cube)
     ck3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], terr_from_cube=terr_from_cube)
+    ck3map.surround_mask(file_dir=file_dir)  # TODO: Figure out where's far enough away to mask
+    ck3map.create_bookmarks(file_dir=file_dir, terr_from_cube=terr_from_cube, bookmark_groups=[])
     ck3map.update_defines(base_dir=config["BASE_CK3_DIR"])
     create_adjacencies(file_dir=file_dir, straits=straits, pid_from_cube=pid_from_cube, name_from_pid=name_from_pid, closest_xy=lambda fr, to: closest_xy(fr, to, ck3map.box_height, ck3map.box_width))
     create_geographical_regions(file_dir, region_trees, sea_region)
