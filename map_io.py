@@ -213,7 +213,7 @@ def create_tri_map(height_from_vertex, max_x, max_y, n_x, n_y, mode='L', default
         # There are two types of triangles: pointing-up and pointing-down.
         # For each vertex, we check whether its two mates (up or down) exist, and if so, draw that triangle.
         start_x, start_y = xy_from_cube(vertex.cube, box_width=box_width, box_height=box_height)
-        start_x += (2*vertex.rot - 1)*box_width  # Offset based on which is the center.
+        start_x += (2*vertex.rot + 1)*box_width  # Offset based on which is the center.
         down_ok = True
         l, r = vertex.down_pair()
         if l in height_from_vertex:
