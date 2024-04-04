@@ -971,46 +971,89 @@ def create_data(config):
     # Create rivers
     # Determine the coastal vertices
     coastal_vertices = set()
-    for cube in [k for k,v in land_height_from_cube.items() if v == 0]:
+    interior_vertices = set()
+    for cube in land_height_from_cube:
         nbrs = sorted(cube.neighbors())
+        v_buffer = set()
         for ind0 in range(0,6):
             if nbrs[ind0] not in land_height_from_cube:
                 for v in Edge.from_pair(cube, nbrs[ind0]).vertices():
                     coastal_vertices.add(v)
-    # TODO: better river creation
-    mouths = []
-    for v in coastal_vertices:
-        for ov, e in v.edge_vertices():
-            if ov not in coastal_vertices and height_from_vertex[ov] >= WATER_HEIGHT:
-                mouths.append((v, e))
-    river_edges = {}
-    river_vertices = {}
-    vs = set()
-    for m in random.sample(mouths, k=len(mouths)//20):
-        edges = [m[1]]
-        if m[0] in vs:
-            continue
-        vs.add(m[0])
-        evs = m[1].vertices()
-        nextv = evs[1] if evs[0] == m[0] else evs[0]
-        if nextv in coastal_vertices:
-            continue
-        vs.add(nextv)
-        new_h = 255
-        max_h = max([height_from_vertex[v] for v in vs])
-        while new_h >= max_h:
-            new_h, v, e = sorted([(height_from_vertex[v], v, e) for v, e in nextv.edge_vertices()], key=lambda x: x[0])[-1]
-            if new_h >= max_h and v not in vs and v not in coastal_vertices:
-                max_h = new_h
-                vs.add(v)
-                edges.append(e)
-                nextv = v
             else:
-                river_vertices[nextv] = 0
-                new_h = 0
-        edges.reverse()
-        for ind, e in enumerate(edges):
-            river_edges[e] = (min(12, 4 + ind),1)
+                for v in Edge.from_pair(cube, nbrs[ind0]).vertices():
+                    v_buffer.add(v)
+        interior_vertices.update(v_buffer.difference(coastal_vertices))
+    # We have the cube distance from the coast, but we also need it for vertices.
+    inland_from_v = {v: 0 for v in coastal_vertices}
+    to_expand = {v for v in coastal_vertices}
+    edges = set()
+    while len(to_expand) > 0:
+        this = to_expand.pop()
+        next_height = inland_from_v[this] + 1
+        for v in this.edge_vertices():
+            if v not in interior_vertices:
+                continue
+            edges.add(Edge.from_vertices(this, v))
+            if (v in inland_from_v and next_height < inland_from_v[v]) or v not in inland_from_v:
+                inland_from_v[v] = next_height
+                to_expand.add(v)
+    # This seems dumb? But want to ensure the order is correct.
+    invs = [v for v in interior_vertices]  # Maybe I should instead make this one w/ the counts and then not have to use counts in random.sample?
+    dists = [inland_from_v[v] for v in interior_vertices]
+    len_edges = len(edges)
+    v_graph = {}
+    river_flow_from_edge = {}
+    river_sources = []
+    river_merges = []
+    endpoints = []
+    river_max_flow = 0
+    # Flowing down from randomly sampled interior points
+    # Points further from the coast are proportionally more likely to be selected as a source
+    while len(v_graph) < len_edges * config.get("RIVER_FRAC", 0.1):
+        start = random.sample(invs, k=1, counts=dists)[0]
+        if start in v_graph:
+            continue
+        print(len(v_graph), len_edges)
+        width = 1
+        this_river = set()
+        unmerged = True
+        this = start
+        while this not in coastal_vertices:
+            poss = []
+            maxv = inland_from_v[this]
+            for v in this.edge_vertices():
+                if inland_from_v[v] <= maxv and v not in this_river:
+                    poss.append(v)
+            nextv = random.sample(poss, k=1)[0]
+            this_river.add(this)
+            v_graph[this] = nextv
+            river_flow_from_edge[Edge.from_vertices(this, nextv)] = 1
+            if width > river_max_flow:
+                river_max_flow = width
+            if nextv in v_graph:
+                if nextv in river_sources or nextv in endpoints:  # We flowed to the start of another river
+                    if nextv in endpoints:
+                        endpoints.remove(nextv)
+                    else:
+                        river_sources.remove(nextv)
+                else:  # We met a river midway
+                    unmerged = False
+                    river_merges.append((this, nextv))
+                while nextv not in coastal_vertices:
+                    ed = Edge.from_vertices(nextv, v_graph[nextv])
+                    new_width = river_flow_from_edge[ed] + width
+                    if new_width > river_max_flow:
+                        river_max_flow = new_width
+                    river_flow_from_edge[ed] = new_width
+                    nextv = v_graph[nextv]
+                break
+            width += 1
+            this = nextv
+        if unmerged:
+            river_sources.append(start)
+        else:
+            endpoints.append(start)
+    # Assign type_from_pid
     type_from_pid = {}
     lakes = []  # This should be pids, not cubes
     for k in land_cubes:
@@ -1019,7 +1062,7 @@ def create_data(config):
         type_from_pid[pid_from_cube[k]] = "sea"
     for k in lakes:
         type_from_pid[k] = "lake"
-    return continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region
+    return continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region
 
 
 if __name__ == "__main__":
@@ -1041,7 +1084,7 @@ if __name__ == "__main__":
     config["max_x"] = config.get("max_x", config.get("box_width", 10)*(config["n_x"]*3-3))
     config["max_y"] = config.get("max_y", config.get("box_height", 17)*(config["n_y"]*2-2))
 
-    continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_edges, river_vertices, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region = create_data(config)
+    continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region = create_data(config)
     cultures, religions = assemble_culrels(region_trees=region_trees)  # Not obvious this should be here instead of just derived later?
     rgb_from_pid = create_colors(pid_from_cube)
     pids_from_rid = {}
@@ -1090,8 +1133,10 @@ if __name__ == "__main__":
             cultures=cultures,
             religions=religions,
             impassable=impassable,
-            river_edges=river_edges,
-            river_vertices=river_vertices,
+            river_flow_from_edge=river_flow_from_edge,
+            river_sources=river_sources, 
+            river_merges=river_merges,
+            river_max_flow=river_max_flow,
             straits=straits,
             sea_region=sea_region,
         )
@@ -1108,8 +1153,10 @@ if __name__ == "__main__":
             terr_from_cube=terr_from_cube,
             gov_from_tag={},
             height_from_vertex=height_from_vertex,
-            river_edges=river_edges,
-            river_vertices=river_vertices,
+            river_flow_from_edge=river_flow_from_edge,
+            river_sources=river_sources, 
+            river_merges=river_merges,
+            river_max_flow=river_max_flow,
             srid_from_pid=srid_from_pid,
             name_from_srid=name_from_srid,
             cont_names=cont_names,
@@ -1126,8 +1173,10 @@ if __name__ == "__main__":
             terr_from_pid=terr_from_pid,
             rgb_from_pid=rgb_from_pid,
             height_from_vertex=height_from_vertex,
-            river_edges=river_edges,
-            river_vertices=river_vertices,
+            river_flow_from_edge=river_flow_from_edge,
+            river_sources=river_sources, 
+            river_merges=river_merges,
+            river_max_flow=river_max_flow,
             locs_from_rid=locs_from_rid,
             coast_from_rid=coast_from_rid,
             name_from_rid=name_from_rid,
@@ -1150,8 +1199,10 @@ if __name__ == "__main__":
             coast_from_cube=coast_from_cube,
             name_from_rid=name_from_rid,
             pids_from_rid=pids_from_rid,
-            river_edges=river_edges,
-            river_vertices=river_vertices,
+            river_flow_from_edge=river_flow_from_edge,
+            river_sources=river_sources, 
+            river_merges=river_merges,
+            river_max_flow=river_max_flow,
             locs_from_rid=locs_from_rid,
             height_from_vertex=height_from_vertex,
             region_trees=region_trees,

@@ -1,7 +1,7 @@
 import os
 
 from map_io import *
-from terrain import WATER_HEIGHT
+from terrain import SOURCE, MERGE, WATER_HEIGHT
 
 class BasicMap:
     def __init__(self, file_dir, map_dir, max_x, max_y, n_x, n_y):
@@ -38,7 +38,11 @@ class BasicMap:
         """Uses the heightmap to generate the normal vector map."""
         create_normal(PIL.Image.open(self.heightmap_loc)).save(os.path.join(self.file_dir, self.map_dir, "world_normal"+file_ext))
 
-    def create_rivers(self, height_from_vertex, river_edges, river_vertices, base_loc, file_ext):
+    def create_rivers(self, height_from_vertex, river_flow_from_edge, river_sources, river_merges, river_max_flow, base_loc, file_ext):
         """Create rivers.file_ext"""
+        # TODO: Take into account river_max_flow?
+        river_edges = {e: (min(12, 4 + flow),1) for e, flow in river_flow_from_edge.items()}
+        river_vertices = {v: SOURCE for v in river_sources}
+        river_vertices.update({(fr, to): MERGE for fr,to in river_merges})
         river_background = {k.cube.tuple():255 if v > WATER_HEIGHT else 254 for k,v in height_from_vertex.items() if k.rot==0}
         create_hex_map(rgb_from_ijk=river_background, rgb_from_edge=river_edges, rgb_from_vertex=river_vertices, max_x=self.max_x, max_y=self.max_y, mode='P', palette=get_palette(os.path.join(base_loc, self.map_dir, "rivers"+file_ext)), default=254, n_x=self.n_x, n_y=self.n_y).save(os.path.join(self.file_dir, self.map_dir, "rivers"+file_ext))

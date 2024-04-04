@@ -177,10 +177,24 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_f
                 for y in range(start_y + river_border[x] - y_down, start_y + min(box_height,river_border[x + 1] + y_up)):
                     pix[start_x + box_width * 3 + x, y] = rgb
     for vertex, rgb in rgb_from_vertex.items():
-        # The vertices that get painted are the west (-1), center (0), and eastern vertices (1).
-        start_x, start_y = xy_from_cube(vertex.cube, box_width=box_width, box_height=box_height)
-        start_y -= 1  # This is to line it up with the southernmost edge instead of the northernmost edge.
-        pix[start_x + (1 + vertex.rot) * 2 * box_width, start_y + box_height] = rgb
+        if isinstance(vertex, Vertex):
+            # The vertices that get painted are the west (-1), center (0), and eastern vertices (1).
+            start_x, start_y = xy_from_cube(vertex.cube, box_width=box_width, box_height=box_height)
+            start_y -= 1  # This is to line it up with the southernmost edge instead of the northernmost edge.
+            start_x -= vertex.rot == 1
+            pix[start_x + (1 + vertex.rot) * 2 * box_width, start_y + box_height] = rgb
+        elif isinstance(vertex, tuple):
+            fr,to = vertex
+            assert isinstance(fr, Vertex) and isinstance(to, Vertex)
+            start_x, start_y = xy_from_cube(to.cube, box_width=box_width, box_height=box_height)
+            o_x, o_y = xy_from_cube(fr.cube, box_width=box_width, box_height=box_height)
+            if start_y == o_y:
+                start_x += 1 if start_x < o_x else -1
+            else:
+                start_y += 1 if start_y < o_y else -1
+            start_y -= 1  # This is to line it up with the southernmost edge instead of the northernmost edge.
+            start_x -= to.rot == 1
+            pix[start_x + (1 + to.rot) * 2 * box_width, start_y + box_height] = rgb
     return img
 
 

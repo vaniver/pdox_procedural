@@ -422,15 +422,15 @@ class Vertex:
             return []
         elif self.rot == -1:
             return [
-                (Vertex(self.cube.add(Cube(-2,1,1)),1), Edge(self.cube.add(Cube(-1,1,0)), 0, -1)),
-                (Vertex(self.cube.add(Cube(-1,1,0)),1), Edge(self.cube.add(Cube(-1,1,0)), 1, 1)),
-                (Vertex(self.cube.add(Cube(-1,0,1)),1), Edge(self.cube.add(Cube(-1,0,1)), 2, -1)),
+                Vertex(self.cube.add(Cube(-2,1,1)),1),  # Edge(self.cube.add(Cube(-1,1,0)), 0, -1)),
+                Vertex(self.cube.add(Cube(-1,1,0)),1),  # Edge(self.cube.add(Cube(-1,1,0)), 1, 1)),
+                Vertex(self.cube.add(Cube(-1,0,1)),1),  # Edge(self.cube.add(Cube(-1,0,1)), 2, -1)),
                 ]
         else:  # self.rot == 1
             return [
-                (Vertex(self.cube.add(Cube(1,0,-1)),-1), Edge(self.cube, 2, 1)),
-                (Vertex(self.cube.add(Cube(2,-1,-1)),-1), Edge(self.cube.add(Cube(1,0,-1)), 0, 1)),
-                (Vertex(self.cube.add(Cube(1,-1,0)),-1), Edge(self.cube, 1, -1)),
+                Vertex(self.cube.add(Cube(1,0,-1)),-1),  # Edge(self.cube, 2, 1)),
+                Vertex(self.cube.add(Cube(2,-1,-1)),-1),  # Edge(self.cube.add(Cube(1,0,-1)), 0, 1)),
+                Vertex(self.cube.add(Cube(1,-1,0)),-1),  # Edge(self.cube, 1, -1)),
                 ]
 
     def down_pair(self):

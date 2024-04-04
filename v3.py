@@ -429,7 +429,7 @@ def create_journals(file_dir, base_dir):
     # TODO: ones that could be customized are 00_belle_epoque and 00_canals
 
 
-def create_mod(file_dir, config, pid_from_cube, rid_from_pid, pids_from_rid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, river_edges, river_vertices, locs_from_rid, coast_from_rid, name_from_rid, region_trees, tag_from_pid, straits):
+def create_mod(file_dir, config, pid_from_cube, rid_from_pid, pids_from_rid, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, river_flow_from_edge, river_sources, river_merges, river_max_flow, locs_from_rid, coast_from_rid, name_from_rid, region_trees, tag_from_pid, straits):
     """Creates the V3 mod files in file_dir, given the basic data."""
     # Get some conversion data.
     with open(os.path.join("data", "conversion_v3.yml"), 'r', encoding="utf_8_sig") as inf:
@@ -460,7 +460,7 @@ def create_mod(file_dir, config, pid_from_cube, rid_from_pid, pids_from_rid, ter
     v3map.create_provinces(new_rgb_from_pid, pid_from_cube, ".png")
     v3map.create_heightmap(height_from_vertex, ".png", 2)
     
-    v3map.create_rivers(height_from_vertex, river_edges, river_vertices, base_loc=config["BASE_V3_DIR"], file_ext=".png")
+    v3map.create_rivers(height_from_vertex, river_flow_from_edge, river_sources, river_merges, river_max_flow, base_loc=config["BASE_V3_DIR"], file_ext=".png")
     v3map.create_terrain_masks(base_dir=config["BASE_V3_DIR"], terr_from_cube=terr_from_cube)
     create_terrain_file(file_dir, terr_from_pid=terr_from_pid, rgb_from_pid=new_rgb_from_pid)
     v3map.create_locators(
