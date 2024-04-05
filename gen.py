@@ -9,6 +9,7 @@ from cube import *
 from terrain import BaseTerrain, RAIL_DIST, TERRAIN_HEIGHT, WATER_HEIGHT
 from voronoi import area_voronoi, iterative_voronoi, growing_voronoi, voronoi
 
+from region_tree import RegionTree
 import ck3
 import eu4
 import v3
@@ -16,218 +17,6 @@ import hoi4
 
 class CreationError(Exception):
     pass
-
-DEPTH_MAP = {"e": 0, "k": 1, "d": 2, "c": 3, "b": 4}
-
-class RegionTree:
-    """A class to hold the region tree.
-    This is game-agnostic, which means it needs to have the basic details for all games.
-    The ordering goes something like:
-    - era
-      - continent
-        - region
-          - area
-            - county
-              - barony
-    The overall divisions of the world are not a tree, but landed_titles and related things are.
-    At the county level, children (the baronies) is just a list of strings instead of a list of RegionTrees.
-    """
-    def __init__(self, title=None, tag=None, culture=None, religion=None, rough="forest", holy_site=None, color=("0","0","0"), capital_title=None, capital_pid=-1, capital_rid=-1, children = []):
-        self.capital_title = capital_title
-        self.capital_pid = capital_pid
-        self.capital_rid = capital_rid
-        self.culture = culture
-        self.religion = religion
-        self.rough = rough
-        self.holy_site = holy_site
-        self.title = title
-        self.tag = tag
-        self.color = color
-        if len(children) > 0:
-            self.children = children
-        else:
-            self.children = []
-
-    def all_ck3_titles(self):
-        """Returns all ck3 titles defined in this region tree.
-        There are four types:
-        e_ (continents)
-        k_ (regions)
-        d_ (areas)
-        c_ (counties)
-        b_ (baronies)"""
-        if self.title is None:
-            return []
-        title_list = [self.title]
-        for child in self.children:
-            if isinstance(child,RegionTree):
-                title_list.extend(child.all_ck3_titles())
-            else:
-                title_list.append(child)
-        return title_list
-
-    def some_ck3_titles(self, filter):
-        """Returns all ck3 titles that start with filter."""
-        return [x for x in self.all_ck3_titles() if x.startswith(filter)]
-    
-    def all_region_trees(self):
-        rt_list = [self]
-        for child in self.children:
-            if isinstance(child,RegionTree):
-                rt_list.extend(child.all_region_trees())
-        return rt_list
-    
-    def all_tag_pids(self, last_tag=""):
-        """Returns a list of tag mappings defined by this region_tree.
-        Will have a blank string for any untagged provinces."""
-        if self.tag is not None:
-            last_tag = self.tag
-        tag_list = []
-        for child in self.children:
-            if isinstance(child,RegionTree):
-                tag_list.extend(child.all_tag_pids(last_tag=last_tag))
-            else:
-                tag_list.append(last_tag)
-        return tag_list
-
-    def all_holy_sites(self):
-        """Returns all holy sites."""
-        if self.holy_site is None:
-            holy_site_list = []
-        else:
-            holy_site_list = [self.holy_site]
-        for child in self.children:
-            if isinstance(child,RegionTree):
-                holy_site_list.extend(child.all_holy_sites())
-        return holy_site_list
-    
-    def capital(self):
-        if self.capital_title is not None:
-            return self.capital_title
-        if self.title[0] == "c":
-            return self.title
-        if len(self.children) > 0 and isinstance(self.children[0], RegionTree):
-            self.capital_title = self.children[0].capital()
-            return self.capital_title
-        return ""
-    
-    def culrels(self):
-        if self.title[0] == "c":
-            return [(self.culture, self.religion)]
-        else:
-            culrel = [(self.culture, self.religion)]
-            for child in self.children:
-                culrel.extend(child.culrels())
-            return culrel
-        
-    def culrelmap(self):
-        if self.title[0] == "c":
-            if self.culture is not None:
-                return {self.title: (self.culture, self.religion)}
-            else:
-                return {}
-        else:
-            culrelmap = {}
-            if self.culture is not None:
-                culrelmap[self.title] = (self.culture, self.religion)
-            for child in self.children:
-                culrelmap.update(child.culrelmap())
-            return culrelmap
-        
-    def find_by_title(self, title):
-        """Given a title, return the region_tree corresponding to that title (either self or a child, or a more remote descendant.)"""
-        if self.title == title:
-            return self
-        if self.title[0] == "c":
-            return None
-        for child in self.children:
-            f =  child.find_by_title(title)
-            if f is not None:
-                return f
-        return None
-
-    @classmethod
-    def from_csv(cls, filename, last_pid=1, last_rid=1, last_srid=1):
-        """last_pid and last_rid will be used to assign pids and rids as we go.
-        Returns the region_tree, the new last_pid, and the new last_rid."""
-        with open(filename) as inf:
-            current = {}
-            for line in inf.readlines():
-                lsplit = line.split(",")
-                depth = DEPTH_MAP[lsplit[0][0]]
-                if depth == 1:
-                    last_srid += 1
-                elif depth == 2:  # This is a duchy/state, and so the region_id needs to increase.
-                    last_rid += 1
-                elif depth == 4:  # This is a barony, and so just needs to be appended to children of the current county.
-                    for cind in current:
-                        if current[cind].capital_pid < 0:
-                            current[cind].capital_pid = last_pid
-                    current[3].children.append(lsplit[0].strip())
-                    last_pid += 1
-                    continue
-                if depth in current:  # We finished a unit and are on to the next one.
-                    dd = max(current.keys())
-                    while dd >= depth:  # We've got to make sure we finish any smaller units first.
-                        current[dd-1].children.append(current.pop(dd))
-                        dd -= 1
-                title = lsplit[0]
-                color = tuple([x.strip() for x in lsplit[1:4]]) if len(lsplit) > 3 else ("0","0","0")
-                tag, culture, religion, rough = lsplit[4:8] if len(lsplit) > 7 else [None, None, None, "forest"]
-                holy_site = lsplit[8].strip() if len(lsplit) > 8 else None
-                current[depth] = cls(title=title, color=color, tag=tag, culture=culture, religion=religion, rough=rough, holy_site=holy_site, capital_rid=last_rid)
-            while len(current) > 0:
-                depth = max(current.keys())
-                if depth-1 in current:
-                    current[depth-1].children.append(current.pop(depth))
-                else:
-                    result = current[depth]
-                    break
-        return result, last_pid, last_rid, last_srid
-
-    @classmethod
-    def from_dict(cls, contents, last_pid=1, last_rid=1, last_srid=1):
-        """Given a dictionary of region details, recursively create a RegionTree. Also returns pid/rid/srid and localization dictionary."""
-        localization = {}
-        children = contents.get("children", [])
-        result_children = []
-        if len(children) > 0 and isinstance(children[0], str):
-            for child in children:
-                title, local = child.split("|")
-                localization[title] = local
-                result_children.append(title)
-                last_pid += 1
-        else:
-            for child in children:
-                result, last_pid, last_rid, last_srid, child_localization = cls.from_dict(child, last_pid, last_rid, last_srid)
-                result_children.append(result)
-                localization.update(child_localization)
-        title = contents["title"]  # This should break if it's not there
-        color = tuple([x.strip() for x in contents["color"].split(" ")])  # TODO: Maybe just use color as a string instead of a tuple?
-        depth = DEPTH_MAP[title[0]]
-        if depth == 2:
-            last_rid += 1
-        elif depth == 1:
-            last_srid += 1
-        if "l" in contents:
-            localization[title] = contents["l"]
-        culture = contents.get("cul", None)
-        religion = contents.get("rel", None)
-        holy_site = contents.get("holy", None)
-        tag = contents.get("tag", None)
-        rough = contents.get("rough", "forest")
-        result = cls(title=title, color=color, tag=tag, culture=culture, religion=religion, rough=rough, holy_site=holy_site, capital_rid=last_rid, children=result_children)
-        return result, last_pid, last_rid, last_srid, localization
-            
-
-    @classmethod
-    def from_yml(cls, filename, last_pid=1, last_rid=1, last_srid=1):
-        """Processes a .yml file to create a dictionary, which then is run thru from_dict. Also returns localization dictionary."""
-        with open(filename, encoding='utf_8_sig') as inf:
-            contents = yaml.load(inf, yaml.Loader)
-        return cls.from_dict(contents, last_pid, last_rid, last_srid)
-        
-
 
 def assemble_culrels(region_trees):
     """Create lists of cultures and religions that are present in region_trees, which is a list of RegionTrees."""
@@ -598,25 +387,35 @@ def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], 
 
 def assign_terrain_subregion(region, template, rough="forest"):
     """Assign terrain to the region according to the template."""
-    # TODO: treat farmland right
     terr_from_cube = {}
     template_list = []
+    fixed = {}
     for k,v in template.items():
-        template_list.extend([k] * v)
+        if k == "fixed":
+            fixed = v
+        else:
+            template_list.extend([k] * v)
     random.shuffle(template_list)
+    for ind, val in sorted(fixed.items()):
+        template_list.insert(ind, val)
     for ind, cube in enumerate(region.values()):
         terr_from_cube[cube] = BaseTerrain[rough] if template_list[ind] == "rough" else BaseTerrain[template_list[ind]]
     return terr_from_cube
 
-def assign_terrain_continent(cube_from_pid, templates):
-    """Assign terrain to the continent according to the template list.
-    TODO: also generate the heightmap and creates rivers."""
+def assign_terrain_continent(cube_from_pid, rough_from_pid, templates):
+    """Assign terrain to the continent according to the template list."""
     min_pid = min(cube_from_pid.keys())
     terr_from_cube = {}
     for template in templates:
-        max_pid = min_pid + sum(template.values())
+        template_size = 0
+        for k, v in template.items():
+            if isinstance(v, int):
+                template_size += v
+            else:
+                template_size += len(v)
+        max_pid = min_pid + template_size
         region = {k:v for k,v in cube_from_pid.items() if min_pid <= k < max_pid}
-        terr_from_cube.update(assign_terrain_subregion(region, template))  # TODO: Correctly use rough
+        terr_from_cube.update(assign_terrain_subregion(region, template, rough=rough_from_pid[min_pid]))
         min_pid = max_pid
     return terr_from_cube
 
@@ -761,6 +560,7 @@ def create_data(config):
     cont_from_pid = {}
     pid_from_title = {}
     tag_from_pid = {}
+    rough_from_pid = {}
     land_cubes = set()
     sea_cubes = set()
     terr_from_cube = {}
@@ -798,9 +598,10 @@ def create_data(config):
             pid_from_title[title] = pid + last_pid
             cont_from_pid[pid + last_pid] = cind + 1
         tag_from_pid.update({pid + last_pid: tag for pid, tag in enumerate(region_trees[cind].all_tag_pids())})
+        rough_from_pid.update({pid + last_pid: rough for pid, rough in enumerate(region_trees[cind].all_rough_pids())})
         land_cubes = land_cubes.union(continent)
         last_pid += len(continent)
-        terr_from_cube.update(assign_terrain_continent({v:k for k,v in pid_from_cube.items() if k in continent}, terr_templates[cind]))
+        terr_from_cube.update(assign_terrain_continent({v:k for k,v in pid_from_cube.items() if k in continent}, rough_from_pid, terr_templates[cind]))
     # At this point, pid_from_cube should be a 1-1 mapping (because we haven't done the larger regions).
     terr_from_pid = {v:terr_from_cube[k] for k,v in pid_from_cube.items() if k in terr_from_cube}
     land_cube_from_pid = {v:k for k,v in pid_from_cube.items()}
@@ -1013,7 +814,6 @@ def create_data(config):
         start = random.sample(invs, k=1, counts=dists)[0]
         if start in v_graph:
             continue
-        print(len(v_graph), len_edges)
         width = 1
         this_river = set()
         unmerged = True

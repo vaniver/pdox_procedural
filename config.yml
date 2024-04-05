@@ -69,11 +69,16 @@ CENTER_SIZE_LIST:
 - 5
 - 5
 CENTER_TERRAIN_TEMPLATE:
-  farmlands: 4
+  farmlands: 0
   hills: 4
   mountains: 2
   plains: 8
   rough: 4
+  fixed:
+    0: farmlands
+    7: farmlands
+    12: farmlands
+    17: farmlands
 KINGDOM_SIZE_LIST:
 - - 6
   - 4
@@ -92,8 +97,10 @@ KINGDOM_SIZE_LIST:
   - 4
   - 3
 KINGDOM_TERRAIN_TEMPLATE:
-  farmlands: 1
+  farmlands: 0
   hills: 16
   mountains: 8
   plains: 20
   rough: 16
+  fixed:
+    0: farmlands

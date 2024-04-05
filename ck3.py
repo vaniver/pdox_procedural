@@ -597,8 +597,9 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
                         c_capital = False
                     prov_buf +="\tholding = " + template["baronies"].get(num["b"], "none") + "\n}\n"
                 num[title[0]] += 1
-            with open(os.path.join(file_dir, "history", "provinces", region+".txt"),'w', encoding='utf_8_sig') as outf:
-                outf.write(prov_buf)
+            if region[0] != "e":  # We don't need to write out province history for empires.
+                with open(os.path.join(file_dir, "history", "provinces", region+".txt"),'w', encoding='utf_8_sig') as outf:
+                    outf.write(prov_buf)
             title_buf = ""
             for title, events in template["titles"].items():  # We have to do this a second time so that we can make the title map first.
                 if title[0] != "b":
