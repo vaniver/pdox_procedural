@@ -450,20 +450,59 @@ def arrange_inner_sea(continents, inner_sea_center, angles=[2,4,0]):
     assert len(continents) == 3
     moved_continents = []
     sea_region_centers = [inner_sea_center]
-    longest_dim = 0
-    offs = [Cube(-2,4,-2), Cube(0,0,0), Cube(-5,4,1)]  # These are hardcoded for the 1945 seed.
-    for ind,continent in enumerate(continents):
-        ac = Area(ind, continent)  # Area has unordered membership, which is why we have to construct the dict again later. Continent should probably be a Tile (old code w/ ordered membership).
-        off1 = ac.calc_average()
+    # longest_dim = 0
+    # offs = [Cube(-2,4,-2), Cube(0,0,0), Cube(-5,4,1)]  # These are hardcoded for the 1945 seed.
+    for ind, continent in enumerate(continents):
+        ac = Area(ind, continent)
         ac.rectify()
         ac.calc_boundary()
         ac.calc_bounding_hex()
-        longest_dim = max(longest_dim, ac.max_x-ac.min_x, ac.max_y-ac.min_y, ac.max_z-ac.min_z)
+        # longest_dim = max(longest_dim, ac.max_x-ac.min_x, ac.max_y-ac.min_y, ac.max_z-ac.min_z)
         off2, rot = ac.best_corner(angles[ind])
-        moved_continents.append([k.sub(off1).rotate_right(rot+3).sub(off2).add(inner_sea_center).add(offs[ind]) for k in continent])
-    # TODO: Iteratively move them closer to each other until the strait situation is good.
+        ac.rotate(rot + 3)
+        ac.translate(off2.add(inner_sea_center))
+        moved_continents.append(ac)
+    directions = [Cube(x, y, -x-y) for x in range(-2, 3) for y in range(-2, 3)]
+    temp = 0.1
+    score = score_inner_sea(moved_continents)
+    best_score = score
+    steps = 0
+    best_cont = moved_continents
+    while score > -99 and steps < config.get("MAX_STEPS", 10000):
+        steps += 1
+        offs = [Cube(0,0,0)] + [random.choice(directions) for _ in range(1,len(moved_continents))]  # Keep the first continent pegged in place to prevent the world from sliding away from the center.
+        candidate = [cont.add(off) for cont, off in zip(moved_continents, offs)]
+        new_score = score_inner_sea(candidate)
+        if new_score < best_score:
+            best_score = score = new_score
+            best_cont = moved_continents = candidate
+        elif new_score < score or random.random() < temp:
+            score = new_score
+            moved_continents = candidate
+        temp *= 0.9999
+    if score == -99:
+        print("Optimization found a perfect score after", steps, "steps.")
     # TODO: Add the strait mouths to sea_region_centers.
-    return moved_continents, sea_region_centers
+    return [bc.members for bc in best_cont], sea_region_centers
+
+
+def score_inner_sea(conts):
+    """Given a list of three continents, calculate the score between them."""
+    score = 0
+    for ind in range(3):
+        score += (2-conts[ind-1].min_dist(conts[ind]))**2  #index 0-1 is ok; want a distance of 2 between all conts
+    if score > 0:
+        return score
+    connex = True
+    for ind in range(3):
+        cs = conts[ind-1].count_straits(conts[ind])
+        if cs == 0:
+            connex = False
+        score -= 0.5 + 0.1 * cs if cs > 0 else 0.0
+    if connex:
+        return -99
+    return score
+    
 
 def arrange_mediterranean(continents):
     """Given two continents, arrange them to have straits around a central inner sea. Because of how bounding boxes work, might have to be north/south? :/"""
@@ -576,6 +615,7 @@ def create_data(config):
     continents, terr_templates, region_trees, sea_centers, last_pid, last_rid, last_srid, name_from_title = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", None), last_pid=last_pid, last_rid=last_rid, last_srid=last_srid, start_time=start_time)
     m_x = config["n_x"]//2
     m_y = -(config["n_y"]+config["n_x"]//2)//2
+    print("Continents created; time elapsed:", time.time()-start_time)
     continents, sea_region_centers = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
     print("Inner sea arranged; time elapsed:", time.time()-start_time)
     pid_from_cube = {}
@@ -716,10 +756,12 @@ def create_data(config):
         cubes = [cube for cube, pid in pid_from_cube.items() if pid in pids and pid != pid_from_loc["city"]]
         if len(cubes) == 0:
             print(f"Province {pid} only has one cube in it!")
+            pid_from_loc["farm"] = pid_from_loc["mine"] = pid_from_loc["wood"] = pid_from_loc["city"]
         # TODO: farm, mine, wood dependent on trade goods
-        pid_from_loc["farm"] = pid_from_cube[random.sample(cubes, k=1)[0]]
-        pid_from_loc["mine"] = pid_from_cube[random.sample(cubes, k=1)[0]]
-        pid_from_loc["wood"] = pid_from_cube[random.sample(cubes, k=1)[0]]
+        else:
+            pid_from_loc["farm"] = pid_from_cube[random.sample(cubes, k=1)[0]]
+            pid_from_loc["mine"] = pid_from_cube[random.sample(cubes, k=1)[0]]
+            pid_from_loc["wood"] = pid_from_cube[random.sample(cubes, k=1)[0]]
         locs_from_rid[rid] = pid_from_loc
     # Determine distance from land/water boundary
     print("begin coast_dist; time elapsed:", time.time()-start_time)

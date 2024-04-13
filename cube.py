@@ -91,6 +91,16 @@ class Cube:
             
     def tuple(self):
         return (self.x, self.y, self.z)
+    
+    def __add__(self, other):
+        if type(self) != type(other):
+            raise ValueError(f"{type(self)} != {type(other)}")
+        return Cube(self.x + other.x, self.y + other.y, self.z + other.z)
+    
+    def __sub__(self, other):
+        if type(self) != type(other):
+            raise ValueError(f"{type(self)} != {type(other)}")
+        return Cube(self.x - other.x, self.y - other.y, self.z - other.z)
 
     def __str__(self):
         return str(self.x)+", "+str(self.y)+", "+str(self.z)
