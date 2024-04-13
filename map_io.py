@@ -28,6 +28,23 @@ def xy_from_cube(cube, box_width, box_height):
     start_y = (2 * ver - 1 + (hor % 2)) * box_height
     return start_x, start_y
 
+def xy_lattice_from_cube(cube, box_width, box_height, lattice_width=2, lattice_height=2):
+    """Return a list of evenly hexagonally spaced points lattice_width apart horizontally and lattice_height apart vertically.
+    Note this is trying to make a hexagonal lattice, so the distances are more like 2*width and 2*height."""
+    min_x, min_y = xy_from_cube(cube, box_width, box_height)
+    lattice_points = []
+    for ind, dx in enumerate(range(0, box_width*2, lattice_width)):
+        offy = lattice_height if ind % 2 == 1 else 0
+        for dy in range(offy, min(box_height, (box_width*2-round(dx))*box_height//box_width), lattice_height*2):
+            lattice_points.append((min_x+box_width*2+dx, min_y+box_height+dy))
+            if dx > 0:
+                lattice_points.append((min_x+box_width*2-dx, min_y+box_height+dy))
+            if dy > 0:
+                lattice_points.append((min_x+box_width*2+dx, min_y+box_height-dy))
+            if dx > 0 and dy > 0:
+                lattice_points.append((min_x+box_width*2-dx, min_y+box_height-dy))
+    return lattice_points
+
 
 def subset_from_minmax(min_x, max_x, min_y, max_y):
     """Returns the valid cubes between min_x and max_x / min_y and max_y, inclusive."""

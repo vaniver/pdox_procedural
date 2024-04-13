@@ -1,5 +1,6 @@
 import os
 import random
+import time
 import yaml
 
 from map_io import valid_cubes
@@ -45,6 +46,7 @@ def create_chunks(weight_from_cube, num_centers):
         chunk.calc_edges(result)
     return centers, chunks, cids
 
+
 def compute_func(chunks, cids, size):
     """Given a bunch of chunks, figure out which ones are connected to each other as a clique, with the minimum boundary size.
     cids are the ids of the chunks (the index to call into the chunks list); probably I don't need this?
@@ -87,6 +89,25 @@ def compute_func(chunks, cids, size):
     if size == 5:
         return sorted(pents, key=lambda x: x[1], reverse=True)
 
+
+def dist_from_coast(main_region, coast_region):
+    """Returns a dictionary from all the cubes in main_region to their distance to the nearest cube in coast_region.
+    Seeded from the coast_region, so ensure at least some are inside main_region."""
+    dist_from_cube = {cube: 0 for cube in coast_region if cube in main_region}
+    new_coast = []
+    while len(dist_from_cube) < len(main_region) and len(coast_region) > 0:
+        for cube in coast_region:
+            for nbr in cube.neighbors():
+                if nbr in main_region:
+                    if nbr not in dist_from_cube:
+                        dist_from_cube[nbr] = dist_from_cube[cube] + 1
+                        new_coast.append(nbr)
+                    elif dist_from_cube[nbr] > dist_from_cube[cube] + 1:
+                        dist_from_cube[nbr] = dist_from_cube[cube] + 1
+                        new_coast.append(nbr)
+        coast_region = new_coast
+        new_coast = []
+    return dist_from_cube
 
 def create_triangular_continent(weight_from_cube, chunks, candidate, config):
     """Chunks is a list of chunks; candidates is a tuple of chunk ids (of length 3, 4, or 5).
@@ -290,7 +311,7 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
     return cube_from_pid, terr_templates, sea_centers
     
 
-def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65, num_centers=None, last_pid=1, last_rid=0, last_srid=0):
+def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65, num_centers=None, last_pid=1, last_rid=0, last_srid=0, start_time=None):
     """Create len(config["CONTINENT_LISTS"]) continents with the appropriate number of kingdoms.
     Uses the standard triangle-border system, which requires 3 to 5 kingdoms per continent.
     Will start province and region ids at last_pid and last_rid+1 respectively."""
@@ -332,7 +353,10 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
         all_sea_centers = []
         while len(continents) <= cind:
             ind += 1
-            print("Continent attempt: " + str(ind))
+            if start_time is None:
+                print("Continent attempt:",ind)
+            else:
+                print("Continent attempt:",ind, "Time elapsed:", time.time()-start_time)
             subweights = {k:v for k,v in weight_from_cube.items() if any([k in chunks[cid].members for cid in candidates[ind][0]])}
             try:
                 continent, terr_template, sea_centers = create_triangular_continent(subweights, chunks, candidates[ind], config)
@@ -543,16 +567,17 @@ def create_supply_rails(terr_from_cube, pids_from_rid, rid_from_cube, cube_from_
 def create_data(config):
     """The main function that calls all the other functions in order. 
     The resulting data structure should be enough to make the mod for any particular game."""
+    start_time = time.time()
     random.seed(config.get("seed", 1945))
     last_pid = 1  # province_id. They 1-index instead of 0-indexing.
     last_cid = 1  # county_id. They 1-index instead of 0-indexing.
     last_rid = 1  # region_id. They 1-index instead of 0-indexing.
     last_srid = 1  # strategic_region_id. They 1-index instead of 0-indexing.
-    continents, terr_templates, region_trees, sea_centers, last_pid, last_rid, last_srid, name_from_title = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", None), last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+    continents, terr_templates, region_trees, sea_centers, last_pid, last_rid, last_srid, name_from_title = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", None), last_pid=last_pid, last_rid=last_rid, last_srid=last_srid, start_time=start_time)
     m_x = config["n_x"]//2
     m_y = -(config["n_y"]+config["n_x"]//2)//2
     continents, sea_region_centers = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
-
+    print("Inner sea arranged; time elapsed:", time.time()-start_time)
     pid_from_cube = {}
     rid_from_pid = {}
     srid_from_pid = {}
@@ -605,15 +630,18 @@ def create_data(config):
     # At this point, pid_from_cube should be a 1-1 mapping (because we haven't done the larger regions).
     terr_from_pid = {v:terr_from_cube[k] for k,v in pid_from_cube.items() if k in terr_from_cube}
     land_cube_from_pid = {v:k for k,v in pid_from_cube.items()}
+    print("pid/cube relationships established; time elapsed:", time.time()-start_time)
     # Split out wastelands / mountains / lakes
     non_land = sorted(find_contiguous(set(valid_cubes(config["n_x"], config["n_y"])) - land_cubes), key=len)
     sea_cubes = set(non_land.pop(-1))  # The largest non-land chunk is the ocean.
+    print("non_land contiguous groups found; time elapsed:", time.time()-start_time)
     # Determine straits
     straits = []
     for k in land_cubes:
         for other_land, sea_1, sea_2 in k.valid_straits(land_cubes, sea_cubes):
             straits.append((k, other_land, sea_1, sea_2))
             sea_centers.append(sea_1)
+    print("beginning impassable; time elapsed:", time.time()-start_time)
     impassable = []
     impassable_rids = []
     for iind, nlg in enumerate(non_land):
@@ -633,8 +661,10 @@ def create_data(config):
         # cont_from_pid[last_pid] = 
         last_pid += 1
         last_rid += 1
+    print("assigning sea provinces; time elapsed:", time.time()-start_time)
     #TODO: Assigning sea provinces should 1) look for major inland seas, like the med, 2) use more regular things that are faster for the deep ocean
     sid_from_cube, rid_from_sid, srid_from_sid = assign_sea_zones(sea_cubes, config, province_centers=sea_centers, region_centers=sea_region_centers, style=config.get("SEA_PROVINCE_STYLE", "even"))
+    print("assigned sea zones; time elapsed:", time.time()-start_time)
     pid_from_cube.update({k:v + last_pid for k,v in sid_from_cube.items()})
     sea_region = {"ocean": []}  # TODO: multiple oceans
     for k, sid in sid_from_cube.items():
@@ -661,6 +691,7 @@ def create_data(config):
     terr_from_cube.update({k:BaseTerrain.ocean for k in sea_cubes})
     # Finish up straits
     straits = [(k, ok, pid_from_cube[x1]) for (k, ok, x1, x2) in straits]
+    print("straits found; time elapsed:", time.time()-start_time)
     # Assign region points
     coast_from_cube = {}
     coast_from_rid = {}  # This is not quite what I want.
@@ -690,27 +721,28 @@ def create_data(config):
         pid_from_loc["mine"] = pid_from_cube[random.sample(cubes, k=1)[0]]
         pid_from_loc["wood"] = pid_from_cube[random.sample(cubes, k=1)[0]]
         locs_from_rid[rid] = pid_from_loc
-
     # Determine distance from land/water boundary
-    coast = [cube for cube in land_cubes if any([nbr in sea_cubes for nbr in cube.neighbors()])]
-    remaining_cubes = land_cubes.difference(coast)
-    land_height_from_cube = {cube: 0 for cube in coast}
-    distance = 1
-    # The height calculation is surprisingly slow. Fix it?
-    while len(remaining_cubes) > 0:
-        coast = [cube for cube in remaining_cubes if any([nbr in coast for nbr in cube.neighbors()])]
-        land_height_from_cube.update({cube: distance for cube in coast})
-        remaining_cubes = remaining_cubes.difference(coast)
-        distance += 1
-    coast = [cube for cube in sea_cubes if any([nbr in land_cubes for nbr in cube.neighbors()])]
-    remaining_cubes = sea_cubes.difference(coast)
-    water_depth_from_cube = {cube: 0 for cube in coast}
-    distance = 1
-    while len(remaining_cubes) > 0:
-        coast = [cube for cube in remaining_cubes if any([nbr in coast for nbr in cube.neighbors()])]
-        water_depth_from_cube.update({cube: distance for cube in coast})
-        remaining_cubes = remaining_cubes.difference(coast)
-        distance += 1
+    print("begin coast_dist; time elapsed:", time.time()-start_time)
+    # Determine the coastal vertices and cubes
+    coastal_vertices = set()
+    interior_vertices = set()
+    land_coast = set()
+    sea_coast = set()
+    for cube in land_cubes:
+        v_buffer = set()
+        for nbr in cube.neighbors():
+            if nbr in sea_cubes:  # TODO: Should this also determine which sea zone land zones are adjacent to?
+                sea_coast.add(nbr)
+                land_coast.add(cube)
+                for v in Edge.from_pair(cube, nbr).vertices():
+                    coastal_vertices.add(v)
+            else:
+                for v in Edge.from_pair(cube, nbr).vertices():
+                    v_buffer.add(v)
+        interior_vertices.update(v_buffer.difference(coastal_vertices))
+    land_height_from_cube = dist_from_coast(land_cubes, land_coast)
+    water_depth_from_cube = dist_from_coast(sea_cubes, sea_coast)
+    print("end coast_dist; time elapsed:", time.time()-start_time)
     # Make heightmap
     height_from_vertex = {}
     for cube, height in land_height_from_cube.items():
@@ -768,23 +800,8 @@ def create_data(config):
                 height_from_vertex[vr] = min(max(0, r), WATER_HEIGHT - 1)
         else:
             print("it was a real check.")
-    print(f"Heightmap heights range from {min(height_from_vertex.values())} to {max(height_from_vertex.values())}.")
+    print(f"Heightmap heights range from {min(height_from_vertex.values())} to {max(height_from_vertex.values())}. Time elapsed: {time.time()-start_time}")
     # Create rivers
-    # Determine the coastal vertices
-    coastal_vertices = set()
-    interior_vertices = set()
-    for cube in land_height_from_cube:
-        nbrs = sorted(cube.neighbors())
-        v_buffer = set()
-        for ind0 in range(0,6):
-            if nbrs[ind0] not in land_height_from_cube:
-                for v in Edge.from_pair(cube, nbrs[ind0]).vertices():
-                    coastal_vertices.add(v)
-            else:
-                for v in Edge.from_pair(cube, nbrs[ind0]).vertices():
-                    v_buffer.add(v)
-        interior_vertices.update(v_buffer.difference(coastal_vertices))
-    # We have the cube distance from the coast, but we also need it for vertices.
     inland_from_v = {v: 0 for v in coastal_vertices}
     to_expand = {v for v in coastal_vertices}
     edges = set()
@@ -853,6 +870,7 @@ def create_data(config):
             river_sources.append(start)
         else:
             endpoints.append(start)
+    print("rivers flowed; time elapsed:", time.time()-start_time)
     # Assign type_from_pid
     type_from_pid = {}
     lakes = []  # This should be pids, not cubes

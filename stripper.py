@@ -118,3 +118,11 @@ def create_blanks(file_dir, file_paths, encoding="utf_8_sig"):
         os.makedirs(os.path.join(file_dir,*file_path[:-1]), exist_ok=True)
         with open(os.path.join(file_dir, *file_path), 'w', encoding=encoding) as outf:
             outf.write("\n")
+
+def copy_base_files(file_dir, base_dir, file_paths, encoding="utf_8_sig"):
+    """For when you want to replace_path a directory, but some of the vanilla files should just be copied over."""
+    for file_path in file_paths:
+        os.makedirs(os.path.join(file_dir,*file_path[:-1]), exist_ok=True)
+        with open(os.path.join(file_dir, *file_path), 'w', encoding=encoding) as outf:
+            with open(os.path.join(base_dir, *file_path), 'r', encoding=encoding) as inf:
+                outf.write(inf.read())

@@ -1,13 +1,14 @@
+from math import sqrt
 import os
 import random
 import yaml
 
 from basic_map import BasicMap
 from map_io import *
-from stripper import strip_base_files
+from stripper import copy_base_files, create_blanks, strip_base_files
 from terrain import *
 
-USED_MASKS = {
+USED_MASKS = {  # Not obvious this should go in this direction.
     BaseTerrain.plains: "plains_01",
     BaseTerrain.farmlands: "farmland_01",
     BaseTerrain.hills: "hills_01",
@@ -17,6 +18,48 @@ USED_MASKS = {
     BaseTerrain.marsh: "wetlands_02",
     BaseTerrain.jungle: "forest_jungle_01",
     BaseTerrain.ocean: "beach_02",
+}
+
+CONTENT_SOURCES = {
+    BaseTerrain.forest: "tree_leaf_01",
+    BaseTerrain.jungle: "tree_jungle_01_d",
+}
+
+MAIN_OFFSETS = ["building", "combat", "player_stack", "siege"]
+
+OFFSETS = {
+    "building": (0,0),
+    "combat": (0.2, 0),
+    "player_stack": (0.2, 0.1),
+    "siege": (0.1, 0),
+    "other_stack": (0.2, -0.1),
+    "stack": (0.2, -0.1),
+    "special_building": (-0.1, 0.1),
+    "activities": (-0.1, -0.1),
+}
+
+ZEROS = ["combat", "player_stack", "other_stack", "stack"]
+
+CLAMP = {
+    "building": "yes",
+    "combat": "yes",
+    "player_stack": "yes",
+    "siege": "no",
+    "other_stack": "yes",
+    "stack": "yes",
+    "special_building": "yes",
+    "activities": "no",
+}
+
+LAYERS = {
+    "building": "building",
+    "combat": "unit",
+    "player_stack": "unit",
+    "siege": "unit",
+    "other_stack": "unit",
+    "stack": "unit",
+    "special_building": "building",
+    "activities": "activities",
 }
 
 class CK3Map(BasicMap):
@@ -43,11 +86,12 @@ class CK3Map(BasicMap):
             outf.write("should_wrap_x=no\n")
             outf.write("level_offsets={ { 0 0 }{ 0 0 }{ 0 0 }{ 0 0 }{ 0 7 }}\n")
 
-    def create_terrain_masks(self, file_dir, base_dir, terr_from_cube):
+    def create_terrain_masks(self, file_dir, base_dir, terr_from_cube, tree_sparsity=(8,8)):
         """Creates all the terrain masks; just fills each cube.
         terr_from_cube is a map from cube to BaseTerrain.
         Also creates flatmap.dds and colormap.dds."""
         os.makedirs(os.path.join(file_dir, "gfx", "map", "terrain"), exist_ok=True)
+        os.makedirs(os.path.join(file_dir, "content_source", "map_objects", "masks"), exist_ok=True)
         for mask in os.listdir(os.path.join(base_dir, "gfx", "map", "terrain")):
             if "mask.png" not in mask:
                 continue
@@ -61,7 +105,16 @@ class CK3Map(BasicMap):
         create_hex_map(rgb_from_ijk={}, max_x=self.max_x // 4, max_y=self.max_y // 4, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(127, 127, 127)).save(os.path.join(file_dir, "gfx", "map", "terrain", "colormap.dds"))
         rgb_from_cube = {k.tuple(): (120, 120, 100) if v == BaseTerrain.ocean else (170,160,140) for k,v in terr_from_cube.items()}
         create_hex_map(rgb_from_ijk=rgb_from_cube, max_x=self.max_x, max_y=self.max_y, n_x=self.n_x, n_y=self.n_y, mode='RGB', default="black").save(os.path.join(file_dir, "gfx", "map", "terrain", "flatmap.dds"))
+        for mask in os.listdir(os.path.join(base_dir, "content_source", "map_objects", "masks")):
+            mask_name = mask.split("_mask")[0]
+            if mask_name not in CONTENT_SOURCES.values():
+                create_hex_map(rgb_from_ijk={}, max_x=self.max_x//2, max_y=self.max_y//2, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(file_dir, "content_source", "map_objects", "masks", mask))
+            else:
+                terrain = [k for k,v in CONTENT_SOURCES.items() if v == mask_name][0]
+                rgb_from_cube = {k.tuple(): random.randint(64,192) for k,v in terr_from_cube.items() if v == terrain}
+                create_hex_map(rgb_from_ijk=rgb_from_cube, max_x=self.max_x//2, max_y=self.max_y//2, n_x=self.n_x, n_y=self.n_y, mode='L', default="black").save(os.path.join(file_dir, "content_source", "map_objects", "masks", mask))
 
+        
     def create_flowmap(self, file_dir, terr_from_cube):
         os.makedirs(os.path.join(file_dir, "gfx", "map", "water"), exist_ok=True)
         rgb_from_ijk = {}
@@ -80,12 +133,16 @@ class CK3Map(BasicMap):
         create_hex_map(rgb_from_ijk={k.tuple(): v for k,v in surround_cubes.items()}, max_x=self.max_x // 8, max_y=self.max_y // 8, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(255, 255, 0)).save(os.path.join(file_dir, "gfx", "map", "surround_map", "surround_fade.dds"))
         create_hex_map(rgb_from_ijk={k.tuple(): (255,255,255) for k in surround_cubes}, max_x=self.max_x // 2, max_y=self.max_y // 2, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(0, 0, 0)).save(os.path.join(file_dir, "gfx", "map", "surround_map", "surround_mask.dds"))
 
-    def create_positions(self, name_from_pid, pid_from_cube):
-        """Create positions.txt"""
-        ox = self.box_width // 3
-        oy = self.box_height // 3
+    def create_positions(self, name_from_pid, pid_from_cube, file_dir,):
+        """Create positions.txt and gfx/map/map_object_data files"""
+        os.makedirs(os.path.join(file_dir, "gfx", "map", "map_object_data"), exist_ok=True)
+        buffers = {name: f"game_object_locator={{\n\tname=\"{name}\"\n\trender_pass=Map\n\tclamp_to_water_level={CLAMP[name]}\n\tgenerated_content=no\n\tlayer=\"{LAYERS[name]}_layer\"\n\tinstances={{\n" for name in OFFSETS}
+        for otype in ZEROS:
+            buffers[otype] += "\t\t{\n\t\t\tid=0\n\t\t\tposition={ 0.0 0.0 0.0 }\n\t\t\trotation={ -0.0 -0.0 -0.0 1.0 }\n\t\t\tscale={ 1.0 1.0 1.0 }\n\t\t}\n"
         with open(os.path.join(self.file_dir, self.map_dir, "positions.txt"), 'w', encoding="utf_8_sig") as outf:
-            for pid, name in name_from_pid.items():
+            rotation = " ".join([str(s) for s in [0] * 5])
+            height = " ".join([str(s) for s in [0, 0, 0, 20, 0]])
+            for pid, name in sorted(name_from_pid.items()):
                 cube = [k for k,v in pid_from_cube.items() if v == pid]
                 if len(cube) == 0:
                     print(pid, name)
@@ -94,15 +151,25 @@ class CK3Map(BasicMap):
                     cube = cube[0]
                 else:
                     cube = random.sample(cube, k=1)[0]
-                hor = cube.x
-                ver = -cube.y - hor // 2 - hor % 2
-                x = 3 * hor  * self.box_width
-                y = (2 * ver + (hor % 2)) * self.box_height
-                # TODO: Handle the edges better.
-                position = " ".join([str(s) for s in [x + ox, y, x, y,  max(0,x - ox), y, x, y + oy, x, max(0,y - oy)]])
-                rotation = " ".join([str(s) for s in [0] * 5])
-                height = " ".join([str(s) for s in [0, 0, 0, 20, 0]])
+                start_x, start_y = xy_from_cube(cube, self.box_width, self.box_height)
+                start_x += 2*self.box_width
+                start_y += self.box_height
+                position = ""
+                for otype, (offx, offy) in OFFSETS.items():
+                    x = max(min(start_x + offx*self.box_width, self.max_x), 0)
+                    y = max(min(start_y + offy*self.box_height, self.max_y), 0)
+                    if otype in MAIN_OFFSETS:
+                        position += f" {x} {y}"
+                    buffers[otype] += f"\t\t{{\n\t\t\tid={pid}\n\t\t\tposition={{ {x} 0.0 {y} }}\n\t\t\trotation={{ -0.0 -0.0 -0.0 1.0}}\n\t\t\tscale={{ 1.0 1.0 1.0 }}\n\t\t}}\n"
                 outf.write(f"#{name}\n\t{pid}=\n\t{{\n\t\tposition=\n\t\t{{\n{position} }}\n\t\trotation=\n\t\t{{\n{rotation} }}\n\t\theight=\n\t\t{{\n{height} }}\n\t}}\n")
+        buffers = {k: v + "\t}\n}\n" for k,v in buffers.items()}
+        for name, contents in buffers.items():
+            if name == "activities":  # It is dumb that we have to hardcode this but it doesn't follow the normal naming convention.
+                filename = name + ".txt"
+            else:
+                filename = name + "_locators.txt"
+            with open(os.path.join(self.file_dir, "gfx", "map", "map_object_data", filename), 'w', encoding="utf_8_sig") as outf:
+                outf.write(contents)
 
     def update_defines(self, base_dir):
         """Copies common/defines/00_defines.txt but replaces WORLD_EXTENTS_X and Z."""
@@ -706,6 +773,7 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     """Creates the CK3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
+    create_blanks(file_dir, [["map", "lakes", "00_lakes.txt"]] + [["gfx", "map", "map_object_data", x + ".txt"] for x in ["bridges", "cliffs_coastline", "cliffs_rock", "coast_foam", "env_effects", "lakes", "special"]])
     # make common
     all_titles = []
     holy_sites = []
@@ -728,11 +796,12 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     ck3map.create_heightmap(height_from_vertex=height_from_vertex, file_ext=".png")
     ck3map.create_rivers(height_from_vertex, river_flow_from_edge, river_sources, river_merges, river_max_flow, base_loc=config["BASE_CK3_DIR"], file_ext=".png")
     ck3map.create_flowmap(file_dir=file_dir, terr_from_cube=terr_from_cube)
-    ck3map.create_positions(name_from_pid, pid_from_cube)
+    ck3map.create_positions(name_from_pid, pid_from_cube, file_dir=file_dir)
     ck3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], terr_from_cube=terr_from_cube)
     ck3map.surround_mask(file_dir=file_dir)  # TODO: Figure out where's far enough away to mask
     ck3map.create_bookmarks(file_dir=file_dir, terr_from_cube=terr_from_cube, bookmark_groups=[])
     ck3map.update_defines(base_dir=config["BASE_CK3_DIR"])
+    copy_base_files(file_dir, base_dir=config["BASE_CK3_DIR"], file_paths=[["gfx", "map", "map_object_data", x] for x in ["effect_layers.txt", "game_object_layers.txt", "map_table_ce1.txt", "map_table_western.txt",]])
     create_adjacencies(file_dir=file_dir, straits=straits, pid_from_cube=pid_from_cube, name_from_pid=name_from_pid, closest_xy=lambda fr, to: closest_xy(fr, to, ck3map.box_height, ck3map.box_width))
     create_geographical_regions(file_dir, region_trees, sea_region)
     if len(impassable) > 0:
