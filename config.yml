@@ -37,6 +37,8 @@ CONTINENT_LISTS:
   - 24-d_lower_silesia
   - 24-d_moravia
   - 24-d_tyrol
+ISLAND_LISTS:
+  
 n_x: 171
 n_y: 57
 max_x: 8192

@@ -603,6 +603,36 @@ def create_supply_rails(terr_from_cube, pids_from_rid, rid_from_cube, cube_from_
     return supply_nodes, railways
 
 
+def create_old_world_islands_and_seas(config, land_cubes, sea_centers, cont_from_pid, last_pid,):
+    """Given land_cubes, calculate shallow waters, place islands, and calculate sea regions."""
+    # sea_centers[0] should be the middle of the inner sea region.
+    sea_shore = set()
+    for lc in land_cubes:  # Maybe this should be a boundary instead of the whole set?
+        for nbr in lc.neighbors():
+            if nbr not in land_cubes:
+                sea_shore.add(nbr)
+    med = set()
+    inner_med = set()
+    to_explore = [sea_centers[0]]
+    while len(to_explore) > 0 and len(to_explore) < 200:
+        tc = to_explore.pop()
+        med.add(tc)
+        inner = True
+        for nbr in tc.neighbors():
+            if nbr not in sea_shore:
+                to_explore.append(nbr)
+            else:
+                inner = False
+        if inner:
+            inner_med.add(tc)
+    if len(to_explore) > 200:
+        raise CreationError  # This should only happen if the med is somehow open, and is to prevent going forever.
+    # We should now have all depth 2+ inner sea in med and all depth 3+ in inner_med.
+    # Make inner med islands:
+    if len(inner_med) > 0:
+        pass
+
+
 def create_data(config):
     """The main function that calls all the other functions in order. 
     The resulting data structure should be enough to make the mod for any particular game."""
@@ -672,6 +702,7 @@ def create_data(config):
     land_cube_from_pid = {v:k for k,v in pid_from_cube.items()}
     print("pid/cube relationships established; time elapsed:", time.time()-start_time)
     # Split out wastelands / mountains / lakes
+    # TODO: This should not use valid_cubes, but instead the interior of the bounding hex. This would also make the continent obvious.
     non_land = sorted(find_contiguous(set(valid_cubes(config["n_x"], config["n_y"])) - land_cubes), key=len)
     sea_cubes = set(non_land.pop(-1))  # The largest non-land chunk is the ocean.
     print("non_land contiguous groups found; time elapsed:", time.time()-start_time)
@@ -691,17 +722,25 @@ def create_data(config):
         pid_from_title[f"i_{str(iind)}"] = last_pid
         name_from_pid[last_pid] = f"i_{str(iind)}"
         name_from_rid[last_rid] = f"i_{str(iind)}"
+        cont = None
         for nlc in nlg:
             pid_from_cube[nlc] = last_pid
             terr_from_cube[nlc] = BaseTerrain.mountains
             terr_from_pid[last_pid] = BaseTerrain.mountains
             land_cubes.add(nlc)
+            if cont is None:
+                for nbr in nlc.neighbors():
+                    if nbr in pid_from_cube and pid_from_cube[nbr] in cont_from_pid:
+                        cont = cont_from_pid[pid_from_cube[nbr]]
+                        break
         rid_from_pid[last_pid] = last_rid
-        # TODO: determine continent
-        # cont_from_pid[last_pid] = 
+        if cont is not None:
+            cont_from_pid[last_pid] = cont
         last_pid += 1
         last_rid += 1
-    print("assigning sea provinces; time elapsed:", time.time()-start_time)
+    print("assigned impassable; time elapsed:", time.time()-start_time)
+    # First we find the 'inland seas'; the med, the old world coasts. We extend with islands, create the shallow sea zones, and then crop the old world for CK3.
+    # create_old_world_islands_and_seas()
     #TODO: Assigning sea provinces should 1) look for major inland seas, like the med, 2) use more regular things that are faster for the deep ocean
     sid_from_cube, rid_from_sid, srid_from_sid = assign_sea_zones(sea_cubes, config, province_centers=sea_centers, region_centers=sea_region_centers, style=config.get("SEA_PROVINCE_STYLE", "even"))
     print("assigned sea zones; time elapsed:", time.time()-start_time)

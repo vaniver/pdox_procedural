@@ -1,9 +1,9 @@
-This project procedurally generates maps for the four main historical Paradox games: Crusader Kings III, Europa Universalis IV, Victoria 3, and Hearts of Iron IV.
+This project procedurally generates maps for the four main historical Paradox games: Crusader Kings III, Europa Universalis IV, Victoria 3, and Hearts of Iron IV. The maps are tuned for multiplayer rather than singleplayer.
 
 To install requirements, use a command like `pip install -r requirements.txt`. 
 
 Current status is:
-* CK3: CTD
+* CK3: Functional
 * EU4: Not started
 * V3: loads
 * HOI4: loads to menu; some issue with output
@@ -18,6 +18,8 @@ After that is the base install files. A bunch of files are read from the base ga
 `CONTINENT_LISTS` is used to determine which countries to include on the map, and how to arrange them. The countries need to have appropriate csv files in `data`.
 
 The remaining configs are used to shape the construction procedure.
+
+The basic procedure starts with three continents arranged around an inner sea roughly similar to the Mediterranean. Islands and island kingdoms are added to make the 'old world'. (CK3 stops generation at this point, but mods for the other games will continue making other continents.)
 
 **TITLE FORMAT**
 
