@@ -828,23 +828,29 @@ def create_data(config):
     height_from_vertex = {}
     for cube, height in land_height_from_cube.items():
         a,b = TERRAIN_HEIGHT[terr_from_cube[cube]]
-        height_from_vertex[Vertex(cube, 0)] = height * 3 + sum([random.randint(a,b) for _ in range(4)]) + WATER_HEIGHT
-        l = height + random.randint(a,b) + random.randint(a,b)
-        r = height + random.randint(a,b) + random.randint(a,b)
-        for k in [cube.add(Cube(-1,1,0)), cube.add(Cube(-1,0,1))]:
-            if k in land_height_from_cube:
-                a,b = TERRAIN_HEIGHT[terr_from_cube[k]]
-                l += land_height_from_cube[k] + random.randint(a,b) + random.randint(a,b)
-            else:
-                l -= 2
-        height_from_vertex[Vertex(cube, 1)] = max(1,l) + WATER_HEIGHT
-        for k in [cube.add(Cube(1,-1,0)), cube.add(Cube(1,0,-1))]:
-            if k in land_height_from_cube:
-                a,b = TERRAIN_HEIGHT[terr_from_cube[k]]
-                r += land_height_from_cube[k] + random.randint(a,b) + random.randint(a,b)
-            else:
-                r -= 2
-        height_from_vertex[Vertex(cube, -1)] = max(1,r) + WATER_HEIGHT
+        height_from_vertex[Vertex(cube, 0)] = min(255, height * 3 + sum([random.randint(a,b) for _ in range(4)]) + WATER_HEIGHT)
+        if Vertex(cube, 1) in coastal_vertices:
+            height_from_vertex[Vertex(cube, 1)] = WATER_HEIGHT - 1
+        else:
+            l = height + random.randint(a,b) + random.randint(a,b)
+            for k in [cube.add(Cube(-1,1,0)), cube.add(Cube(-1,0,1))]:
+                if k in land_height_from_cube:
+                    a,b = TERRAIN_HEIGHT[terr_from_cube[k]]
+                    l += land_height_from_cube[k] + random.randint(a,b) + random.randint(a,b)
+                else:
+                    l -= 2
+            height_from_vertex[Vertex(cube, 1)] = min(255, max(1,l) + WATER_HEIGHT)
+        if Vertex(cube, -1) in coastal_vertices:
+            height_from_vertex[Vertex(cube, -1)] = WATER_HEIGHT - 1
+        else:
+            r = height + random.randint(a,b) + random.randint(a,b)
+            for k in [cube.add(Cube(1,-1,0)), cube.add(Cube(1,0,-1))]:
+                if k in land_height_from_cube:
+                    a,b = TERRAIN_HEIGHT[terr_from_cube[k]]
+                    r += land_height_from_cube[k] + random.randint(a,b) + random.randint(a,b)
+                else:
+                    r -= 2
+            height_from_vertex[Vertex(cube, -1)] = min(255, max(1,r) + WATER_HEIGHT)
     a,b = TERRAIN_HEIGHT[BaseTerrain.ocean]
     base_water = WATER_HEIGHT * 4 // 5
     for cube, depth in water_depth_from_cube.items():
@@ -861,7 +867,7 @@ def create_data(config):
                 else:
                     coast = True
             if coast:
-                height_from_vertex[vl] = WATER_HEIGHT + 1
+                height_from_vertex[vl] = WATER_HEIGHT - 1
             else:
                 height_from_vertex[vl] = min(max(0, l), WATER_HEIGHT - 1)
         else:
@@ -876,7 +882,7 @@ def create_data(config):
                 else:
                     coast = True
             if coast:
-                height_from_vertex[vr] = WATER_HEIGHT + 1
+                height_from_vertex[vr] = WATER_HEIGHT - 1
             else:
                 height_from_vertex[vr] = min(max(0, r), WATER_HEIGHT - 1)
         else:

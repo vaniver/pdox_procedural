@@ -172,8 +172,10 @@ class CK3Map(BasicMap):
                 outf.write(contents)
 
     def update_defines(self, base_dir):
-        """Copies common/defines/00_defines.txt but replaces WORLD_EXTENTS_X and Z."""
+        """Copies common/defines/00_defines.txt but replaces WORLD_EXTENTS_X and Z and WATERLEVEL.
+        Also copies common/defines/graphics/00_graphics.txt but replaces FLAT_MAP_HEIGHT."""
         os.makedirs(os.path.join(self.file_dir, "common", "defines"), exist_ok=True)
+        os.makedirs(os.path.join(self.file_dir, "common", "defines", "graphic"), exist_ok=True)
         with open(os.path.join(base_dir, "common", "defines", "00_defines.txt"), 'r', encoding='utf_8_sig') as inf:
             with open(os.path.join(self.file_dir, "common", "defines", "00_defines.txt"), 'w', encoding='utf_8_sig') as outf:
                 for line in inf.readlines():
@@ -185,7 +187,14 @@ class CK3Map(BasicMap):
                         outf.write(line.split("=")[0] + f"= 19.0\n")
                     else:
                         outf.write(line)
-        # TODO: Confirm that I don't need to update 00_graphics.txt, mostly CAMERA_START.
+        with open(os.path.join(base_dir, "common", "defines", "graphic", "00_graphics.txt"), 'r', encoding='utf_8_sig') as inf:
+            with open(os.path.join(self.file_dir, "common", "defines", "graphic", "00_graphics.txt"), 'w', encoding='utf_8_sig') as outf:
+                for line in inf.readlines():
+                    if line.startswith("\tFLAT_MAP_HEIGHT"):
+                        outf.write(line.split("=")[0] + f"= 19.2\n")
+                    # TODO: Change many more lines in this file
+                    else:
+                        outf.write(line)
     
     def create_bookmarks(self, file_dir, terr_from_cube, bookmark_groups, ):
         """terr_from_cube is used to determine where is land and where is sea; bookmark_groups is a list of tuples:
