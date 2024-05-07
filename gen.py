@@ -741,6 +741,32 @@ def create_data(config):
     print("assigned impassable; time elapsed:", time.time()-start_time)
     # First we find the 'inland seas'; the med, the old world coasts. We extend with islands, create the shallow sea zones, and then crop the old world for CK3.
     # create_old_world_islands_and_seas()
+    # Now we 'crop' the old world.
+    if "CROP_OW" in config:
+        min_x = min(k.x for k in land_cubes) - 2
+        max_y = max(k.y+k.x//2+k.x % 2 for k in land_cubes) + 2  # This is flipped b/c the ys are all negative.
+        translator = Cube(min_x, -min_x//2 + max_y, -min_x//2-min_x%2-max_y)
+        land_cubes = {k.sub(translator) for k in land_cubes}
+        straits = [(k.sub(translator), o.sub(translator), s1.sub(translator), s2.sub(translator)) for (k, o, s1, s2) in straits]
+        sea_centers = [k.sub(translator) for k in sea_centers]
+        sea_region_centers = [k.sub(translator) for k in sea_region_centers]
+        land_cube_from_pid = {pid: k.sub(translator) for pid, k in land_cube_from_pid.items()}
+        pid_from_cube = {k.sub(translator): pid for k, pid in pid_from_cube.items()}
+        terr_from_cube = {k.sub(translator): terr for k, terr in terr_from_cube.items()}
+        max_x = max(k.x for k in land_cubes)
+        num_hor_hexes = 4  # TODO: Don't hardcode this, have it be a function of box_width and 32.
+        hor_offset = 1  # Also don't hardcode this.
+        ow_nx = max_x + (hor_offset - max_x % num_hor_hexes) % num_hor_hexes
+        ow_max_x = 3 * (ow_nx-1) * config.get("box_width",8)
+        assert ow_max_x % 32 == 0
+    else:
+        ow_nx = config["n_x"]
+        ow_max_x = config["max_x"]
+    ow_ny = config["n_y"]
+    ow_max_y = config["max_y"]
+    assert ow_max_y % 32 == 0
+    sea_cubes = set(valid_cubes(ow_nx, config["n_y"])) - land_cubes
+    print("Cropped down to",ow_nx,"hexes and a width of",ow_max_x,"for the old world.")
     #TODO: Assigning sea provinces should 1) look for major inland seas, like the med, 2) use more regular things that are faster for the deep ocean
     sid_from_cube, rid_from_sid, srid_from_sid = assign_sea_zones(sea_cubes, config, province_centers=sea_centers, region_centers=sea_region_centers, style=config.get("SEA_PROVINCE_STYLE", "even"))
     print("assigned sea zones; time elapsed:", time.time()-start_time)
@@ -830,7 +856,7 @@ def create_data(config):
         a,b = TERRAIN_HEIGHT[terr_from_cube[cube]]
         height_from_vertex[Vertex(cube, 0)] = min(255, height * 3 + sum([random.randint(a,b) for _ in range(4)]) + WATER_HEIGHT)
         if Vertex(cube, 1) in coastal_vertices:
-            height_from_vertex[Vertex(cube, 1)] = WATER_HEIGHT - 1
+            height_from_vertex[Vertex(cube, 1)] = WATER_HEIGHT - 3
         else:
             l = height + random.randint(a,b) + random.randint(a,b)
             for k in [cube.add(Cube(-1,1,0)), cube.add(Cube(-1,0,1))]:
@@ -841,7 +867,7 @@ def create_data(config):
                     l -= 2
             height_from_vertex[Vertex(cube, 1)] = min(255, max(1,l) + WATER_HEIGHT)
         if Vertex(cube, -1) in coastal_vertices:
-            height_from_vertex[Vertex(cube, -1)] = WATER_HEIGHT - 1
+            height_from_vertex[Vertex(cube, -1)] = WATER_HEIGHT - 3
         else:
             r = height + random.randint(a,b) + random.randint(a,b)
             for k in [cube.add(Cube(1,-1,0)), cube.add(Cube(1,0,-1))]:
@@ -867,9 +893,9 @@ def create_data(config):
                 else:
                     coast = True
             if coast:
-                height_from_vertex[vl] = WATER_HEIGHT - 1
+                height_from_vertex[vl] = WATER_HEIGHT - 3
             else:
-                height_from_vertex[vl] = min(max(0, l), WATER_HEIGHT - 1)
+                height_from_vertex[vl] = min(max(0, l), WATER_HEIGHT - 3)
         else:
             print("it was a real check.")
         vr = Vertex(cube, 1)
@@ -882,9 +908,9 @@ def create_data(config):
                 else:
                     coast = True
             if coast:
-                height_from_vertex[vr] = WATER_HEIGHT - 1
+                height_from_vertex[vr] = WATER_HEIGHT - 3
             else:
-                height_from_vertex[vr] = min(max(0, r), WATER_HEIGHT - 1)
+                height_from_vertex[vr] = min(max(0, r), WATER_HEIGHT - 3)
         else:
             print("it was a real check.")
     print(f"Heightmap heights range from {min(height_from_vertex.values())} to {max(height_from_vertex.values())}. Time elapsed: {time.time()-start_time}")
@@ -967,7 +993,7 @@ def create_data(config):
         type_from_pid[pid_from_cube[k]] = "sea"
     for k in lakes:
         type_from_pid[k] = "lake"
-    return continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region
+    return continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region, ow_nx, ow_ny, ow_max_x, ow_max_y
 
 
 if __name__ == "__main__":
@@ -989,7 +1015,7 @@ if __name__ == "__main__":
     config["max_x"] = config.get("max_x", config.get("box_width", 10)*(config["n_x"]*3-3))
     config["max_y"] = config.get("max_y", config.get("box_height", 17)*(config["n_y"]*2-2))
 
-    continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region = create_data(config)
+    continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region, ow_nx, ow_ny, ow_max_x, ow_max_y = create_data(config)
     cultures, religions = assemble_culrels(region_trees=region_trees)  # Not obvious this should be here instead of just derived later?
     rgb_from_pid = create_colors(pid_from_cube)
     pids_from_rid = {}
@@ -1044,6 +1070,10 @@ if __name__ == "__main__":
             river_max_flow=river_max_flow,
             straits=straits,
             sea_region=sea_region,
+            ow_nx=ow_nx,
+            ow_ny=ow_ny,
+            ow_max_x=ow_max_x,
+            ow_max_y=ow_max_y,
         )
     if "EU4" in config["MOD_OUTPUTS"]:
         eu4.create_mod(

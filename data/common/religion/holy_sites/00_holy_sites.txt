@@ -49,3 +49,41 @@ segrada_familia = {
 		monthly_piety_gain_mult = 0.1
 	}
 }
+
+standrews = {
+	county = c_fife
+	barony = b_st_andrews
+
+	character_modifier = {
+		name = holy_site_segrada_familia_effect_name
+		monthly_piety_gain_mult = 0.1
+	}
+}
+
+praha = {
+	county = c_praha
+
+	character_modifier = {
+		name = holy_site_segrada_familia_effect_name
+		monthly_piety_gain_mult = 0.1
+	}
+}
+
+augsburg = {
+	county = c_augsburg
+
+	character_modifier = {
+		name = holy_site_segrada_familia_effect_name
+		monthly_piety_gain_mult = 0.1
+	}
+}
+
+lindisfarne = {
+	county = c_northumberland
+	barony = b_lindisfarne
+
+	character_modifier = {
+		name = holy_site_segrada_familia_effect_name
+		monthly_piety_gain_mult = 0.1
+	}
+}

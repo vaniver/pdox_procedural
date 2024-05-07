@@ -11,6 +11,8 @@ SEA_COLOR = 254
 
 def box_from_max(max_x, max_y, n_x, n_y):
     """Compute the box height and box_width."""
+    if n_x == 1 or n_y == 1:
+        return max_x // 4, max_y // 2
     box_height = max_y // (n_y * 2 - 2)  # TODO: make this divide exactly?
     # There are n_x+1 thin boxes (n_x-1 plus 2 on the edges) and n_x-2 double boxes, so 3n_x-3 total.
     box_width = max_x // (n_x * 3 - 3)   # TODO: make this divide exactly?

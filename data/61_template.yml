@@ -58,6 +58,20 @@ chars:
     cid: 20
     dd: 990.1.1
     dynasty: 4
+  minor1_son:
+    bd: 98Y.M.D
+    cid: 23
+    dynasty: 4
+    father: 21
+  minor1_daughter:
+    bd: 98Y.M.D
+    cid: 24
+    dynasty: 4
+    father: 21
+  minor2:
+    bd: 97Y.M.D
+    cid: 30
+    dynasty: 3
   minor2:
     bd: 97Y.M.D
     cid: 30
@@ -66,14 +80,29 @@ chars:
     bd: 97Y.M.D
     cid: 35
     dynasty: 4
+  minor3child:
+    bd: 99Y.M.D
+    cid: 36
+    dynasty: 4
+    father: 35
   minor4:
     bd: 97Y.M.D
     cid: 40
     dynasty: 5
+  minor4child:
+    bd: 99Y.M.D
+    cid: 41
+    dynasty: 5
+    father: 40
   minor5:
     bd: 97Y.M.D
     cid: 45
     dynasty: 6
+  minor5child:
+    bd: 99Y.M.D
+    cid: 46
+    dynasty: 5
+    father: 45
   minor6:
     bd: 97Y.M.D
     cid: 50
@@ -171,6 +200,17 @@ chars:
     female: true
     spouse_date: 985.1.1
     spouse_id: 10
+  rival_son:
+    bd: 987.M.D
+    cid: 11
+    dynasty: 1
+    father: 10
+  rival_daughter:
+    bd: 989.M.D
+    cid: 12
+    dynasty: 1
+    father: 10
+    female: true
 dynasties:
   c_10: 7
   c_13: 8
@@ -225,6 +265,7 @@ titles:
     1000.1.1: 2
     980.1.1: 0
     development_level: 7
+    succession_law: single_heir_succession_law
   d_1:
     985.1.1: 10
     development_level: 7

@@ -41,13 +41,13 @@ OFFSETS = {
 ZEROS = ["combat", "player_stack", "other_stack", "stack"]
 
 CLAMP = {
-    "building": "yes",
-    "combat": "yes",
-    "player_stack": "yes",
+    "building": "yes",  # yes
+    "combat": "yes",  # yes
+    "player_stack": "yes",  # yes
     "siege": "no",
-    "other_stack": "yes",
-    "stack": "yes",
-    "special_building": "yes",
+    "other_stack": "yes",  # yes
+    "stack": "yes",  # yes
+    "special_building": "yes",  # yes
     "activities": "no",
 }
 
@@ -62,10 +62,22 @@ LAYERS = {
     "activities": "activities",
 }
 
+LAYER_NAME = {
+    "building": "buildings",
+    "combat": "combat",
+    "player_stack": "unit_stack_player_owned",
+    "siege": "siege",
+    "other_stack": "unit_stack_other_owner",
+    "stack": "unit_stack",
+    "special_building": "special_building",
+    "activities": "activities",
+}
+
 class CK3Map(BasicMap):
     def __init__(self, file_dir, max_x, max_y, n_x, n_y):
         """Creates a map of size max_x * max_y, which is n_x hexes wide and n_y hexes tall."""
         super().__init__(file_dir, "map_data", max_x, max_y, n_x, n_y)
+        create_hex_map(rgb_from_ijk={}, max_x=self.max_x//32, max_y=self.max_y//32, n_x=1, n_y=1, mode='RGBA', default=(255,255,255,100)).save(os.path.join(self.file_dir, self.map_dir, "indirection_heightmap.png"))
 
     def prov_extra(self, rgb_from_pid, pid_from_cube, name_from_pid):
         """Creates definition.csv"""
@@ -127,6 +139,7 @@ class CK3Map(BasicMap):
         create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x // 8, max_y=self.max_y // 8, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(0, 0, 0)).save(os.path.join(file_dir, "gfx", "map", "water", "foam_map.dds"))
         # TODO: Port over flowmap code
         create_hex_map(rgb_from_ijk={}, max_x=self.max_x // 4, max_y=self.max_y // 4, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(126,130,255)).save(os.path.join(file_dir, "gfx", "map", "water", "flowmap.dds"))
+        create_hex_map(rgb_from_ijk={}, max_x=self.max_x // 2, max_y=self.max_y // 2, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(32,41,49)).save(os.path.join(file_dir, "gfx", "map", "water", "watercolor_rgb_waterspec_a.dds"))
 
     def surround_mask(self, file_dir, surround_cubes = {}):
         os.makedirs(os.path.join(file_dir, "gfx", "map", "surround_map"), exist_ok=True)
@@ -136,7 +149,7 @@ class CK3Map(BasicMap):
     def create_positions(self, name_from_pid, pid_from_cube, file_dir,):
         """Create positions.txt and gfx/map/map_object_data files"""
         os.makedirs(os.path.join(file_dir, "gfx", "map", "map_object_data"), exist_ok=True)
-        buffers = {name: f"game_object_locator={{\n\tname=\"{name}\"\n\trender_pass=Map\n\tclamp_to_water_level={CLAMP[name]}\n\tgenerated_content=no\n\tlayer=\"{LAYERS[name]}_layer\"\n\tinstances={{\n" for name in OFFSETS}
+        buffers = {name: f"game_object_locator={{\n\tname=\"{LAYER_NAME[name]}\"\n\trender_pass=Map\n\tclamp_to_water_level={CLAMP[name]}\n\tgenerated_content=no\n\tlayer=\"{LAYERS[name]}_layer\"\n\tinstances={{\n" for name in OFFSETS}
         for otype in ZEROS:
             buffers[otype] += "\t\t{\n\t\t\tid=0\n\t\t\tposition={ 0.0 0.0 0.0 }\n\t\t\trotation={ -0.0 -0.0 -0.0 1.0 }\n\t\t\tscale={ 1.0 1.0 1.0 }\n\t\t}\n"
         with open(os.path.join(self.file_dir, self.map_dir, "positions.txt"), 'w', encoding="utf_8_sig") as outf:
@@ -157,7 +170,7 @@ class CK3Map(BasicMap):
                 position = ""
                 for otype, (offx, offy) in OFFSETS.items():
                     x = max(min(start_x + offx*self.box_width, self.max_x), 0)
-                    y = max(min(start_y + offy*self.box_height, self.max_y), 0)
+                    y = self.max_y - max(min(start_y + offy*self.box_height, self.max_y), 0)
                     if otype in MAIN_OFFSETS:
                         position += f" {x} {y}"
                     buffers[otype] += f"\t\t{{\n\t\t\tid={pid}\n\t\t\tposition={{ {x} 0.0 {y} }}\n\t\t\trotation={{ -0.0 -0.0 -0.0 1.0}}\n\t\t\tscale={{ 1.0 1.0 1.0 }}\n\t\t}}\n"
@@ -173,16 +186,16 @@ class CK3Map(BasicMap):
 
     def update_defines(self, base_dir):
         """Copies common/defines/00_defines.txt but replaces WORLD_EXTENTS_X and Z and WATERLEVEL.
-        Also copies common/defines/graphics/00_graphics.txt but replaces FLAT_MAP_HEIGHT."""
+        Also copies common/defines/graphics/00_graphics.txt but replaces FLAT_MAP_HEIGHT and PANNING / surround map rectangles."""
         os.makedirs(os.path.join(self.file_dir, "common", "defines"), exist_ok=True)
         os.makedirs(os.path.join(self.file_dir, "common", "defines", "graphic"), exist_ok=True)
         with open(os.path.join(base_dir, "common", "defines", "00_defines.txt"), 'r', encoding='utf_8_sig') as inf:
             with open(os.path.join(self.file_dir, "common", "defines", "00_defines.txt"), 'w', encoding='utf_8_sig') as outf:
                 for line in inf.readlines():
                     if line.startswith("\tWORLD_EXTENTS_X"):
-                        outf.write(line.split("=")[0] + f"= {self.max_x}\n")
+                        outf.write(line.split("=")[0] + f"= {self.max_x - 1}\n")
                     elif line.startswith("\tWORLD_EXTENTS_Z"):
-                        outf.write(line.split("=")[0] + f"= {self.max_y}\n")
+                        outf.write(line.split("=")[0] + f"= {self.max_y - 1}\n")
                     elif line.startswith("\tWATERLEVEL"):
                         outf.write(line.split("=")[0] + f"= 19.0\n")
                     else:
@@ -192,7 +205,12 @@ class CK3Map(BasicMap):
                 for line in inf.readlines():
                     if line.startswith("\tFLAT_MAP_HEIGHT"):
                         outf.write(line.split("=")[0] + f"= 19.2\n")
-                    # TODO: Change many more lines in this file
+                    elif line.startswith("\tSURROUND_MAP_INNER_RECT"):
+                        outf.write(line.split("=")[0] + f"= {{ 500.0 500.0 500.0 {self.max_y - 500} }}\n")
+                    elif line.startswith("\tPANNING_WIDTH"):
+                        outf.write(line.split("=")[0] + f"= {self.max_x}\n")
+                    elif line.startswith("\tPANNING_HEIGHT"):
+                        outf.write(line.split("=")[0] + f"= {self.max_y}\n")
                     else:
                         outf.write(line)
     
@@ -429,6 +447,8 @@ def title_history(name, events, title_data, coffset):
                 buf += f"\t{event_date} = {{\n\t\tliege = {other_title}\n\t}}\n"
         elif k == "development_level":
             buf += f"\t1000.1.1 = {{\tchange_development_level = {str(v)} }}\n"
+        elif k == "succession_law":
+            buf += f"\t1000.1.1 = {{\n\t\tsuccession_laws = {{\n\t\t\t{str(v)}\n\t\t}}\n\t}}\n"
         else:
             print(f"Unknown event: {k} {v}")
     if vacant:
@@ -437,14 +457,15 @@ def title_history(name, events, title_data, coffset):
     return buf
 
 
-def culture_history(name, innovations, date="900.1.1"):
+def culture_history(name, innovations, date="900"):
     """Return the history for the culture."""
-    buf = f"#{name}\n\n{date} = {{\n"
     innos = [x for x in innovations if x.startswith("innovation")]
     eras = [x for x in innovations if not(x.startswith("innovation"))]
+    buf = f"#{name}\n\n{date}.1.1 = {{\n"
+    buf += "\n".join(f"\tjoin_era = culture_era_{i}" for i in eras) + "\n}\n"
+    buf += f"\n{date}.1.2 = {{\n"
     buf += "\n".join(f"\tdiscover_innovation = {i}" for i in innos) + "\n"
-    buf += "\n".join(f"\tjoin_era = {i}" for i in eras)
-    buf += "\n}\n"
+    buf += "}\n"
     return buf
 
 
@@ -580,6 +601,8 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
             this_innos.extend(base_innos)
             for era_name, num in config["RANDOM_INNOS"].items():
                 this_innos.extend(random.sample(random_opts[era_name],k=num))
+                if era_name not in this_innos:
+                    this_innos.append(era_name)
             outf.write(culture_history(culture, this_innos))
     # CHARACTERS, PROVINCES, TITLES
     # Characters are saved in files that correspond to their original title instead of their culture
@@ -762,11 +785,11 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     shared = "version = \"0.0.1\"\n"
     shared += "tags = {\n\t\"Total Conversion\"\n}\n"
     shared += "name = \"{}\"\n".format(mod_disp_name)
-    shared += "supported_version = \"1.12.2\"\n"
+    shared += "supported_version = \"1.12.4\"\n"
     outer = "path = \"mod/{}\"\n".format(mod_name)
     
     replace_paths = [
-        "common/bookmark_portraits", "common/culture/innovations", "common/dynasties", "common/dynasty_houses",
+        "common/bookmark_portraits", "common/dynasties", "common/dynasty_houses",
         "history/characters", "history/cultures", "history/province_mappings", "history/provinces", "history/struggles", "history/titles", "history/wars"
         ]
     shared += "replace_path = \"" + "\"\nreplace_path = \"".join(replace_paths)+"\""
@@ -778,11 +801,11 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     return os.path.join(file_dir, mod_name)
 
 
-def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, pid_from_title, name_from_pid, region_trees, cultures, religions, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, sea_region):
+def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, pid_from_title, name_from_pid, region_trees, cultures, religions, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, sea_region, ow_nx, ow_ny, ow_max_x, ow_max_y):
     """Creates the CK3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
-    create_blanks(file_dir, [["map", "lakes", "00_lakes.txt"]] + [["gfx", "map", "map_object_data", x + ".txt"] for x in ["bridges", "cliffs_coastline", "cliffs_rock", "coast_foam", "env_effects", "lakes", "special"]])
+    create_blanks(file_dir, [["gfx", "map", "map_object_data", x + ".txt"] for x in ["bridges", "cliffs_coastline", "cliffs_rock", "coast_foam", "env_effects", "lakes", "special"]])
     # make common
     all_titles = []
     holy_sites = []
@@ -799,7 +822,7 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     create_religion(file_dir, config["BASE_CK3_DIR"], religions, holy_sites, custom_dir=config.get("RELIGION_DIR", None))
     # Determine major rivers and impassable mountain boundaries (done here b/c it affects provinces also)
     # Make map
-    ck3map = CK3Map(file_dir, max_x=config["max_x"], max_y=config["max_y"], n_x=config["n_x"], n_y=config["n_y"])
+    ck3map = CK3Map(file_dir, max_x=ow_max_x, max_y=ow_max_y, n_x=ow_nx, n_y=ow_ny)
     title_from_pid = {pid: title for title, pid in pid_from_title.items()}
     ck3map.create_provinces(rgb_from_pid, pid_from_cube, ".png", name_from_pid=title_from_pid)
     ck3map.create_heightmap(height_from_vertex=height_from_vertex, file_ext=".png")
@@ -825,7 +848,8 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
         "common\\travel",
         "events"
     ],
-    to_remove=["province:", "title:", "character:"],
+    to_remove=["province:", "title:", "character:", "heritage"],
     to_keep = [],
     subsection=["modifier = {"],
     )
+    strip_base_files(file_dir, config["BASE_CK3_DIR"], subpaths=["common\\culture\\innovations"], to_remove=["potential", "region = "], to_keep=[], subsection=["modifier = {"])  # idk about what to put for subsection here
