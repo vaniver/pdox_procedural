@@ -801,7 +801,7 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     return os.path.join(file_dir, mod_name)
 
 
-def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, rgb_from_pid, height_from_vertex, pid_from_title, name_from_pid, region_trees, cultures, religions, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, sea_region, ow_nx, ow_ny, ow_max_x, ow_max_y):
+def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, rgb_from_pid, base_from_vertex, mask_from_vertex, pid_from_title, name_from_pid, region_trees, cultures, religions, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, sea_region, ow_nx, ow_ny, ow_max_x, ow_max_y):
     """Creates the CK3 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
@@ -825,8 +825,8 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     ck3map = CK3Map(file_dir, max_x=ow_max_x, max_y=ow_max_y, n_x=ow_nx, n_y=ow_ny)
     title_from_pid = {pid: title for title, pid in pid_from_title.items()}
     ck3map.create_provinces(rgb_from_pid, pid_from_cube, ".png", name_from_pid=title_from_pid)
-    ck3map.create_heightmap(height_from_vertex=height_from_vertex, file_ext=".png")
-    ck3map.create_rivers(height_from_vertex, river_flow_from_edge, river_sources, river_merges, river_max_flow, base_loc=config["BASE_CK3_DIR"], file_ext=".png")
+    ck3map.create_heightmap(base_from_vertex=base_from_vertex, mask_from_vertex=mask_from_vertex, file_ext=".png")
+    ck3map.create_rivers(base_from_vertex, river_flow_from_edge, river_sources, river_merges, river_max_flow, base_loc=config["BASE_CK3_DIR"], file_ext=".png")
     ck3map.create_flowmap(file_dir=file_dir, terr_from_cube=terr_from_cube)
     ck3map.create_positions(name_from_pid, pid_from_cube, file_dir=file_dir)
     ck3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], terr_from_cube=terr_from_cube)

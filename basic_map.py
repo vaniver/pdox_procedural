@@ -25,10 +25,10 @@ class BasicMap:
     def prov_extra(self, rgb_from_pid, pid_from_cube):
         pass
 
-    def create_heightmap(self, height_from_vertex, file_ext, size_factor=1, **extras):
+    def create_heightmap(self, base_from_vertex, mask_from_vertex, file_ext, size_factor=1, **extras):
         """Uses height_from_cube to generate a simple heightmap."""
         self.heightmap_loc = os.path.join(self.file_dir, self.map_dir, "heightmap"+file_ext)
-        create_tri_map(height_from_vertex=height_from_vertex, max_x=self.max_x * size_factor, max_y=self.max_y * size_factor, n_x=self.n_x, n_y=self.n_y).save(self.heightmap_loc)
+        create_noise_map(base_from_vertex=base_from_vertex, mask_from_vertex=mask_from_vertex, max_x=self.max_x * size_factor, max_y=self.max_y * size_factor, n_x=self.n_x, n_y=self.n_y, mask_max=(255-WATER_HEIGHT)//2).save(self.heightmap_loc)
         self.height_extra(**extras)
 
     def height_extra(self):

@@ -15,11 +15,11 @@ LAND = 255
 
 BaseTerrain = Enum('BaseTerrain', 'plains farmlands hills mountains forest desert marsh jungle ocean urban')
 TERRAIN_HEIGHT = {
-    BaseTerrain.ocean: (0,1),
-    BaseTerrain.farmlands: (0,4), BaseTerrain.plains: (0,4), BaseTerrain.marsh: (0,2), BaseTerrain.desert: (0,4),
-    BaseTerrain.jungle: (5,20), BaseTerrain.forest: (5,15),
-    BaseTerrain.hills: (10,30),
-    BaseTerrain.mountains: (20,50),
+    BaseTerrain.ocean: 0,
+    BaseTerrain.farmlands: -2, BaseTerrain.plains: -2, BaseTerrain.marsh: -2, BaseTerrain.desert: -0.8,
+    BaseTerrain.jungle: 0.1, BaseTerrain.forest: 0.1,
+    BaseTerrain.hills: 0.2,
+    BaseTerrain.mountains: 0.5,
 }
 
 RAIL_DIST = {

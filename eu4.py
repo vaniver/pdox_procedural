@@ -137,7 +137,7 @@ def create_geography(file_dir, pids_from_rid, srid_from_pid, name_from_rid, name
         outf.write("island_check_provinces = {\n}\n\nnew_world = {\n}")
 
 
-def create_mod(file_dir, config, region_trees, rgb_from_pid, name_from_pid, pids_from_rid, name_from_rid, pid_from_cube, terr_from_cube, gov_from_tag, height_from_vertex, river_flow_from_edge, river_sources, river_merges, river_max_flow, srid_from_pid, name_from_srid, cont_names, cont_from_pid):
+def create_mod(file_dir, config, region_trees, rgb_from_pid, name_from_pid, pids_from_rid, name_from_rid, pid_from_cube, terr_from_cube, gov_from_tag, base_from_vertex, mask_from_vertex, river_flow_from_edge, river_sources, river_merges, river_max_flow, srid_from_pid, name_from_srid, cont_names, cont_from_pid):
     """Creates the EU4 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
@@ -153,8 +153,8 @@ def create_mod(file_dir, config, region_trees, rgb_from_pid, name_from_pid, pids
     eu4map = EU4Map(file_dir, max_x=config["max_x"], max_y=config["max_y"], n_x=config["n_x"], n_y=config["n_y"])
     eu4map.create_provinces(rgb_from_pid, pid_from_cube, ".bmp", name_from_pid=name_from_pid)
     eu4map.create_terrain(terr_from_cube=terr_from_cube, base_loc=config["BASE_EU4_DIR"], file_ext=".bmp")
-    eu4map.create_heightmap(height_from_vertex=height_from_vertex, file_ext=".bmp")
+    eu4map.create_heightmap(base_from_vertex=base_from_vertex, mask_from_vertex=mask_from_vertex, file_ext=".bmp")
     eu4map.create_world_normal()
-    eu4map.create_rivers(height_from_vertex, river_flow_from_edge, river_sources, river_merges, river_max_flow, base_loc=config["BASE_EU4_DIR"], file_ext=".bmp")
+    eu4map.create_rivers(base_from_vertex, river_flow_from_edge, river_sources, river_merges, river_max_flow, base_loc=config["BASE_EU4_DIR"], file_ext=".bmp")
     create_adjacencies(file_dir)
     create_geography(file_dir, pids_from_rid, srid_from_pid, name_from_rid, name_from_srid, cont_names, cont_from_pid)

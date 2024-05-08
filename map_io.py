@@ -1,6 +1,7 @@
 # This file is for map-rendering code / file-IO that's game-independent.
 from math import sqrt
 
+import perlin_numpy
 import PIL.Image
 
 from cube import Cube, Edge, Vertex
@@ -217,9 +218,8 @@ def create_hex_map(rgb_from_ijk, max_x, max_y, n_x, n_y, rgb_from_edge={}, rgb_f
     return img
 
 
-def create_tri_map(height_from_vertex, max_x, max_y, n_x, n_y, mode='L', default="black", palette=None):
-    """Creates a map out of triangular patches, each defined by three adjacent vertices in height_from_vertex."""
-    box_width, box_height = box_from_max(max_x, max_y, n_x, n_y)
+def calc_bary(box_width, box_height):
+    """Calculates the barycentric triangles for a triangle with base 2*box_width and height box_height; returns a tuple of the up-triangle and the down-triangle."""
     river_border = [x*box_height//box_width for x in range(box_width)] + [box_height]
     # It is the same triangle everywhere, so we can compute once the barycentric ratios for all the pixels in the triangle.
     bary_up = {}
@@ -238,6 +238,14 @@ def create_tri_map(height_from_vertex, max_x, max_y, n_x, n_y, mode='L', default
             gamma = 2*box_width*y / denom
             alpha = 1-beta-gamma
             bary_down[(x,y)] = (gamma,alpha,beta)
+    return bary_up, bary_down
+
+
+def create_tri_map(height_from_vertex, max_x, max_y, n_x, n_y, mode='L', default="black", palette=None):
+    """Creates a map out of triangular patches, each defined by three adjacent vertices in height_from_vertex."""
+    box_width, box_height = box_from_max(max_x, max_y, n_x, n_y)
+    # It is the same triangle everywhere, so we can compute once the barycentric ratios for all the pixels in the triangle.
+    bary_up, bary_down = calc_bary(box_width, box_height)
     img = PIL.Image.new(mode, (max_x, max_y), default)
     if palette is not None:
         img.putpalette(palette)
@@ -247,34 +255,59 @@ def create_tri_map(height_from_vertex, max_x, max_y, n_x, n_y, mode='L', default
         # For each vertex, we check whether its two mates (up or down) exist, and if so, draw that triangle.
         start_x, start_y = xy_from_cube(vertex.cube, box_width=box_width, box_height=box_height)
         start_x += (2*vertex.rot + 1)*box_width  # Offset based on which is the center.
-        down_ok = True
-        l, r = vertex.down_pair()
-        if l in height_from_vertex:
-            zl = height_from_vertex[l]
-        else:
-            down_ok = False
-        if r in height_from_vertex:
-            zr = height_from_vertex[r]
-        else:
-            down_ok = False
-        if down_ok:
-            for (x,y), (a,b,c) in bary_down.items():
-                pix[start_x + x, start_y + y] = int(z * a + zl * b + zr * c)
-        up_ok = True  # Eh maybe I should loop this instead of just copy/pasting
-        l, r = vertex.up_pair()
-        if l in height_from_vertex:
-            zl = height_from_vertex[l]
-        else:
-            up_ok = False
-        if r in height_from_vertex:
-            zr = height_from_vertex[r]
-        else:
-            up_ok = False
-        if up_ok:
-            start_y += box_height
-            for (x,y), (a,b,c) in bary_up.items():
-                pix[start_x + x, start_y + y] = int(z * a + zl * b + zr * c)
-    return img        
+        for ind, (bary, pair) in enumerate([(bary_down, vertex.down_pair()), (bary_up, vertex.up_pair())]):
+            ok = True
+            l, r = pair
+            if l in height_from_vertex:
+                zl = height_from_vertex[l]
+            else:
+                ok = False
+            if r in height_from_vertex:
+                zr = height_from_vertex[r]
+            else:
+                ok = False
+            if ok:
+                start_y += ind * box_height
+                for (x,y), (a,b,c) in bary.items():
+                    pix[start_x + x, start_y + y] = int(z * a + zl * b + zr * c)
+    return img
+
+
+def create_noise_map(base_from_vertex, mask_from_vertex, max_x, max_y, n_x, n_y, mask_max, mode='L', default="black", palette=None):
+    """Similar to create_tri_map but using mask_from_vertex to determine how much of a shared noise source to use.
+    Ensure that mask_from_vertex has elements wherever base_from_vertex does."""
+    noise = mask_max * (1 - abs(perlin_numpy.generate_fractal_noise_2d((max_x, max_y), (max_x//32, max_y//32), octaves=5)))
+    box_width, box_height = box_from_max(max_x, max_y, n_x, n_y)
+    # It is the same triangle everywhere, so we can compute once the barycentric ratios for all the pixels in the triangle.
+    bary_up, bary_down = calc_bary(box_width, box_height)
+    img = PIL.Image.new(mode, (max_x, max_y), default)
+    if palette is not None:
+        img.putpalette(palette)
+    pix = img.load()
+    for vertex, z in base_from_vertex.items():
+        # There are two types of triangles: pointing-up and pointing-down.
+        # For each vertex, we check whether its two mates (up or down) exist, and if so, draw that triangle.
+        start_x, start_y = xy_from_cube(vertex.cube, box_width=box_width, box_height=box_height)
+        start_x += (2*vertex.rot + 1)*box_width  # Offset based on which is the center.
+        for ind, (bary, pair) in enumerate([(bary_down, vertex.down_pair()), (bary_up, vertex.up_pair())]):
+            ok = True
+            m = mask_from_vertex[vertex]
+            l, r = pair
+            if l in base_from_vertex:
+                zl = base_from_vertex[l]
+                ml = mask_from_vertex[l]
+            else:
+                ok = False
+            if r in base_from_vertex:
+                zr = base_from_vertex[r]
+                mr = mask_from_vertex[r]
+            else:
+                ok = False
+            if ok:
+                start_y += ind * box_height
+                for (x,y), (a,b,c) in bary.items():
+                    pix[start_x + x, start_y + y] = min(255, int(z * a + zl * b + zr * c + max(0, m * a + ml * b + mr * c) * noise[start_x+x,start_y+y]))
+    return img
 
 
 def create_normal(heightmap):

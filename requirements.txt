@@ -1,2 +1,3 @@
 pillow>=10.2.0
 pyyaml>=6.0
+perlin-numpy @ git+https://github.com/pvigier/perlin-numpy

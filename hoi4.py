@@ -246,7 +246,7 @@ def create_flags(file_dir, base_dir, tag_mapping, tags):
                     continue
 
 
-def create_mod(file_dir, config, pid_from_cube, rgb_from_pid, terr_from_cube, terr_from_pid, rid_from_pid, tag_from_pid, type_from_pid, cont_from_pid, coast_from_cube, pids_from_rid, name_from_rid, river_flow_from_edge, river_sources, river_merges, river_max_flow, locs_from_rid, height_from_vertex, region_trees, supply_nodes, railways, pids_from_srid, name_from_srid, weather_periods_from_srid, naval_from_srid,):
+def create_mod(file_dir, config, pid_from_cube, rgb_from_pid, terr_from_cube, terr_from_pid, rid_from_pid, tag_from_pid, type_from_pid, cont_from_pid, coast_from_cube, pids_from_rid, name_from_rid, river_flow_from_edge, river_sources, river_merges, river_max_flow, locs_from_rid, base_from_vertex, mask_from_vertex, region_trees, supply_nodes, railways, pids_from_srid, name_from_srid, weather_periods_from_srid, naval_from_srid,):
     """Creates the HOI4 mod files in file_dir, given the basic data."""
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
@@ -259,10 +259,10 @@ def create_mod(file_dir, config, pid_from_cube, rgb_from_pid, terr_from_cube, te
     coastal.update({pid: pid for pid in sorted(set(coast_from_cube.values()))})  # We want the coastal water to also be flagged; this is maybe the wrong way to identify it.
     hoi4map.create_provinces(rgb_from_pid, pid_from_cube, coastal, cont_from_pid, terr_from_pid, type_from_pid)
     hoi4map.create_terrain(terr_from_cube=terr_from_cube, base_loc=config["BASE_HOI4_DIR"], file_ext=".bmp")
-    hoi4map.create_heightmap(height_from_vertex=height_from_vertex, file_ext=".bmp")
+    hoi4map.create_heightmap(base_from_vertex=base_from_vertex, mask_from_vertex=mask_from_vertex, file_ext=".bmp")
     hoi4map.create_world_normal()
     hoi4map.create_buildings(file_dir=file_dir, pids_from_rid=pids_from_rid, coastal=coastal)
-    hoi4map.create_rivers(height_from_vertex, river_flow_from_edge, river_sources, river_merges, river_max_flow, base_loc=config["BASE_HOI4_DIR"], file_ext=".bmp")
+    hoi4map.create_rivers(base_from_vertex, river_flow_from_edge, river_sources, river_merges, river_max_flow, base_loc=config["BASE_HOI4_DIR"], file_ext=".bmp")
     create_adjacencies(file_dir)
     create_rail_supplies(file_dir, supply_nodes, railways)
     tags = sorted(set(tag_from_pid.values()))

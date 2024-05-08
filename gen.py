@@ -3,6 +3,8 @@ import random
 import time
 import yaml
 
+import perlin_noise
+
 from map_io import valid_cubes
 from area import Area
 from chunk_split import check_contiguous, find_contiguous, split_chunk, SplitChunkMaxIterationExceeded
@@ -468,7 +470,7 @@ def arrange_inner_sea(continents, inner_sea_center, angles=[2,4,0]):
     best_score = score
     steps = 0
     best_cont = moved_continents
-    while score > -99 and steps < config.get("MAX_STEPS", 10000):
+    while score > -99 and steps < 10000:
         steps += 1
         offs = [Cube(0,0,0)] + [random.choice(directions) for _ in range(1,len(moved_continents))]  # Keep the first continent pegged in place to prevent the world from sliding away from the center.
         candidate = [cont.add(off) for cont, off in zip(moved_continents, offs)]
@@ -851,69 +853,47 @@ def create_data(config):
     water_depth_from_cube = dist_from_coast(sea_cubes, sea_coast)
     print("end coast_dist; time elapsed:", time.time()-start_time)
     # Make heightmap
-    height_from_vertex = {}
+    mask_from_vertex = {}
+    base_from_vertex = {}
     for cube, height in land_height_from_cube.items():
-        a,b = TERRAIN_HEIGHT[terr_from_cube[cube]]
-        height_from_vertex[Vertex(cube, 0)] = min(255, height * 3 + sum([random.randint(a,b) for _ in range(4)]) + WATER_HEIGHT)
-        if Vertex(cube, 1) in coastal_vertices:
-            height_from_vertex[Vertex(cube, 1)] = WATER_HEIGHT - 3
-        else:
-            l = height + random.randint(a,b) + random.randint(a,b)
-            for k in [cube.add(Cube(-1,1,0)), cube.add(Cube(-1,0,1))]:
-                if k in land_height_from_cube:
-                    a,b = TERRAIN_HEIGHT[terr_from_cube[k]]
-                    l += land_height_from_cube[k] + random.randint(a,b) + random.randint(a,b)
-                else:
-                    l -= 2
-            height_from_vertex[Vertex(cube, 1)] = min(255, max(1,l) + WATER_HEIGHT)
-        if Vertex(cube, -1) in coastal_vertices:
-            height_from_vertex[Vertex(cube, -1)] = WATER_HEIGHT - 3
-        else:
-            r = height + random.randint(a,b) + random.randint(a,b)
-            for k in [cube.add(Cube(1,-1,0)), cube.add(Cube(1,0,-1))]:
-                if k in land_height_from_cube:
-                    a,b = TERRAIN_HEIGHT[terr_from_cube[k]]
-                    r += land_height_from_cube[k] + random.randint(a,b) + random.randint(a,b)
-                else:
-                    r -= 2
-            height_from_vertex[Vertex(cube, -1)] = min(255, max(1,r) + WATER_HEIGHT)
-    a,b = TERRAIN_HEIGHT[BaseTerrain.ocean]
+        terr = terr_from_cube[cube]
+        base_from_vertex[Vertex(cube, 0)] = min(255, height * 3 + WATER_HEIGHT)
+        mask_from_vertex[Vertex(cube, 0)] = TERRAIN_HEIGHT[terr] * 2
+        for dir in [-1, 1]:
+            if Vertex(cube, dir) in coastal_vertices:
+                base_from_vertex[Vertex(cube, dir)] = WATER_HEIGHT - 3
+                mask_from_vertex[Vertex(cube, dir)] = 0
+            else:
+                b = height
+                m = TERRAIN_HEIGHT[terr]
+                for k in [cube.add(Cube(dir,-1*dir,0)), cube.add(Cube(dir,0,-1*dir))]:
+                    assert k in land_height_from_cube
+                    m += TERRAIN_HEIGHT[terr_from_cube[k]]
+                    b += land_height_from_cube[k]
+                base_from_vertex[Vertex(cube, dir)] = max(1, b) + WATER_HEIGHT
+                mask_from_vertex[Vertex(cube, dir)] = max(0, m)
     base_water = WATER_HEIGHT * 4 // 5
     for cube, depth in water_depth_from_cube.items():
         if depth > 3:
             continue
-        height_from_vertex[Vertex(cube, 0)] = max(0, base_water - 3 * depth * depth + sum([random.randint(a,b) for _ in range(4)]))
-        vl = Vertex(cube, -1)
-        if vl not in height_from_vertex:  # Why did I think I needed to check this?
-            l = base_water - depth * depth + random.randint(a,b) + random.randint(a,b)
+        base_from_vertex[Vertex(cube, 0)] = max(0, base_water - 3 * depth * depth)
+        mask_from_vertex[Vertex(cube, 0)] = 0
+        for dir in [-1, 1]:
+            vl = Vertex(cube, dir)
+            if vl not in mask_from_vertex:
+                mask_from_vertex[vl] = 0
+            l = base_water - depth * depth
             coast = False
-            for k in [cube.add(Cube(-1,1,0)), cube.add(Cube(-1,0,1))]:
+            for k in [cube.add(Cube(dir,-1*dir,0)), cube.add(Cube(dir,0,-1*dir))]:
                 if k in water_depth_from_cube:
-                    l += random.randint(a,b) - water_depth_from_cube[k] * water_depth_from_cube[k]
+                    l -= water_depth_from_cube[k] * water_depth_from_cube[k]
                 else:
                     coast = True
             if coast:
-                height_from_vertex[vl] = WATER_HEIGHT - 3
+                base_from_vertex[vl] = WATER_HEIGHT - 3
             else:
-                height_from_vertex[vl] = min(max(0, l), WATER_HEIGHT - 3)
-        else:
-            print("it was a real check.")
-        vr = Vertex(cube, 1)
-        if vr not in height_from_vertex:
-            r = base_water - depth * depth + random.randint(a,b) + random.randint(a,b)
-            coast = False
-            for k in [cube.add(Cube(1,-1,0)), cube.add(Cube(1,0,-1))]:
-                if k in water_depth_from_cube:
-                    r += random.randint(a,b) - water_depth_from_cube[k] * water_depth_from_cube[k]
-                else:
-                    coast = True
-            if coast:
-                height_from_vertex[vr] = WATER_HEIGHT - 3
-            else:
-                height_from_vertex[vr] = min(max(0, r), WATER_HEIGHT - 3)
-        else:
-            print("it was a real check.")
-    print(f"Heightmap heights range from {min(height_from_vertex.values())} to {max(height_from_vertex.values())}. Time elapsed: {time.time()-start_time}")
+                base_from_vertex[vl] = min(max(0, l), WATER_HEIGHT - 3)
+    print(f"Heightmap base heights range from {min(base_from_vertex.values())} to {max(base_from_vertex.values())}, and mask heights range from {min(mask_from_vertex.values())} to {max(mask_from_vertex.values())}. Time elapsed: {time.time()-start_time}")
     # Create rivers
     inland_from_v = {v: 0 for v in coastal_vertices}
     to_expand = {v for v in coastal_vertices}
@@ -993,7 +973,7 @@ def create_data(config):
         type_from_pid[pid_from_cube[k]] = "sea"
     for k in lakes:
         type_from_pid[k] = "lake"
-    return continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region, ow_nx, ow_ny, ow_max_x, ow_max_y
+    return continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, base_from_vertex, mask_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region, ow_nx, ow_ny, ow_max_x, ow_max_y
 
 
 if __name__ == "__main__":
@@ -1015,7 +995,7 @@ if __name__ == "__main__":
     config["max_x"] = config.get("max_x", config.get("box_width", 10)*(config["n_x"]*3-3))
     config["max_y"] = config.get("max_y", config.get("box_height", 17)*(config["n_y"]*2-2))
 
-    continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, height_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region, ow_nx, ow_ny, ow_max_x, ow_max_y = create_data(config)
+    continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, base_from_vertex, mask_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region, ow_nx, ow_ny, ow_max_x, ow_max_y = create_data(config)
     cultures, religions = assemble_culrels(region_trees=region_trees)  # Not obvious this should be here instead of just derived later?
     rgb_from_pid = create_colors(pid_from_cube)
     pids_from_rid = {}
@@ -1057,7 +1037,8 @@ if __name__ == "__main__":
             terr_from_cube=terr_from_cube,
             terr_from_pid=terr_from_pid,
             rgb_from_pid=rgb_from_pid,
-            height_from_vertex=height_from_vertex,
+            base_from_vertex=base_from_vertex,
+            mask_from_vertex=mask_from_vertex,
             pid_from_title=pid_from_title,
             name_from_pid=name_from_pid,
             region_trees=region_trees,
@@ -1087,7 +1068,8 @@ if __name__ == "__main__":
             pid_from_cube=pid_from_cube,
             terr_from_cube=terr_from_cube,
             gov_from_tag={},
-            height_from_vertex=height_from_vertex,
+            base_from_vertex=base_from_vertex,
+            mask_from_vertex=mask_from_vertex,
             river_flow_from_edge=river_flow_from_edge,
             river_sources=river_sources, 
             river_merges=river_merges,
@@ -1107,7 +1089,8 @@ if __name__ == "__main__":
             terr_from_cube=terr_from_cube,
             terr_from_pid=terr_from_pid,
             rgb_from_pid=rgb_from_pid,
-            height_from_vertex=height_from_vertex,
+            base_from_vertex=base_from_vertex,
+            mask_from_vertex=mask_from_vertex,
             river_flow_from_edge=river_flow_from_edge,
             river_sources=river_sources, 
             river_merges=river_merges,
@@ -1139,7 +1122,8 @@ if __name__ == "__main__":
             river_merges=river_merges,
             river_max_flow=river_max_flow,
             locs_from_rid=locs_from_rid,
-            height_from_vertex=height_from_vertex,
+            base_from_vertex=base_from_vertex,
+            mask_from_vertex=mask_from_vertex,
             region_trees=region_trees,
             supply_nodes=supply_nodes,
             railways=railways,
