@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - b_benevento|Benevento
+  - b_alife|Alife
+  - b_isernia|Isernia
+  - b_melfi|Melfi
+  color: 189 150 55
+  l: Benevento
+  title: c_benevento
+- children:
+  - b_lucera|Lucera
+  - b_larino|Larino
+  - b_vieste|Vieste
+  - b_ariano|Ariano
+  color: 169 150 45
+  l: Foggia
+  title: c_foggia
+- children:
+  - b_capua|Capua
+  - b_gaeta|Gaeta
+  - b_cassino|Cassino
+  - b_fermo|Fermo
+  color: 240 209 100
+  l: Capua
+  title: c_capua
+- children:
+  - b_napoli|Napoli
+  - b_amalfi|Amalfi
+  - b_aversa|Aversa
+  - b_catanzaro|Catanzaro
+  color: 230 225 90
+  l: Napoli
+  title: c_napoli
+- children:
+  - b_spoleto|Spoleto
+  - b_assissi|Assisi
+  - b_terni|Terni
+  - b_ascoli_piceno|Ascoli Piceno
+  color: 197 162 133
+  l: Spoleto
+  title: c_spoleto
+- children:
+  - b_ancona|Ancona
+  - b_cagli|Cagli
+  - b_gubbio|Gubbio
+  - b_camerino|Camerino
+  color: 245 245 195
+  l: Ancona
+  title: c_ancona
+color: 209 170 75
+l: Benevento
+title: d_benevento
+cul: cisalpine
+rel: catholic
+rough: forest
+tag: BEN

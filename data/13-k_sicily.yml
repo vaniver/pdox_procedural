@@ -1,0 +1,39 @@
+﻿children:
+- children:
+  - children:
+    - b_palermo|Palermo
+    - b_trapani|Trapani
+    - b_calatafimi|Calatafimi
+    - b_mazara|Mazara
+    color: 155 254 86
+    l: Palermo
+    title: c_palermo
+  - children:
+    - b_messina|Messina
+    - b_cefalu|Cefalu
+    - b_catania|Catania
+    color: 160 210 100
+    l: Messina
+    title: c_messina
+  - children:
+    - b_syracusa|Syracusa
+    - b_lentini|Lentini
+    - b_caltagirone|Caltagirone
+    color: 115 195 85
+    l: Siracusa
+    title: c_siracusa
+  - children:
+    - b_castrogiovanni|Castrogiovanni
+    - b_agricento|Girgenti
+    - b_caltanisetta|Caltanissetta
+    color: 125 230 110
+    l: Castrogiovanni
+    title: c_agrigento
+  color: 155 254 86
+  l: Sicily
+  title: d_sicily
+color: 180 160 80
+cul: sicilian
+l: Sicily
+rel: catholic
+title: k_sicily

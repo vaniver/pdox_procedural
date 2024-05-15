@@ -33,7 +33,11 @@ CONTINENT_LISTS:
   - 61-k_bavaria
   - 61-k_pomerania
   - 61-k_saxony
+  # - 61-k_hungary
   - 22-d_bohemia
+  # - 22-d_osterreich
+  # - 24-d_east_franconia
+  # - 24-d_west_franconia
   - 24-d_lower_silesia
   - 24-d_moravia
   - 24-d_tyrol

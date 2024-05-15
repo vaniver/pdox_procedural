@@ -81,38 +81,38 @@
   title: d_somerset
 - children:
   - children:
-    - b_gloucester|Gloucester
-    - b_bristol|Bristol
-    - b_winchcombe|Winchcombe
-    - b_blything|Blything
-    color: 245 85 20
-    l: Gloucestershire
-    title: c_gloucestershire
+    - b_norwich|Norwich
+    - b_thetford|Thetford
+    - b_walsingham|Walshingham
+    - b_lynn|Lynn
+    color: 210 100 0
+    l: Norfolk
+    title: c_norfolk
   - children:
-    - b_salisbury|Salisbury
-    - b_wilton|Wilton
-    - b_ramsbury|Ramsbury
-    - b_malmesbury|Malmesbury
-    color: 250 55 15
-    l: Wiltshire
-    title: c_wiltshire
+    - b_cambridge|Cambridge
+    - b_radfield|Radfield
+    - b_papworth|Papworth
+    - b_ely|Ely
+    color: 205 145 5
+    l: Cambridgeshire
+    title: c_cambridgeshire
   - children:
-    - b_oxford|Oxford
-    - b_banbury|Banbury
-    - b_witney|Witney
-    color: 255 115 15
-    l: Oxfordshire
-    title: c_oxfordshire
+    - b_ipswich|Ipswich
+    - b_sudbury|Sudbury
+    - b_beodericsworth|Beodericsworth
+    color: 215 125 10
+    l: Suffolk
+    title: c_suffolk
   - children:
-    - b_reading|Reading
-    - b_newbury|Newbury
-    - b_abingdon|Abingdon
-    color: 255 100 25
-    l: Berkshire
-    title: c_berkshire
-  color: 241 79 15
-  l: Hwicce
-  title: d_gloucester
+    - b_hurstingstone|Hurstingstone
+    - b_norman_cross|Norman Cross
+    - b_leightonstone|Leightonstone
+    color: 175 40 55
+    l: Huntingdonshire
+    title: c_huntingdonshire
+  color: 200 90 0
+  l: East Anglia
+  title: d_norfolk
 - children:
   - children:
     - b_dover|Dover
@@ -141,7 +141,7 @@
   l: Kent
   title: d_canterbury
 color: 202 26 26
-cul: anglo_saxon
+cul: english
 l: England
 rel: catholic
 title: k_england

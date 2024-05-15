@@ -1,0 +1,32 @@
+﻿children:
+- children:
+  - "b_reykjavik|Reykjav\xEDk"
+  - "b_vestfirdir|Vestfir\xF0ir"
+  - "b_olafsvik|Borg \xE1 M\xFDrum"
+  color: 255 245 245
+  l: Vestrland
+  title: c_vestisland
+- children:
+  - "b_husavik|Nor\xF0rland"
+  - "b_vopnafjordur|Vopnafj\xF6r\xF0r"
+  color: 240 230 230
+  l: "Nor\xF0rland"
+  title: c_nordrland
+- children:
+  - "b_reydarfjall|Austfir\xF0ir"
+  - "b_hofn|H\xF6fn"
+  color: 250 215 215
+  l: Austrland
+  title: c_austisland
+- children:
+  - "b_stokkseyri|Sk\xE1laholt"
+  - b_klaustur|Klaustr
+  color: 220 220 220
+  l: "Su\xF0rland"
+  title: c_sudurland
+color: 255 245 245
+cul: norse
+l: Iceland
+rel: asatru
+title: d_iceland
+tag: ICE

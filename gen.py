@@ -401,7 +401,7 @@ def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], 
     v_centers, pid_from_cube, _ = voronoi(v_centers, {k:1 for k in sea_cubes})  # TODO: This really ought to be better.
     # Group the provinces together into regions.
     pids = sorted(set(pid_from_cube.values()))
-    pid_centers = sorted(set([pid_from_cube[rc] for rc in region_centers]))
+    pid_centers = sorted(set([pid_from_cube[rc] for rc in region_centers if rc in pid_from_cube]))
     extra_regions = config.get("SEA_REGIONS", 20) - len(pid_centers)
     if extra_regions > 0:
         pid_centers.extend(random.sample([x for x in pids if x not in pid_centers], k=extra_regions))

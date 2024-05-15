@@ -1,0 +1,21 @@
+﻿children:
+- children:
+  - b_kirkwall|Kirkwall
+  color: 195 75 75
+  l: Orkney
+  title: c_orkney
+- children:
+  - "b_torshavn|\xDE\xF3rsh\xF6fn"
+  color: 200 70 70
+  l: "F\xE6reyjar"
+  title: c_faereyar
+- children:
+  - b_scalloway|Scalloway
+  color: 205 65 65
+  l: Shetland
+  title: c_shetland
+color: 195 75 75
+cul: norse
+l: Northern Isles
+rel: asatru
+title: d_northern_isles

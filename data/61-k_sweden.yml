@@ -1,0 +1,150 @@
+﻿children:
+- children:
+  - children:
+    - b_sigtuna|Sigtuna
+    - b_uppsala|Uppsala
+    - "b_enescopinge|Enk\xF6ping"
+    - "b_osthammar|\xD6sthammar"
+    - b_borgholm|Borgholm
+    - b_eketorp|Eketorp
+    color: 30 90 210
+    l: Uppland
+    title: c_upland
+  - children:
+    - "b_gavle|G\xE4vle"
+    - b_oklabo|Oklabo
+    - "b_odmarden|\xD6dm\xE5rden"
+    - b_leksand|Leksand
+    color: 40 70 220
+    l: Gestrikalandia
+    title: c_gastrikland
+  - children:
+    - b_strigines|Strigines
+    - "b_talje|T\xE4lje"
+    - "b_nykopung|Nyk\xF6ping"
+    - b_sundby|Sundby
+    color: 50 110 230
+    l: "S\xF6dermannaland"
+    title: c_sodermannaland
+  - children:
+    - b_sund|Sund
+    - b_jomala|Jomala
+    - b_lima|Lima
+    - b_birkevik|Birkevik
+    color: 28 56 199
+    l: Aland
+    title: c_aland
+  - children:
+    - b_warnnamo|Warnnamo
+    - b_liongby|Liongby
+    - b_uppvidinge|Uppvidinge
+    - b_grundasund|Grundasund
+    color: 55 80 215
+    l: Finnveden
+    title: c_finnveden
+  color: 20 20 145
+  l: Uppland
+  title: d_svealand
+- children:
+  - children:
+    - "b_vaestraaros|V\xE4straaros"
+    - b_arbuga|Arboga
+    - b_skynzekkeberge|Skynzekkeberge
+    - b_fernabo|Fernabo
+    color: 43 43 153
+    l: "V\xE4stmannaland"
+    title: c_vastmanland
+  - children:
+    - b_tingvalla|Tingvalla
+    - b_friskdal|Friskdal
+    - "b_vase|V\xE4se"
+    - "b_farnebo|F\xE4rnebo"
+    color: 18 57 153
+    l: "V\xE4rmaland"
+    title: c_varmland
+  - children:
+    - b_mor|Morum
+    - b_molungr|Molungr
+    - b_orsa|Orsa
+    color: 65 115 235
+    l: "\xD6vre Dalarna"
+    title: c_dalarna
+  - children:
+    - b_falene|Falene
+    - "b_norrbarke|Norrb\xE4rke"
+    - b_henamorum|Henamorum
+    color: 56 56 199
+    l: Dalabergslagen
+    title: c_dalabergslagen
+  color: 60 60 200
+  l: Bergslagen
+  title: d_bergslagen
+- children:
+  - children:
+    - b_kalmar|Kalmar
+    - "b_hogsby|H\xF6gsby"
+    - "b_torsas|Tors\xE5s"
+    - b_hultaby|Hultaby
+    color: 45 85 245
+    l: "M\xF6re"
+    title: c_more
+  - children:
+    - "b_vaxjo|V\xE4xj\xF6"
+    - b_allbo|Allbo
+    - b_kinnevald|Kinnevald
+    - b_norrvidinge|Norrvidinge
+    color: 55 80 255
+    l: "V\xE4rend"
+    title: c_varend
+  - children:
+    - b_stegholm|Stegholm
+    - b_hulingsryd|Hulingsryd
+    - b_vimmerby|Vimarby
+    color: 28 14 230
+    l: Sevede
+    title: c_sevede
+  - children:
+    - "b_wisinghnso|Wisinghns\xF6"
+    - "b_jonkoping|J\xF6nk\xF6ping"
+    - "b_eksjo|Eksj\xF6"
+    color: 35 90 255
+    l: Njudung
+    title: c_njudung
+  color: 45 85 245
+  l: "Sm\xE5land"
+  title: d_smaland
+- children:
+  - children:
+    - b_norale|Norale
+    - "b_baldanas|Baldan\xE4s"
+    - "b_farila|F\xE4rila"
+    - b_dilsbo|Dilsbo
+    color: 60 70 235
+    l: Halsingland
+    title: c_halsingland
+  - children:
+    - b_seilanger|Seilanger
+    - "b_hafra|Hafr\xE4"
+    - b_lidh|Lidh
+    - b_hedanger|Hedanger
+    color: 55 65 215
+    l: Medelpad
+    title: c_medelpad
+  - children:
+    - b_solatumum|Solatumum
+    - b_sioboradh|Sioboradh
+    - b_neteru|Neteru
+    color: 30 55 185
+    l: "\xC5ngermanland"
+    title: c_angermanland
+  color: 40 70 220
+  l: Norrland
+  title: d_norrland
+color: 50 110 165
+cul: swedish
+l: Sweden
+rel: catholic
+title: k_sweden
+tag: SWE
+rough: forest
+holy: uppsala

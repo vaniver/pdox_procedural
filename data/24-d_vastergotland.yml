@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - "b_lodose|L\xF6d\xF6se"
+  - "b_falkoping|Falk\xF6ping"
+  - b_kungahalla|Utlanden
+  - b_opensten|Opensten
+  color: 20 70 215
+  l: "V\xE4sterg\xF6tland"
+  title: c_vastergotland
+- children:
+  - "b_lacko|L\xE4ck\xF6"
+  - b_skara|Skara
+  - b_varnhem|Varnhem
+  - b_kindaholm|Kindaholm
+  color: 61 104 227
+  l: Skara
+  title: c_skara
+- children:
+  - b_nordmark|Nordmark
+  - "b_josse|J\xF6sse"
+  - b_gillberg|Gillberg
+  - b_dalaborg|Dalaborg
+  color: 30 70 235
+  l: Nordmark
+  title: c_nordmark
+- children:
+  - "b_sudherkopung|S\xF6derk\xF6ping"
+  - b_hamarkinda|Hamarkinda
+  - b_vreta|Vreta
+  - "b_norrkoping|Norrk\xF6ping"
+  color: 34 80 161
+  l: "\xD6sterg\xF6tland"
+  title: c_ostergotland
+- children:
+  - b_liunga|Linuga
+  - "b_skanninge|Sk\xE4nninge"
+  - b_grebo2|Grebo
+  - b_tisselskog|Tisselskog
+  color: 8 55 138
+  l: Kinda
+  title: c_kinda
+- children:
+  - "b_orabro|\xD6rebro"
+  - b_riseberga|Riseberga
+  - b_noraskog|Noraskog
+  - b_onsala|Onsala
+  color: 15 90 195
+  l: Neeric
+  title: c_narke
+color: 38 93 163
+l: "V\xE4sterg\xF6tland"
+title: d_vastergotland
+cul: norse
+rel: catholic
+tag: VAS
+rough: forest

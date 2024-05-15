@@ -37,7 +37,6 @@
   color: 245 245 200
   l: Acre
   title: c_acre
-color: 225 200 160
 cul: levantine
 rel: ashari
 color: 160 160 200
@@ -45,3 +44,4 @@ l: Palestine
 title: d_palestine
 rough: desert
 tag: PAL
+holy: jerusalem

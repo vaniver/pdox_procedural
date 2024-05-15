@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - b_aarhus|Aarhus
+  - b_jelling|Jelling
+  - b_djursland|Djursland
+  - b_viborg|Viborg
+  color: 155 50 26
+  l: Aarhus
+  title: c_aarhus
+- children:
+  - b_bregne|Bregne
+  - b_ronneby|Ronneby
+  - b_lister|Lister
+  - "b_avaskar|Avask\xE4r"
+  color: 220 30 20
+  l: Blekinge
+  title: c_blekinge
+- children:
+  - "b_ringkobing|Ringk\xF8bing"
+  - b_holstebro|Holstebro
+  - b_ycost|Ycost
+  - b_tarm|Tarm
+  color: 175 70 22
+  l: "Ringk\xF8bing"
+  title: c_ringkobing
+- children:
+  - b_aalborg|Aalborg
+  - b_lindholm|Lindholm
+  - "b_randros|Randr\xF8s"
+  - b_strand|Strand
+  color: 165 9 64
+  l: Aalborg
+  title: c_aalborg
+- children:
+  - b_hedeby|Hedeby
+  - b_aabenraa|Abenraa
+  - b_husumbro|Husumbro
+  - b_varde|Varde
+  color: 216 89 60
+  l: Slesvig
+  title: c_slesvig
+- children:
+  - b_vorbasse|Vorbasse
+  - b_taulov|Taulov
+  - b_kolding|Kolding
+  - b_ribe|Ribe
+  color: 160 43 17
+  l: Vorbasse
+  title: c_vorbasse
+color: 160 25 72
+l: Jylland
+title: d_jylland
+cul: norse
+rel: norse_pagan
+TAG: JYL
+rough: forest

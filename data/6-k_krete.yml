@@ -1,0 +1,25 @@
+﻿children:
+- children:
+  - children:
+    - b_iraklio|Iraklio
+    - b_agiosnikolaos|Agios Nikolaos
+    - b_ierapetra|Ierapetra
+    color: 205 110 35
+    l: Chandax
+    title: c_chandax
+  - children:
+    - b_chania|Chania
+    - b_rethymno|Rethymno
+    - b_paleohora|Paleohora
+    color: 210 145 20
+    l: Chania
+    title: c_chania
+  color: 205 110 35
+  l: Krete
+  title: d_krete
+color: 215 120 45
+cul: greek
+l: Krete
+rel: orthodox
+title: k_krete
+tag: KRE

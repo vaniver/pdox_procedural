@@ -1,0 +1,56 @@
+﻿children:
+- children:
+  - b_trani|Trani
+  - b_siponto|Siponto
+  - b_venosa|Venosa
+  - b_acerenza|Acerenza
+  color: 152 157 48
+  l: Apulia
+  title: c_apulia
+- children:
+  - b_bari|Bari
+  - b_matera|Matera
+  - b_taranto|Taranto
+  - b_camarda|Camarda
+  color: 167 182 83
+  l: Bari
+  title: c_bari
+- children:
+  - b_lecce|Lecce
+  - b_brindisi|Brindisi
+  - b_orlanto|Otranto
+  - b_stigliano|Stigliano
+  color: 187 172 83
+  l: Lecce
+  title: c_lecce
+- children:
+  - b_salerno|Salerno
+  - b_maratea|Maratea
+  - b_potenza|Potenza
+  - b_policastro|Policastro
+  color: 245 194 199
+  l: Salerno
+  title: c_salerno
+- children:
+  - b_reggio_calabria|Reggio Calabria
+  - b_squilluce|Squilluce
+  - b_tropea|Tropea
+  - b_rossano|Rossano
+  color: 165 150 95
+  l: Reggio Calabria
+  title: c_reggio_calabria
+- children:
+  - b_cosenza|Cosenza
+  - b_castrovillari|Castrovillari
+  - b_belvedere|Belvedere
+  - b_cotrone|Crotone
+  color: 170 132 80
+  l: Cosenza
+  title: c_cosenza
+color: 167 172 63
+l: Apulia
+title: d_apulia
+cul: sicilian
+rel: catholic
+rough: forest
+tag: APU

@@ -1,0 +1,66 @@
+﻿children:
+- children:
+  - children:
+    - b_ajaccio|Ajaccio
+    - b_calvi|Calvi
+    color: 200 200 250
+    l: Ajaccio
+    title: c_ajaccio
+  - children:
+    - b_bastia|Bastia
+    - b_corte|Corte
+    color: 226 248 251
+    l: Bastia
+    title: c_bastia
+  - children:
+    - b_bonifacio|Bonifacio
+    - b_vecchio|Vecchio
+    color: 205 230 235
+    l: Vecchio
+    title: c_vecchio
+  color: 200 200 250
+  l: Corsica
+  title: d_corsica
+- children:
+  - children:
+    - b_cagliari|Cagliari
+    - b_iglesias|Iglesias
+    - b_samassi|Samassi
+    color: 220 160 250
+    l: Cagliari
+    title: c_cagliari
+  - children:
+    - b_oristano|Oristano
+    - b_isili|Isili
+    color: 200 185 250
+    l: Arborea
+    title: c_arborea
+  - children:
+    - b_olbia|Olbia
+    - b_galtelli|Galtelli
+    color: 195 175 225
+    l: Gallura
+    title: c_gallura
+  - children:
+    - b_sassari|Sassari
+    - b_alghero|Alghero
+    - b_porto_torres|Porto Torres
+    - b_ardara|Ardara
+    color: 170 182 225
+    l: Logudoro
+    title: c_logudoro
+  - children:
+    - b_tortoli|Tortoli
+    - b_carbonara|Carbonara
+    color: 180 170 180
+    l: Tortoli
+    title: c_tortoli
+  color: 217 159 255
+  l: Sardinia
+  title: d_sardinia
+color: 210 165 255
+cul: sardinian
+l: Sardinia
+rel: catholic
+title: k_sardinia
+tag: SAR

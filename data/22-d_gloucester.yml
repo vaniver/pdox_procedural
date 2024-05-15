@@ -1,0 +1,47 @@
+﻿children:
+- children:
+  - b_gloucester|Gloucester
+  - b_bristol|Bristol
+  - b_winchcombe|Winchcombe
+  - b_hereford|Hereford
+  - b_wigmore|Wigmore
+  - b_clifford|Clifford
+  - b_pembroke|Penfro
+  color: 245 85 20
+  l: Gloucestershire
+  title: c_gloucestershire
+- children:
+  - b_salisbury|Salisbury
+  - b_wilton|Wilton
+  - b_ramsbury|Ramsbury
+  - b_malmesbury|Malmesbury
+  - b_northampton|Northampton
+  color: 250 55 15
+  l: Wiltshire
+  title: c_wiltshire
+- children:
+  - b_oxford|Oxford
+  - b_banbury|Banbury
+  - b_witney|Witney
+  - b_peterborough|Peterborough
+  - b_blything|Blything
+  color: 255 115 15
+  l: Oxfordshire
+  title: c_oxfordshire
+- children:
+  - b_reading|Reading
+  - b_newbury|Newbury
+  - b_abingdon|Abingdon
+  - b_monmouth|Trefynwy
+  - b_swansea|Abertawe
+  color: 255 100 25
+  l: Berkshire
+  title: c_berkshire
+color: 241 79 15
+cul: old_saxon
+l: Gloucester
+rel: catholic
+title: d_gloucester
+rough: forest
+holy: oxford
+tag: GLO

@@ -1,0 +1,51 @@
+﻿children:
+- children:
+  - children:
+    - b_jerusalem|Jerusalem
+    - b_ar-ramla|Ar-Ramla
+    - b_nablus|Nablus
+    - b_hebron|Hebron
+    - b_kerak|Kerak
+    - b_shawbak|Shawbak
+    - b_at-tafila|At-Tafila
+    color: 176 190 140
+    l: Jerusalem
+    title: c_jerusalem
+  - children:
+    - b_ghazza|Ghazza
+    - b_ascalon|Ascalon
+    - b_zughar|Zughar
+    - b_baidha-petra|Baidha-Petra
+    - b_arandal|Arandal
+    color: 167 165 190
+    l: Ghazza
+    title: c_ghazza
+  - children:
+    - b_yaffa|Yaffa
+    - b_cesarea|Cesarea
+    - b_aila|Aila
+    - b_jarash|Jarash
+    - b_busra|Busra
+    color: 167 190 150
+    l: Jaffa
+    title: c_jaffa
+  - children:
+    - b_acre|Acre
+    - b_tyre|Tyre
+    - b_irbid|Irbid
+    - b_tiberias|Tiberias
+    - b_baniyas|Baniyas
+    color: 245 245 200
+    l: Acre
+    title: c_acre
+  color: 160 160 200
+  l: Palestine
+  title: d_palestine
+color: 180 180 180
+cul: levantine
+l: Jerusalem
+rel: ashari
+title: k_jerusalem
+holy: jerusalem
+rough: desert
+TAG: JER

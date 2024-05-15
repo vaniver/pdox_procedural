@@ -83,8 +83,8 @@ class CK3Map(BasicMap):
         """Creates definition.csv"""
         with open(os.path.join(self.file_dir, self.map_dir, "definition.csv"), 'w') as outf:
             outf.write("0;0;0;0;x;x;\n")
-            for pid in sorted(name_from_pid.keys()):
-                name = name_from_pid[pid]
+            for pid in sorted(rgb_from_pid.keys()):
+                name = name_from_pid.get(pid,"b_"+str(pid))
                 r,g,b = rgb_from_pid[pid]
                 outf.write(";".join([str(x) for x in [pid,r,g,b,name,"x"]])+"\n")
 
@@ -143,8 +143,8 @@ class CK3Map(BasicMap):
 
     def surround_mask(self, file_dir, surround_cubes = {}):
         os.makedirs(os.path.join(file_dir, "gfx", "map", "surround_map"), exist_ok=True)
-        create_hex_map(rgb_from_ijk={k.tuple(): v for k,v in surround_cubes.items()}, max_x=self.max_x // 8, max_y=self.max_y // 8, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(255, 255, 0)).save(os.path.join(file_dir, "gfx", "map", "surround_map", "surround_fade.dds"))
-        create_hex_map(rgb_from_ijk={k.tuple(): (255,255,255) for k in surround_cubes}, max_x=self.max_x // 2, max_y=self.max_y // 2, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(0, 0, 0)).save(os.path.join(file_dir, "gfx", "map", "surround_map", "surround_mask.dds"))
+        create_hex_map(rgb_from_ijk={k.tuple(): v for k,v in surround_cubes.items()}, max_x=self.max_x // 8, max_y=self.max_y // 8, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(0, 0, 0)).save(os.path.join(file_dir, "gfx", "map", "surround_map", "surround_fade.dds"))
+        create_hex_map(rgb_from_ijk={k.tuple(): (0,0,0) for k in surround_cubes}, max_x=self.max_x // 2, max_y=self.max_y // 2, n_x=self.n_x, n_y=self.n_y, mode='RGB', default=(255, 255, 255)).save(os.path.join(file_dir, "gfx", "map", "surround_map", "surround_mask.dds"))
 
     def create_positions(self, name_from_pid, pid_from_cube, file_dir,):
         """Create positions.txt and gfx/map/map_object_data files"""
@@ -726,9 +726,10 @@ def create_default_map(file_dir, impassable, sea_min, sea_max):
     os.makedirs(os.path.join(file_dir, "map_data"), exist_ok=True)
     with open(os.path.join(file_dir, "map_data", "default.map"), 'w', encoding='utf_8_sig') as outf:
         outf.write("""definitions = "definition.csv"\nprovinces = "provinces.png"\n#positions = "positions.txt"\nrivers = "rivers.png"\n#terrain_definition = "terrain.txt"\ntopology = "heightmap.heightmap"\n#tree_definition = "trees.bmp"\ncontinent = "continent.txt"\nadjacencies = "adjacencies.csv"\n#climate = "climate.txt"\nisland_region = "island_region.txt"\nseasons = "seasons.txt"\n\n""")
-        outf.write("sea_zones = RANGE { "+str(sea_min)+" "+str(sea_max)+" }\n\n")
+        outf.write(f"sea_zones = RANGE {{ {sea_min} {sea_max} }}\n\n")
         for impid in impassable:
-            outf.write("impassable_mountains = LIST { "+str(impid)+" }\n")
+            outf.write(f"impassable_mountains = LIST {{ {impid} }}\n")
+        # outf.write(f"impassable_seas = LIST {{ {sea_max + 1} }}\n")
         outf.write("\n")
 
 
@@ -785,7 +786,7 @@ def create_dot_mod(file_dir, mod_name, mod_disp_name):
     shared = "version = \"0.0.1\"\n"
     shared += "tags = {\n\t\"Total Conversion\"\n}\n"
     shared += "name = \"{}\"\n".format(mod_disp_name)
-    shared += "supported_version = \"1.12.4\"\n"
+    shared += "supported_version = \"1.12.5\"\n"
     outer = "path = \"mod/{}\"\n".format(mod_name)
     
     replace_paths = [
@@ -824,13 +825,15 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
     # Make map
     ck3map = CK3Map(file_dir, max_x=ow_max_x, max_y=ow_max_y, n_x=ow_nx, n_y=ow_ny)
     title_from_pid = {pid: title for title, pid in pid_from_title.items()}
-    ck3map.create_provinces(rgb_from_pid, pid_from_cube, ".png", name_from_pid=title_from_pid)
+    ck3map.create_provinces(rgb_from_pid, pid_from_cube, ".png", default=rgb_from_pid[max(rgb_from_pid.keys())], name_from_pid=title_from_pid)
     ck3map.create_heightmap(base_from_vertex=base_from_vertex, mask_from_vertex=mask_from_vertex, file_ext=".png")
     ck3map.create_rivers(base_from_vertex, river_flow_from_edge, river_sources, river_merges, river_max_flow, base_loc=config["BASE_CK3_DIR"], file_ext=".png")
     ck3map.create_flowmap(file_dir=file_dir, terr_from_cube=terr_from_cube)
     ck3map.create_positions(name_from_pid, pid_from_cube, file_dir=file_dir)
     ck3map.create_terrain_masks(file_dir=file_dir, base_dir=config["BASE_CK3_DIR"], terr_from_cube=terr_from_cube)
-    ck3map.surround_mask(file_dir=file_dir)  # TODO: Figure out where's far enough away to mask
+    surround_cubes = {k: (255, 255, 0) for k in pid_from_cube}
+    surround_cubes.update({k: (255,0,0) for k in pid_from_cube if any([nbr not in pid_from_cube for nbr in k.neighbors()])})
+    ck3map.surround_mask(file_dir=file_dir, surround_cubes=surround_cubes)  # TODO: Figure out where's far enough away to mask
     ck3map.create_bookmarks(file_dir=file_dir, terr_from_cube=terr_from_cube, bookmark_groups=[])
     ck3map.update_defines(base_dir=config["BASE_CK3_DIR"])
     copy_base_files(file_dir, base_dir=config["BASE_CK3_DIR"], file_paths=[["gfx", "map", "map_object_data", x] for x in ["effect_layers.txt", "game_object_layers.txt", "map_table_ce1.txt", "map_table_western.txt",]])

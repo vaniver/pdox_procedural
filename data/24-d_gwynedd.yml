@@ -40,13 +40,13 @@
   l: Perfeddwlad
   title: c_denbighshire
 - children:
-  - b_hereford|Hereford
-  - b_wigmore|Wigmore
-  - b_clifford|Clifford
   - b_pembroke|Penfro
-  color: 110 45 35
-  l: Herefordshire
-  title: c_hereford
+  - b_st_davids|Tyddewi
+  - b_fishguard|Abergwaun
+  - b_cardiff|Caerdydd
+  color: 210 140 90
+  l: Dyfed
+  title: c_pembrokeshire
 l: Gwynedd
 title: d_gwynedd
 color: 135 25 3

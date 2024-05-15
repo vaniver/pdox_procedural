@@ -1,0 +1,14 @@
+﻿children:
+- children:
+  - b_wysbu|Visby
+  - "b_garna|Garn\xE4"
+  - b_burss|Burss
+  - "b_faroo|Far\xF6\xF6"
+  color: 0 90 160
+  l: Gotland
+  title: c_gutland
+color: 0 90 160
+l: Visby
+title: d_gotland
+cul: norse
+rel: asatru

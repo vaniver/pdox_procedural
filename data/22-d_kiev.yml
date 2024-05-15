@@ -1,0 +1,47 @@
+﻿children:
+- children:
+  - b_kiev|Kyiv
+  - b_vyshgorod|Vyshgorod
+  - b_bilhorod|Bilhorod
+  - b_yuriev|Yuriev
+  - b_kaniv|Kaniv
+  - b_zdvyzhen|Zdvyzhen
+  - b_korsun|Korsun
+  color: 53 105 66
+  l: Kyiv
+  title: c_kiev
+- children:
+  - b_zvyahel|Zvyahel
+  - b_kolodiazhen|Kolodiazhen
+  - b_chortolisy|Chortolisy
+  - b_horodnytsia|Horodnytsia
+  - b_zhytomyr|Zhytomyr
+  color: 70 183 89
+  l: Zvyahel
+  title: c_zvyahel
+- children:
+  - b_chornobyl|Chornobyl
+  - b_ivankiv|Ivankiv
+  - b_radynka|Radynka
+  - b_mezhybozhe|Mezhybozhe
+  - b_rastovets|Rastovets
+  color: 52 156 80
+  l: Chornobyl
+  title: c_chornobyl
+- children:
+  - b_ushytsia|Ushytsia
+  - b_vinnytsia|Vinnytsia
+  - b_yampil|Yampil
+  - b_malaia_skvirka|Malaia Skvirka
+  - b_haisyn|Haisyn
+  color: 163 201 106
+  l: Ushytsia
+  title: c_ushytsia
+color: 52 120 69
+l: Kyiv
+title: d_kiev
+cul: russian
+rel: slavic_pagan
+rough: forest
+TAG: KIE
+holy: kiev

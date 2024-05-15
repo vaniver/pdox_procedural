@@ -1,0 +1,25 @@
+﻿children:
+- children:
+  - children:
+    - b_nicosia|Nicosia
+    - b_limisol|Limisol
+    - b_paphos|Paphos
+    color: 200 200 20
+    l: Nicosia
+    title: c_nicosia
+  - children:
+    - b_famagusta|Famagusta
+    - b_cerynia|Cerynia
+    - b_soli_CYP|Soli
+    color: 180 180 25
+    l: Famagusta
+    title: c_famagusta
+  color: 215 215 20
+  l: Cyprus
+  title: d_cyprus
+color: 215 215 20
+cul: greek
+l: Cyprus
+rel: orthodox
+title: k_cyprus
+tag: CYP

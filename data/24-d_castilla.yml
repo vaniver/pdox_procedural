@@ -1,0 +1,55 @@
+﻿children:
+- children:
+  - b_burgos|Burgos
+  - b_atapuerca|Atapuerca
+  - b_lerma|Lerma
+  - b_palencia|Palencia
+  color: 242 186 22
+  l: Burgos
+  title: c_burgos
+- children:
+  - b_valladolid|Valladolid
+  - b_simancas|Simancas
+  - b_arandadeduero|Aranda de Duero
+  - b_olmedo|Olmedo
+  color: 210 160 10
+  l: Valladolid
+  title: c_valladolid
+- children:
+  - b_soria|Soria
+  - b_osma|Osma
+  - b_sanesteban|San Esteban
+  - b_sanleonardodeyague|San Leonardo
+  color: 255 215 5
+  l: Soria
+  title: c_soria
+- children:
+  - b_segovia|Segovia
+  - b_cuellar|Cuellar
+  - b_uceda|Uceda
+  - b_alba|Alba
+  color: 255 245 10
+  l: Cuellar
+  title: c_cuellar
+- children:
+  - b_santiallana|Santillana
+  - b_santander|Santander
+  - b_reinosa|Reinosa
+  - b_medinadepomar|Medina de Pomar
+  color: 230 190 10
+  l: Asturias de Santillana
+  title: c_asturias_de_santillana
+- children:
+  - b_amaya|Amaya
+  - b_mirandadeebro|Miranda de Ebro
+  - b_sedano|Sedano
+  - b_coracera|Coracera
+  color: 245 205 60
+  l: Amaya
+  title: c_amaya
+cul: castilian
+rel: catholic
+color: 242 196 12
+l: Castille
+title: d_castilla
+rough: forest

@@ -24,7 +24,7 @@ def simple_voronoi(centers, weights_from_cube):
 def voronoi(centers, weight_from_cube):
     """Uses the domain of weight_from_cube to determine which cubes are eligible to be filled.
     - centers is a list of cubes; if they aren't unique they will be made unique
-    - weight_from_cube is a dictionary of cube tuples to numbers
+    - weight_from_cube is a dictionary of cube tuples to numbers. Does not have to be connected!
     returns a dictionary of cube tuples to the index of the centers list that they correspond to, centers, and the distmap."""
     centers = [Cube(x) for x in centers]  #If they're tuples, make them cubes.
     # If any of the centers are duplicates, delete them. This will unfortunately muck up the ordering.
@@ -55,13 +55,14 @@ def voronoi(centers, weight_from_cube):
     #TODO: This currently is 'kind of fast' but could be faster. Two possible improvements:
     # Instead of starting with center 1 and fully calculating the distances, start with all centers simultaneously.
     # The previous, but instead of having to argmin the to_explore queue each time, have the queue split out by distance so that it's obvious where the next place to go is.
-    result = dict()
+    group_from_cube = dict()
     mindistmap = dict()
     for cub in weight_from_cube.keys():
-        dists = distmap.get(Cube(cub),{0:0})
-        result[cub] = min(dists, key=dists.get)
-        mindistmap[cub] = min(dists.values())
-    return centers, result, mindistmap
+        dists = distmap.get(Cube(cub),None)
+        if dists is not None and len(dists) > 0:
+            group_from_cube[cub] = min(dists, key=dists.get)
+            mindistmap[cub] = min(dists.values())
+    return centers, group_from_cube, mindistmap
 
 
 def growing_voronoi(centers, region_sizes, weight_from_cube):

@@ -1,0 +1,23 @@
+﻿children:
+- children:
+  - b_tenerife|Achinech
+  - b_grancanaria|Tamaran
+  color: 22 107 181
+  l: Achinech
+  title: c_canarias
+- children:
+  - b_fuerteventura|Maxorata
+  - b_lanzarote|Titeroigatra
+  color: 52 107 151
+  l: Maxorata
+  title: c_fuerteventura
+- children:
+  - b_madeira|Madeira
+  color: 42 87 151
+  l: Madeira
+  title: c_madeira
+color: 42 127 201
+cul: guanche
+l: Canarias
+rel: achamanism
+title: d_canarias
