@@ -41,15 +41,25 @@ CONTINENT_LISTS:
   - 24-d_lower_silesia
   - 24-d_moravia
   - 24-d_tyrol
-ISLAND_LISTS:
-  
+ISLAND_LIST:
+# - 22-d_latium
+# - 6-k_cyprus
+- 6-k_krete
+# - 9-d_iceland
+# - 4-d_gotland
+# - 3-d_northern_isles
+# - 5-d_canarias
+seed: 20240512
 n_x: 171
 n_y: 57
 box_width: 8
 box_height: 16
 max_x: 8192
 max_y: 4096
+ck3n_x: 338
+ck3n_y: 129
 RELIGION_DIR: "data"
+PLAYER_HOLY_SITES: False
 GUARANTEED_INNOS:
 - tribal
 - innovation_chronicle_writing
@@ -112,3 +122,7 @@ KINGDOM_TERRAIN_TEMPLATE:
   rough: 16
   fixed:
     0: farmlands
+ISLAND_TERRAIN_TEMPLATE:
+  hills: 10
+  mountains: 10
+  plains: 10

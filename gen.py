@@ -1,4 +1,5 @@
 import os
+import pickle
 import random
 import time
 import yaml
@@ -38,7 +39,7 @@ def assemble_culrels(region_trees):
 
 def create_chunks(weight_from_cube, num_centers):
     """Create num_centers different voronoi chunks using weight_from_cube."""
-    centers = random.sample(sorted(weight_from_cube.keys()),num_centers)
+    centers = random.sample(sorted(weight_from_cube.keys()), num_centers)
     centers, result, distmap = voronoi(centers, weight_from_cube=weight_from_cube)
     cids = sorted(set(result.values()))  # This should just be the range from 0 to num_centers
     chunks = []
@@ -348,6 +349,8 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
             region_tree.children[0].children.append(rt) # The empires come with an interstitial kingdom to add all of these duchies to.
         for title in kingdoms:
             rt, last_pid, last_rid, last_srid, local = RegionTree.from_yml(os.path.join("data", title)+".yml", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+            if not config.get("PLAYER_HOLY_SITES", True):
+                rt.holy_site = None
             l_from_title.update(local)
             region_tree.children.append(rt)
         region_trees.append(region_tree)
@@ -377,6 +380,7 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
 
 def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], min_province_distance=2, style="random"):
     """Given the set of cubes sea_cubes, the overall config and optional centers (for regions or provinces), determine the sea regions and sea provinces."""
+    # TODO: Add in option to force all centers to be on the coast.
     # Determine if any of the proposed centers are close to each other, and drop the spare(s) if so. 
     sea_province_centers = []
     rid_from_pid = {}
@@ -384,9 +388,9 @@ def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], 
         if not any([ok.sub(k).mag() <= min_province_distance for ok in province_centers[ind:]]):
             sea_province_centers.append(k)
     if "SEA_PROVINCES" not in config:
-        config["SEA_PROVINCES"] = len(sea_cubes) // config.get("SEA_PROVINCE_SIZE", 40)
+        config["SEA_PROVINCES"] = len(sea_cubes) // config.get("SEA_PROVINCE_SIZE", 10)
     if style == "random":
-        v_centers = random.sample(list(sea_cubes),max(0, config["SEA_PROVINCES"] - len(sea_province_centers))) + sea_province_centers
+        v_centers = random.sample(list(sea_cubes), max(0, config["SEA_PROVINCES"] - len(sea_province_centers))) + sea_province_centers
     elif style == "even":
         y_num = 20 #sqrt(config["SEA_PROVINCES"] * config["n_y"] / config["n_x"]).__round__()
         x_num = y_num * config["n_x"] // config["n_y"]
@@ -401,18 +405,19 @@ def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], 
     v_centers, pid_from_cube, _ = voronoi(v_centers, {k:1 for k in sea_cubes})  # TODO: This really ought to be better.
     # Group the provinces together into regions.
     pids = sorted(set(pid_from_cube.values()))
-    pid_centers = sorted(set([pid_from_cube[rc] for rc in region_centers if rc in pid_from_cube]))
+    pid_centers = sorted(set([pid_from_cube[rc] for rc in region_centers]))
     extra_regions = config.get("SEA_REGIONS", 20) - len(pid_centers)
-    if extra_regions > 0:
-        pid_centers.extend(random.sample([x for x in pids if x not in pid_centers], k=extra_regions))
+    poss_centers = [x for x in pids if x not in pid_centers]
+    if len(poss_centers) > extra_regions >  0:
+        pid_centers.extend(random.sample(poss_centers, k=extra_regions))
     # Now that we have a bunch of centers, we need to allocate all of the regions.
     rid_from_pid = area_voronoi(pid_from_cube, pid_centers)
     # TODO: Assign strategic regions instead of just doing the region clumping?
     return pid_from_cube, rid_from_pid, rid_from_pid
 
 
-def assign_terrain_subregion(region, template, rough="forest"):
-    """Assign terrain to the region according to the template."""
+def assign_terrain_subregion(cube_from_pid, template, rough="forest"):
+    """Assign terrain to the cube_from_pid according to the template, in sorted pid order."""
     terr_from_cube = {}
     template_list = []
     fixed = {}
@@ -424,7 +429,7 @@ def assign_terrain_subregion(region, template, rough="forest"):
     random.shuffle(template_list)
     for ind, val in sorted(fixed.items()):
         template_list.insert(ind, val)
-    for ind, cube in enumerate(region.values()):
+    for ind, cube in enumerate([cube_from_pid[pid] for pid in sorted(cube_from_pid)]):
         terr_from_cube[cube] = BaseTerrain[rough] if template_list[ind] == "rough" else BaseTerrain[template_list[ind]]
     return terr_from_cube
 
@@ -446,31 +451,30 @@ def assign_terrain_continent(cube_from_pid, rough_from_pid, templates):
     return terr_from_cube
 
 
-def arrange_inner_sea(continents, inner_sea_center, angles=[2,4,0]):
+def arrange_inner_sea(continents, inner_sea_center, angles=[2,0,4]):
     """Given three continents, arrange them to have straits around a central inner sea.
-    Also computes wastelands."""
+    Returns the cube lists for the continents, centers for sea regions, and the part of the inner sea within the bounding hex from its entrances."""
     assert len(continents) == 3
     moved_continents = []
-    sea_region_centers = [inner_sea_center]
-    # longest_dim = 0
-    # offs = [Cube(-2,4,-2), Cube(0,0,0), Cube(-5,4,1)]  # These are hardcoded for the 1945 seed.
     for ind, continent in enumerate(continents):
         ac = Area(ind, continent)
         ac.rectify()
         ac.calc_boundary()
         ac.calc_bounding_hex()
-        # longest_dim = max(longest_dim, ac.max_x-ac.min_x, ac.max_y-ac.min_y, ac.max_z-ac.min_z)
         off2, rot = ac.best_corner(angles[ind])
         ac.rotate(rot + 3)
-        ac.translate(off2.add(inner_sea_center))
+        ac.translate(off2)
         moved_continents.append(ac)
+    if config.get("seed", None) == 20240512:  # Help the optimization along
+        moved_continents = [cont.add(off) for cont, off in zip(moved_continents, [Cube(0,0,0), Cube(-13,1,12), Cube(-4,-12,16)])]
     directions = [Cube(x, y, -x-y) for x in range(-2, 3) for y in range(-2, 3)]
     temp = 0.1
     score = score_inner_sea(moved_continents)
     best_score = score
     steps = 0
     best_cont = moved_continents
-    while score > -99 and steps < 10000:
+    total_moves = [Cube(0,0,0), Cube(0,0,0), Cube(0,0,0)]
+    while score > -99 and steps < 100000:
         steps += 1
         offs = [Cube(0,0,0)] + [random.choice(directions) for _ in range(1,len(moved_continents))]  # Keep the first continent pegged in place to prevent the world from sliding away from the center.
         candidate = [cont.add(off) for cont, off in zip(moved_continents, offs)]
@@ -478,14 +482,37 @@ def arrange_inner_sea(continents, inner_sea_center, angles=[2,4,0]):
         if new_score < best_score:
             best_score = score = new_score
             best_cont = moved_continents = candidate
+            total_moves = [x.add(y) for x,y in zip(total_moves, offs)]
         elif new_score < score or random.random() < temp:
             score = new_score
             moved_continents = candidate
+            total_moves = [x.add(y) for x,y in zip(total_moves, offs)]
         temp *= 0.9999
     if score == -99:
         print("Optimization found a perfect score after", steps, "steps.")
-    # TODO: Add the strait mouths to sea_region_centers.
-    return [bc.members for bc in best_cont], sea_region_centers
+        print(total_moves)
+    # Calculate the location of the straits
+    strait_pairs = []
+    for ind in range(3):
+        strait_pairs.extend(best_cont[ind-1].find_straits(best_cont[ind]))
+    sea_region_centers = []
+    for sp in strait_pairs:
+        for nbr in sp[0].neighbors():
+            if sp[1].sub(nbr).mag() == 1:
+                sea_region_centers.append(nbr)
+                break
+    # Calculate the location of the med center and all med cubes
+    med = [k for k in Area(0, members=sea_region_centers).bounding_hex_interior() if not any([k in cont for cont in best_cont])]
+    _, group_from_cube, _ = voronoi(sea_region_centers, {k: 1 for k in med})
+    trio = [k for k,v in group_from_cube.items() if len(set([group_from_cube[nbr] for nbr in k.neighbors() if nbr in group_from_cube])) == 3]
+    print(trio)
+    calc_center = random.choice(trio)
+    sea_region_centers.insert(0, calc_center)
+    center_offset = inner_sea_center.sub(calc_center)
+    sea_region_centers = [src.add(center_offset) for src in sea_region_centers]
+    med = [k.add(center_offset) for k in med]
+    adj_cont = [[k.add(center_offset) for k in bc.members] for bc in best_cont]
+    return adj_cont, sea_region_centers, med
 
 
 def score_inner_sea(conts):
@@ -512,8 +539,13 @@ def arrange_mediterranean(continents):
     raise NotImplementedError
 
 
-def assign_color(rgb_from_pid):
-    rgb = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
+def assign_color(rgb_from_pid, land=None):
+    if land is None:
+        rgb = (random.randint(2,255),random.randint(2,255),random.randint(2,255))
+    elif land:
+        rgb = (random.randint(64,255),random.randint(64,255),random.randint(2,64))
+    else:
+        rgb = (random.randint(2,128),random.randint(2,128),random.randint(128,255))
     if rgb not in rgb_from_pid.values():
         return rgb
     else:
@@ -527,6 +559,14 @@ def create_colors(pid_from_cube):
     return rgb_from_pid
 
 
+def create_landed_colors(pid_from_cube, land_cubes):
+    """Assign a unique color to each of the pids in pid_from_cube."""
+    rgb_from_pid = {}
+    for cube, pid in pid_from_cube.items():
+        rgb_from_pid[pid] = assign_color(rgb_from_pid, cube in land_cubes)
+    return rgb_from_pid
+
+
 def create_supply_rails(terr_from_cube, pids_from_rid, rid_from_cube, cube_from_pid, pid_from_cube, name_from_rid):
     """Create supply nodes and railways"""
     supply_nodes = []
@@ -535,7 +575,7 @@ def create_supply_rails(terr_from_cube, pids_from_rid, rid_from_cube, cube_from_
     rail_dist_from_cube = {k:RAIL_DIST[v] for k,v in terr_from_cube.items()}
     rail_connex = {}
     for rid, pids in pids_from_rid.items():
-        if name_from_rid[rid][0] == "s":
+        if rid not in name_from_rid or name_from_rid[rid][0] == "s":
             continue
         cap_pid = min(pids)
         supply_nodes.append(cap_pid)
@@ -605,7 +645,7 @@ def create_supply_rails(terr_from_cube, pids_from_rid, rid_from_cube, cube_from_
     return supply_nodes, railways
 
 
-def create_old_world_islands_and_seas(config, land_cubes, sea_centers, cont_from_pid, last_pid,):
+def create_old_world_islands_and_seas(config, land_cubes, sea_centers, last_pid, last_rid, last_srid, med=set()):
     """Given land_cubes, calculate shallow waters, place islands, and calculate sea regions."""
     # sea_centers[0] should be the middle of the inner sea region.
     sea_shore = set()
@@ -613,27 +653,199 @@ def create_old_world_islands_and_seas(config, land_cubes, sea_centers, cont_from
         for nbr in lc.neighbors():
             if nbr not in land_cubes:
                 sea_shore.add(nbr)
-    med = set()
-    inner_med = set()
-    to_explore = [sea_centers[0]]
-    while len(to_explore) > 0 and len(to_explore) < 200:
-        tc = to_explore.pop()
-        med.add(tc)
-        inner = True
+    if len(med) == 0:
+        med = set()
+        inner_med = set()
+        to_explore = [sea_centers[0]]
+        while len(to_explore) > 0 and len(to_explore) < 400:
+            tc = to_explore.pop()
+            med.add(tc)
+            inner = True
+            for nbr in tc.neighbors():
+                if nbr not in sea_shore:
+                    to_explore.append(nbr)
+                else:
+                    inner = False
+            if inner:
+                inner_med.add(tc)
+        if len(to_explore) >= 400:
+            print(sea_centers[0])
+            raise CreationError  # This should only happen if the med is somehow open, and is to prevent going forever.
+    else:
+        inner_med = {tc for tc in med if tc not in sea_shore and not any([nbr not in med for nbr in tc.strait_neighbors()])}
+    print(f"There are {len(inner_med)} cubes in the deep inner sea.")
+    shallow = sea_shore.union(med)
+    for tc in sea_shore:
+        outer = True
+        depth2 = []
         for nbr in tc.neighbors():
-            if nbr not in sea_shore:
-                to_explore.append(nbr)
+            if nbr in inner_med:
+                outer = False
+            elif nbr not in land_cubes and nbr not in sea_shore:
+                depth2.append(nbr)
+        if outer:
+            shallow = shallow.union(depth2)
+    outer_coast = set()
+    for tc in shallow:
+        for nbr in tc.neighbors():
+            if nbr not in shallow and nbr not in land_cubes:
+                outer_coast.add(nbr)
+    # We should now have all depth 2+ inner sea in med, all depth 3+ in inner_med, and all of the depth 2 ocean coast in outer_coast.
+    # We're going to make all of the islands in the config, starting with the first one at the center of the (old) world if doable.
+    # Then fill in as much of the rest of the med as possible, and then go to outside the med. (Once the first island is too big to go outside once, all the remaining ones will be sampled from the outside.)
+    filling_med = True
+    region_tree, last_pid, last_rid, last_srid, l_from_title = RegionTree.from_yml(os.path.join("data", "e-e_islands.yml"), last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+    region_tree.children[0].capital_pid = last_pid  # The interstitial kingdom has its capital in another file, and so this needs to be assigned here.
+    candidates = inner_med
+    # These are split into 'earlier' and 'later' because there's both generic islands and island kingdoms, and when pids are assigned they do generics first.
+    earlier_island_cubes = []
+    later_island_cubes = []
+    earlier_terr_templates = []
+    later_terr_templates = []
+    for island_num, island_name in enumerate(config.get("ISLAND_LIST", [])):
+        curr_candidates = [x for x in candidates]
+        # Figure out if it's going to fit in the med and where to start it.
+        size = int(island_name.split("-")[0].strip())
+        # Because island inner structure isn't determined from a template, but instead the region_tree, let's parse that.
+        rt, last_pid, last_rid, last_srid, local = RegionTree.from_yml(os.path.join("data", island_name)+".yml", last_pid=last_pid, last_rid=last_rid, last_srid=last_srid)
+        l_from_title.update(local)
+        depth, size_list = rt.size_list()
+        counties = []
+        failed = False
+        while filling_med and size < len(curr_candidates) and 0 < len(curr_candidates):  # We're still trying to stick them in the middle. Note curr_candidates is used to leave the loop.
+            if island_num == 0 and len(counties) == 0 and sea_centers[0] in inner_med:  # For the first one we want to force the capital location.
+                center = sea_centers[0]
             else:
-                inner = False
-        if inner:
-            inner_med.add(tc)
-    if len(to_explore) > 200:
-        raise CreationError  # This should only happen if the med is somehow open, and is to prevent going forever.
-    # We should now have all depth 2+ inner sea in med and all depth 3+ in inner_med.
-    # Make inner med islands:
-    if len(inner_med) > 0:
-        pass
-
+                center = random.choice(curr_candidates)
+            weight_from_cube = {k: random.randint(1,8) for k in curr_candidates}  # It's a little wasteful to do this here instead of earlier but w/e
+            _, _, big_distmap = voronoi([center], weight_from_cube)
+            big_region = sorted(big_distmap.keys(), key=big_distmap.get)
+            if depth == 2: # We need to split duchies also
+                raise NotImplementedError  # Assuming the center is a single-duchy region.
+            elif depth == 0:
+                counties = [big_region[:size_list]]
+                curr_candidates = []
+            else:  # depth == 1
+                counties = [big_region[:size_list[0]]]  # First county is centered on the sampled point
+                for k in counties[-1]:
+                    if k in curr_candidates:
+                        curr_candidates.remove(k)
+                subweight_from_cube = {k:weight_from_cube[k] for k in big_region[size_list[0]:]}
+                big_region = big_region[size_list[0]:]
+                failed = False
+                for c_size in size_list[1:]:
+                    if len(big_region) < c_size:
+                        failed = True
+                        curr_candidates = [x for x in curr_candidates if x not in big_region]
+                    if failed:
+                        break
+                    _, _, small_distmap = voronoi([big_region[0]], subweight_from_cube)
+                    if len(small_distmap) == len(subweight_from_cube):  # The remaining space is connected, and so we don't need to think about it.
+                        small_region = sorted(small_distmap.keys(), key=small_distmap.get)
+                    else:
+                        small_region = sorted(small_distmap.keys(), key=small_distmap.get)
+                        while len(small_region) < c_size:  # The closest chunk is too small to support the next county. We'll assume that goes for all counties, which is maybe a bit harsh.
+                            subweight_from_cube = {k:v for k,v in subweight_from_cube.items() if k not in small_distmap}
+                            big_region = [k for k in big_region if k not in small_distmap]
+                            if len(big_region) == 0:  # We made it to the end of this candidate section.
+                                failed = True
+                                curr_candidates = [x for x in curr_candidates if x not in big_distmap]
+                                if len(curr_candidates) == 0:  # Not only have we finished this disconnected region, we've finished searching the whole inner sea.
+                                    filling_med = False
+                                break
+                            _, _, small_distmap = voronoi([big_region[0]], subweight_from_cube)
+                            small_region = sorted(small_distmap.keys(), key=small_distmap.get)
+                    if not failed:  # Need to check to make sure we didn't fail
+                        counties.append(small_region[:c_size])
+                        subweight_from_cube = {k:v for k,v in subweight_from_cube.items() if k not in counties[-1]}
+                        big_region = [k for k in big_region if k not in counties[-1]]  # The sort ordering is different so have to search
+                if not failed: # We successfully assigned the counties
+                    curr_candidates = []
+        if failed or sum([len(c) for c in counties]) != size:  # Not sure why this sometimes go thru this path.
+            filling_med = False
+        if not filling_med:  # Written this way instead of as an else so that we can fail over to it, for either the first island or later ones.
+            center = random.choice(list(outer_coast))
+            if depth == 2: # We need to split duchies also
+                raise NotImplementedError  # Assuming the center is a single-duchy region.
+            elif depth == 0:
+                size_list = [size_list]
+            opts = [center]
+            alloc = set()
+            counties = []
+            failed = False
+            succeeded = False
+            while not succeeded:
+                for csize in size_list:
+                    if failed or len(opts) == 0:
+                        break
+                    nk = random.choice(list(opts))
+                    counties.append([nk])
+                    alloc.add(nk)
+                    opts = {k for k in nk.neighbors() if k not in shallow and k not in alloc}
+                    while len(counties[-1]) < csize:
+                        if len(opts) == 0:  # We sampled the county seed in a space that wasn't big enough.
+                            counties[-1] = []  # We're not removing them from alloc so that no one else tries to fill the spot.
+                            opts = set()
+                            for county in counties:
+                                for k in county:
+                                    for nbr in k.neighbors():
+                                        if nbr not in shallow and k not in alloc:
+                                            opts.add(nbr)
+                            if len(opts) == 0:  # We sampled the island seed in a space that wasn't big enough.
+                                failed = True
+                                break
+                        nk = random.choice(list(opts))
+                        opts.remove(nk)
+                        alloc.add(nk)
+                        counties[-1].append(nk)
+                        opts.update({k for k in nk.neighbors() if k not in shallow and k not in alloc})
+                    if sum([len(c) for c in counties]) == size:
+                        succeeded = True
+                if failed:
+                    counties = []
+                    center = random.choice(list(outer_coast))
+                    opts = [center]
+                    failed = False
+        # We should now have counties, a list of lists of pids.
+        cubes = []
+        for county in counties:
+            for barony in county:
+                cubes.append(barony)
+        # remove these cubes (and their neighbors) from the appropriate sets
+        # This could maybe be earlier?
+        if filling_med:
+            for cube in cubes:
+                for nbr in {cube}.union(cube.neighbors()).union(cube.strait_neighbors()):
+                    if nbr in candidates:
+                        candidates.remove(nbr)
+        else:
+            for cube in cubes:
+                for nbr in {cube}.union(cube.neighbors()).union(cube.strait_neighbors()):
+                    if nbr in outer_coast:
+                        shallow.add(nbr)
+                        outer_coast.remove(nbr)
+                        for nn in nbr.neighbors():
+                            if nn not in shallow:
+                                outer_coast.add(nn)
+        # TODO: Do terrain the right way.
+        if size == 22:
+            terr_template = config["CENTER_TERRAIN_TEMPLATE"]
+        elif size == 61:
+            terr_template = config["KINGDOM_TERRAIN_TEMPLATE"]
+        else:
+            terr_template = config["ISLAND_TERRAIN_TEMPLATE"]
+        if island_name.split("-")[1][0] == 'k': # Add a new kingdom.
+            later_island_cubes.extend(cubes)
+            later_terr_templates.append(terr_template)
+            region_tree.children.append(rt)
+        else:
+            earlier_island_cubes.extend(cubes)
+            earlier_terr_templates.append(terr_template)
+            region_tree.children[0].children.append(rt)
+    island_cubes = earlier_island_cubes + later_island_cubes
+    ow_sea = shallow.union(outer_coast).difference(island_cubes)
+    
+    return island_cubes, region_tree, l_from_title, earlier_terr_templates + later_terr_templates, ow_sea, last_pid, last_rid, last_srid
 
 def create_data(config):
     """The main function that calls all the other functions in order. 
@@ -648,8 +860,18 @@ def create_data(config):
     m_x = config["n_x"]//2
     m_y = -(config["n_y"]+config["n_x"]//2)//2
     print("Continents created; time elapsed:", time.time()-start_time)
-    continents, sea_region_centers = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
+    continents, sea_region_centers, med = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
+    sea_centers = sea_region_centers + sea_centers
     print("Inner sea arranged; time elapsed:", time.time()-start_time)
+    # First we find the 'inland seas'; the med, the old world coasts. We extend with islands, create the shallow sea zones, and then crop the old world for CK3.
+    land_cubes = set()
+    for cont in continents:
+        land_cubes = land_cubes.union(cont)
+    island_cubes, island_region_tree, island_l_from_title, island_terr_templates, ow_sea, last_pid, last_rid, last_srid = create_old_world_islands_and_seas(config, land_cubes, sea_centers, last_pid, last_rid, last_srid, med=med)
+    region_trees.append(island_region_tree)
+    continents.append(island_cubes)
+    name_from_title.update(island_l_from_title)
+    terr_templates.append(island_terr_templates)
     pid_from_cube = {}
     rid_from_pid = {}
     srid_from_pid = {}
@@ -659,7 +881,6 @@ def create_data(config):
     tag_from_pid = {}
     rough_from_pid = {}
     land_cubes = set()
-    sea_cubes = set()
     terr_from_cube = {}
     name_from_pid = {}
     name_from_cid = {}
@@ -705,13 +926,13 @@ def create_data(config):
     print("pid/cube relationships established; time elapsed:", time.time()-start_time)
     # Split out wastelands / mountains / lakes
     # TODO: This should not use valid_cubes, but instead the interior of the bounding hex. This would also make the continent obvious.
-    non_land = sorted(find_contiguous(set(valid_cubes(config["n_x"], config["n_y"])) - land_cubes), key=len)
-    sea_cubes = set(non_land.pop(-1))  # The largest non-land chunk is the ocean.
+    non_land = sorted(find_contiguous(Area(0, land_cubes).bounding_hex_interior(extra=1, ignore=land_cubes)), key=len)
+    non_land.pop(-1)  # The largest non-land chunk is the water, which we can ignore
     print("non_land contiguous groups found; time elapsed:", time.time()-start_time)
     # Determine straits
     straits = []
     for k in land_cubes:
-        for other_land, sea_1, sea_2 in k.valid_straits(land_cubes, sea_cubes):
+        for other_land, sea_1, sea_2 in k.valid_straits(land_cubes):
             straits.append((k, other_land, sea_1, sea_2))
             sea_centers.append(sea_1)
     print("beginning impassable; time elapsed:", time.time()-start_time)
@@ -741,8 +962,8 @@ def create_data(config):
         last_pid += 1
         last_rid += 1
     print("assigned impassable; time elapsed:", time.time()-start_time)
-    # First we find the 'inland seas'; the med, the old world coasts. We extend with islands, create the shallow sea zones, and then crop the old world for CK3.
-    # create_old_world_islands_and_seas()
+    with open("pid_from_cube.txt",'wb') as outf:
+        pickle.dump((pid_from_cube, med), outf)
     # Now we 'crop' the old world.
     if "CROP_OW" in config:
         min_x = min(k.x for k in land_cubes) - 2
@@ -762,15 +983,15 @@ def create_data(config):
         ow_max_x = 3 * (ow_nx-1) * config.get("box_width",8)
         assert ow_max_x % 32 == 0
     else:
-        ow_nx = config["n_x"]
+        ow_nx = config["ck3n_x"]
         ow_max_x = config["max_x"]
-    ow_ny = config["n_y"]
+    ow_ny = config["ck3n_y"]
     ow_max_y = config["max_y"]
     assert ow_max_y % 32 == 0
-    sea_cubes = set(valid_cubes(ow_nx, config["n_y"])) - land_cubes
+
     print("Cropped down to",ow_nx,"hexes and a width of",ow_max_x,"for the old world.")
-    #TODO: Assigning sea provinces should 1) look for major inland seas, like the med, 2) use more regular things that are faster for the deep ocean
-    sid_from_cube, rid_from_sid, srid_from_sid = assign_sea_zones(sea_cubes, config, province_centers=sea_centers, region_centers=sea_region_centers, style=config.get("SEA_PROVINCE_STYLE", "even"))
+    print("Cropped down to",ow_ny,"hexes and a height of",ow_max_y,"for the old world.")
+    sid_from_cube, rid_from_sid, srid_from_sid = assign_sea_zones(ow_sea, config, province_centers=sea_centers, region_centers=sea_region_centers, style=config.get("SEA_PROVINCE_STYLE", "random"))
     print("assigned sea zones; time elapsed:", time.time()-start_time)
     pid_from_cube.update({k:v + last_pid for k,v in sid_from_cube.items()})
     sea_region = {"ocean": []}  # TODO: multiple oceans
@@ -795,7 +1016,7 @@ def create_data(config):
     last_rid += max(rid_from_sid.values())
     name_from_srid.update({k + last_srid: "ocean_"+str(k) for k in sorted(set(srid_from_sid.values()))})
     last_srid += max(srid_from_sid.values())
-    terr_from_cube.update({k:BaseTerrain.ocean for k in sea_cubes})
+    terr_from_cube.update({k:BaseTerrain.ocean for k in ow_sea})
     # Finish up straits
     straits = [(k, ok, pid_from_cube[x1]) for (k, ok, x1, x2) in straits]
     print("straits found; time elapsed:", time.time()-start_time)
@@ -803,7 +1024,7 @@ def create_data(config):
     coast_from_cube = {}
     coast_from_rid = {}  # This is not quite what I want.
     for cube in land_cubes:
-        sids = [pid_from_cube[nbr] for nbr in cube.neighbors() if nbr in sea_cubes]
+        sids = [pid_from_cube[nbr] for nbr in cube.neighbors() if nbr in ow_sea and nbr in pid_from_cube]
         if len(sids) > 0:
             coast_from_cube[cube] = min(sids)
     locs_from_rid = {}
@@ -811,7 +1032,7 @@ def create_data(config):
         if rid in impassable_rids:
             continue
         pid_from_loc = {}
-        title = name_from_rid[rid]
+        title = name_from_rid.get(rid, "s_"+str(rid))
         if title[0] == "s":
             continue
         pids = [pid for pid, rr in rid_from_pid.items() if rr==rid]
@@ -826,9 +1047,9 @@ def create_data(config):
             pid_from_loc["farm"] = pid_from_loc["mine"] = pid_from_loc["wood"] = pid_from_loc["city"]
         # TODO: farm, mine, wood dependent on trade goods
         else:
-            pid_from_loc["farm"] = pid_from_cube[random.sample(cubes, k=1)[0]]
-            pid_from_loc["mine"] = pid_from_cube[random.sample(cubes, k=1)[0]]
-            pid_from_loc["wood"] = pid_from_cube[random.sample(cubes, k=1)[0]]
+            pid_from_loc["farm"] = pid_from_cube[random.choice(cubes)]
+            pid_from_loc["mine"] = pid_from_cube[random.choice(cubes)]
+            pid_from_loc["wood"] = pid_from_cube[random.choice(cubes)]
         locs_from_rid[rid] = pid_from_loc
     # Determine distance from land/water boundary
     print("begin coast_dist; time elapsed:", time.time()-start_time)
@@ -840,7 +1061,7 @@ def create_data(config):
     for cube in land_cubes:
         v_buffer = set()
         for nbr in cube.neighbors():
-            if nbr in sea_cubes:  # TODO: Should this also determine which sea zone land zones are adjacent to?
+            if nbr in ow_sea:  # TODO: Should this also determine which sea zone land zones are adjacent to?
                 sea_coast.add(nbr)
                 land_coast.add(cube)
                 for v in Edge.from_pair(cube, nbr).vertices():
@@ -850,7 +1071,7 @@ def create_data(config):
                     v_buffer.add(v)
         interior_vertices.update(v_buffer.difference(coastal_vertices))
     land_height_from_cube = dist_from_coast(land_cubes, land_coast)
-    water_depth_from_cube = dist_from_coast(sea_cubes, sea_coast)
+    water_depth_from_cube = dist_from_coast(ow_sea, sea_coast)
     print("end coast_dist; time elapsed:", time.time()-start_time)
     # Make heightmap
     mask_from_vertex = {}
@@ -861,7 +1082,7 @@ def create_data(config):
         mask_from_vertex[Vertex(cube, 0)] = TERRAIN_HEIGHT[terr] * 2
         for dir in [-1, 1]:
             if Vertex(cube, dir) in coastal_vertices:
-                base_from_vertex[Vertex(cube, dir)] = WATER_HEIGHT - 3
+                base_from_vertex[Vertex(cube, dir)] = WATER_HEIGHT - 1
                 mask_from_vertex[Vertex(cube, dir)] = 0
             else:
                 b = height
@@ -890,9 +1111,9 @@ def create_data(config):
                 else:
                     coast = True
             if coast:
-                base_from_vertex[vl] = WATER_HEIGHT - 3
+                base_from_vertex[vl] = WATER_HEIGHT - 1
             else:
-                base_from_vertex[vl] = min(max(0, l), WATER_HEIGHT - 3)
+                base_from_vertex[vl] = min(max(0, l), WATER_HEIGHT - 1)
     print(f"Heightmap base heights range from {min(base_from_vertex.values())} to {max(base_from_vertex.values())}, and mask heights range from {min(mask_from_vertex.values())} to {max(mask_from_vertex.values())}. Time elapsed: {time.time()-start_time}")
     # Create rivers
     inland_from_v = {v: 0 for v in coastal_vertices}
@@ -934,7 +1155,7 @@ def create_data(config):
             for v in this.edge_vertices():
                 if inland_from_v[v] <= maxv and v not in this_river:
                     poss.append(v)
-            nextv = random.sample(poss, k=1)[0]
+            nextv = random.choice(poss)
             this_river.add(this)
             v_graph[this] = nextv
             river_flow_from_edge[Edge.from_vertices(this, nextv)] = 1
@@ -969,7 +1190,7 @@ def create_data(config):
     lakes = []  # This should be pids, not cubes
     for k in land_cubes:
         type_from_pid[pid_from_cube[k]] = "land"
-    for k in sea_cubes:
+    for k in ow_sea:
         type_from_pid[pid_from_cube[k]] = "sea"
     for k in lakes:
         type_from_pid[k] = "lake"
@@ -997,7 +1218,8 @@ if __name__ == "__main__":
 
     continents, pid_from_cube, land_cube_from_pid, rid_from_pid, srid_from_pid, cont_from_pid, terr_from_cube, terr_from_pid, type_from_pid, base_from_vertex, mask_from_vertex, land_height_from_cube, water_depth_from_cube, region_trees, pid_from_title, name_from_pid, name_from_rid, name_from_srid, impassable, river_flow_from_edge, river_sources, river_merges, river_max_flow, straits, locs_from_rid, coast_from_rid, coast_from_cube, tag_from_pid, sea_region, ow_nx, ow_ny, ow_max_x, ow_max_y = create_data(config)
     cultures, religions = assemble_culrels(region_trees=region_trees)  # Not obvious this should be here instead of just derived later?
-    rgb_from_pid = create_colors(pid_from_cube)
+    rgb_from_pid = create_landed_colors(pid_from_cube, {k for k,v in terr_from_cube.items() if v != BaseTerrain.ocean})
+    rgb_from_pid[max(rgb_from_pid.keys())+1] = (1,1,1)
     pids_from_rid = {}
     for pid, rid in sorted(rid_from_pid.items()):
         if rid in pids_from_rid:

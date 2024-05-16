@@ -141,6 +141,24 @@ class RegionTree:
             if f is not None:
                 return f
         return None
+    
+    def size_list(self):
+        """Returns a tuple of depth and the size_list implied by this region_tree, in the same format as the config.
+        If children is ever a singleton--for example, a kingdom with only one duchy--it is passed thru b/c there's no splitting step necessary later.
+        For example, this might be (1, [7,5,5,5]) for a center duchy, or (2, [[6,4,4,4,4],[4,4,3,3],[4,4,3,3],[4,4,3]]) for a player kingdom, or (0, 5) for a county with 5 baronies."""
+        if len(self.children) == 0:
+            return (0,[])
+        if len(self.children) == 1 and isinstance(self.children[0], RegionTree):
+            return self.children[0].size_list()
+        if isinstance(self.children[0], str):
+            return (0, len(self.children))
+        result = []
+        depth = 0
+        for child in self.children:
+            cd, cr = child.size_list()
+            depth = max(depth, cd+1)
+            result.append(cr)
+        return (depth, result)
 
     @classmethod
     def from_csv(cls, filename, last_pid=1, last_rid=1, last_srid=1):

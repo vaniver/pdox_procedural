@@ -72,6 +72,17 @@ class Area:
             self.min_y = min(self.min_y, member.y)
             self.min_z = min(self.min_z, member.z)
 
+    def bounding_hex_interior(self, extra=0, ignore={}):
+        self.calc_bounding_hex()
+        result = []
+        for x in range(self.min_x-extra, self.max_x+1+extra):
+            for y in range(self.min_y-extra, self.max_y+1+extra):
+                if self.min_z-extra <= -x-y <= self.max_z+extra:
+                    k = Cube(x,y,-x-y)
+                    if k not in ignore:
+                        result.append(k)
+        return result
+
     @property
     def cols(self):
         if self._cols is None:
@@ -149,14 +160,21 @@ class Area:
         """Computes the number of possible straits between self and other.
         Note that single provinces which have multiple possible straits will count each separately.
         other can be a Cube, list of Cubes, or Area (make sure boundary is computed!)."""
+        return len(self.find_straits(other))
+        
+    def find_straits(self, other):
+        """Returns all possible straits between self and other. The return is a list of tuples of cube pairs that are straits.
+        Note that single provinces which have multiple possible straits will count each separately.
+        other can be a Cube, list of Cubes, or Area (make sure boundary is computed!)."""
         if isinstance(other, Cube):
-            return sum([m in other.strait_neighbors() for m in self.boundary])
+            return [(m, other) for m in self.boundary if m in other.strait_neighbors()]
         elif isinstance(other, list):
-            return sum([sum([m in o.strait_neighbors() for m in self.boundary]) for o in other])
+            return [(m, o) for m in self.boundary for o in other if m in o.strait_neighbors()]
         elif isinstance(other, Area):
-            return sum([sum([m in o.strait_neighbors() for m in self.boundary]) for o in other.boundary])
+            return [(m, o) for m in self.boundary for o in other.boundary if m in o.strait_neighbors()]
         else:
             return NotImplementedError
+
 
     def calc_average(self):
         """returns the (integer-valued) average cube of the area."""
