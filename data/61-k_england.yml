@@ -22,7 +22,7 @@
     - b_bedford|Bedford
     - b_ampthill|Ampthill
     - b_luton|Luton
-    - b_ipswich|Ipswich
+    - b_ramsey|Ramsey
     color: 205 20 15
     l: Bedford
     title: c_bedford
@@ -30,7 +30,7 @@
     - b_berkhamsted|Berkhamsted
     - b_saint_albans|Saint Albans
     - b_hertford|Hertford
-    - b_sudbury|Sudbury
+    - b_castletown|Holmwick
     color: 250 35 35
     l: Hertfordshire
     title: c_hertfordshire

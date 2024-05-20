@@ -35,18 +35,18 @@
   - b_denbigh|Dinbych
   - b_wrexham|Tegeingl
   - b_ruthin|Rhuthun
-  - b_monmouth|Trefynwy
+  - b_fishguard|Abergwaun
   color: 125 0 10
   l: Perfeddwlad
   title: c_denbighshire
 - children:
-  - b_pembroke|Penfro
-  - b_st_davids|Tyddewi
-  - b_fishguard|Abergwaun
   - b_cardiff|Caerdydd
-  color: 210 140 90
-  l: Dyfed
-  title: c_pembrokeshire
+  - b_talgarth|Talgarth
+  - b_caerphilly|Caerffili
+  - b_st_davids|Tyddewi
+  color: 220 190 145
+  l: Morgannwg
+  title: c_glamorgan
 l: Gwynedd
 title: d_gwynedd
 color: 135 25 3

@@ -147,22 +147,26 @@ def create_triangular_continent(weight_from_cube, chunks, candidate, config):
         nums = {2: [], 3: [], 4: []}
         for ind in range(5):
             others = list(candidate[0][:ind]) + list(candidate[0][ind+1:])
-            nums[sum([o in candidate[ind].self_edges for o in others])].append(candidate[0][ind])
+            nums[sum([o in chunks[candidate[0][ind]].self_edges for o in others])].append(candidate[0][ind])
         # b connects to at least 4; abc, bcd, bde are the triangles. 
         if len(nums[4]) < 1:
             print("No b for 5-continent")
             raise CreationError
         b = nums[4][0]
         c, d, alpha, beta = nums[4][1:] + nums[3] + nums[2]
-        a = alpha if alpha in chunks[c].self_edges else beta
-        e = alpha if alpha in chunks[d].self_edges else beta
+        if alpha in chunks[c].self_edges:
+            a = alpha
+            e = beta
+        else:
+            a = beta
+            e = alpha
         if d not in chunks[c].self_edges:
             print("c-d didn't line up correctly for 5-continent")
             raise CreationError
         centers = [
             ((a,b,c), list(chunks[a].self_edges[b].intersection(chunks[a].self_edges[c]))[0]),
             ((b,c,d), list(chunks[d].self_edges[b].intersection(chunks[d].self_edges[c]))[0]),
-            ((c,d,e), list(chunks[d].self_edges[c].intersection(chunks[d].self_edges[e]))[0]),
+            ((b,d,e), list(chunks[d].self_edges[b].intersection(chunks[d].self_edges[e]))[0]),
         ]
         fixed_borders = [(b,c), (b,d)]
         dyna_borders = [(a,b),(a,c),(b,c),(b,e),(d,e)]
@@ -405,13 +409,15 @@ def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], 
     v_centers, pid_from_cube, _ = voronoi(v_centers, {k:1 for k in sea_cubes})  # TODO: This really ought to be better.
     # Group the provinces together into regions.
     pids = sorted(set(pid_from_cube.values()))
-    pid_centers = sorted(set([pid_from_cube[rc] for rc in region_centers]))
-    extra_regions = config.get("SEA_REGIONS", 20) - len(pid_centers)
+    pid_centers = sorted(set([pid_from_cube[rc] for rc in region_centers if rc in pid_from_cube]))
+    extra_regions = max(0, config.get("SEA_REGIONS", 20) - len(pid_centers))
     poss_centers = [x for x in pids if x not in pid_centers]
     if len(poss_centers) > extra_regions >  0:
         pid_centers.extend(random.sample(poss_centers, k=extra_regions))
     # Now that we have a bunch of centers, we need to allocate all of the regions.
-    rid_from_pid = area_voronoi(pid_from_cube, pid_centers)
+    # TODO: Fix this
+    # rid_from_pid = area_voronoi(pid_from_cube, pid_centers)
+    rid_from_pid = {pid: 1 for pid in sorted(pid_from_cube.values())}
     # TODO: Assign strategic regions instead of just doing the region clumping?
     return pid_from_cube, rid_from_pid, rid_from_pid
 
@@ -446,7 +452,7 @@ def assign_terrain_continent(cube_from_pid, rough_from_pid, templates):
                 template_size += len(v)
         max_pid = min_pid + template_size
         region = {k:v for k,v in cube_from_pid.items() if min_pid <= k < max_pid}
-        terr_from_cube.update(assign_terrain_subregion(region, template, rough=rough_from_pid[min_pid]))
+        terr_from_cube.update(assign_terrain_subregion(region, template, rough=rough_from_pid.get(min_pid,'forest')))  #TODO: Chase down when min_pid isn't in rough_from_pid
         min_pid = max_pid
     return terr_from_cube
 
@@ -503,10 +509,14 @@ def arrange_inner_sea(continents, inner_sea_center, angles=[2,0,4]):
                 break
     # Calculate the location of the med center and all med cubes
     med = [k for k in Area(0, members=sea_region_centers).bounding_hex_interior() if not any([k in cont for cont in best_cont])]
-    _, group_from_cube, _ = voronoi(sea_region_centers, {k: 1 for k in med})
+    _, group_from_cube, sea_distmap = voronoi(sea_region_centers, {k: 1 for k in med})
     trio = [k for k,v in group_from_cube.items() if len(set([group_from_cube[nbr] for nbr in k.neighbors() if nbr in group_from_cube])) == 3]
-    print(trio)
-    calc_center = random.choice(trio)
+    if len(trio) == 0:
+        print(len(med))
+        calc_center = max(sea_distmap, key=sea_distmap.get)
+    else:
+        print(trio)
+        calc_center = random.choice(trio)
     sea_region_centers.insert(0, calc_center)
     center_offset = inner_sea_center.sub(calc_center)
     sea_region_centers = [src.add(center_offset) for src in sea_region_centers]
@@ -857,10 +867,10 @@ def create_data(config):
     last_rid = 1  # region_id. They 1-index instead of 0-indexing.
     last_srid = 1  # strategic_region_id. They 1-index instead of 0-indexing.
     continents, terr_templates, region_trees, sea_centers, last_pid, last_rid, last_srid, name_from_title = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", None), last_pid=last_pid, last_rid=last_rid, last_srid=last_srid, start_time=start_time)
-    m_x = config["n_x"]//2
-    m_y = -(config["n_y"]+config["n_x"]//2)//2
+    m_x = config["ck3n_x"]//2
+    m_y = -(config["ck3n_y"]+config["ck3n_x"]//2)//2
     print("Continents created; time elapsed:", time.time()-start_time)
-    continents, sea_region_centers, med = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y))
+    continents, sea_region_centers, med = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y), config.get("angles", [2,0,4]))
     sea_centers = sea_region_centers + sea_centers
     print("Inner sea arranged; time elapsed:", time.time()-start_time)
     # First we find the 'inland seas'; the med, the old world coasts. We extend with islands, create the shallow sea zones, and then crop the old world for CK3.
@@ -868,10 +878,11 @@ def create_data(config):
     for cont in continents:
         land_cubes = land_cubes.union(cont)
     island_cubes, island_region_tree, island_l_from_title, island_terr_templates, ow_sea, last_pid, last_rid, last_srid = create_old_world_islands_and_seas(config, land_cubes, sea_centers, last_pid, last_rid, last_srid, med=med)
-    region_trees.append(island_region_tree)
-    continents.append(island_cubes)
-    name_from_title.update(island_l_from_title)
-    terr_templates.append(island_terr_templates)
+    if len(config["ISLAND_LIST"]) > 0:
+        region_trees.append(island_region_tree)
+        continents.append(island_cubes)
+        name_from_title.update(island_l_from_title)
+        terr_templates.append(island_terr_templates)
     pid_from_cube = {}
     rid_from_pid = {}
     srid_from_pid = {}

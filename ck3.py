@@ -353,8 +353,9 @@ def create_geographical_regions(file_dir, regions, sea_region, all_material_type
         for animal in no_animal_types:
             outf.write("hunt_animal_"+animal+"_region = {\n\tregions = {\n\t\t\n\t}\n}\n")
     with open(os.path.join(file_dir, "map_data", "island_region.txt"),'w', encoding='utf_8_sig') as outf:
-        # TODO: figuring out islands will depend on chunking the land elsewhere. For this basic one, we're fine.
-        outf.write("\n")
+        # TODO: figuring out islands will depend on chunking the land elsewhere.
+        for region_title in [x for x in regions[-1].all_ck3_titles() if x[0] == 'd']:
+            outf.write("island_region_" + region_title + " = {\n\tduchies= {\n\t\t" + region_title + "\n\t}\n}\n\n")
 
 
 def create_landed_titles(file_dir, pid_from_title, regions, special_titles=None):
@@ -617,14 +618,15 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
 
     coffset = 1000
     doffset = 100
+    PLAYER_SIZE = 61  # TODO: Source this better
     dynasty_buffer = ""
     player_buffer = ""
     bookmark_buffer = ""
     bookmark_pictures = []
     # bookmark_group_buffer = ""  # This one is only used if you have multiple start dates; the continents are bookmarks and kingdoms are characters inside a single bookmark.
-    for cont_ind, cont_list in enumerate(config["CONTINENT_LISTS"]):
+    for cont_ind, cont_list in enumerate(config["CONTINENT_LISTS"] + [config["ISLAND_LIST"]]):
         bookmark_pictures.append(["bm_1000_" + region_trees[cont_ind].title])
-        bookmark_buffer += "bm_1000_" + region_trees[cont_ind].title + " {\n\tstart_date=1000.1.1\n\tis_playable = yes\n\tgroup = bm_group_1000\n\n\tweight = {\n\t\tvalue = 0\n\t}\n\n"
+        bookmark_buffer += "bm_1000_" + region_trees[cont_ind].title + " = {\n\tstart_date=1000.1.1\n\tis_playable = yes\n\tgroup = bm_group_1000\n\n\tweight = {\n\t\tvalue = 0\n\t}\n\n"
         for region in cont_list:
             rtype, region = region.split("-")
             with open(os.path.join("data", rtype + "_template.yml"),'r') as inf:
@@ -658,7 +660,7 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
                         if len(dns) >= 4:
                             prefix = dns[1]
                             dyn_name = dns[3]
-                    if did == 0:
+                    if did == 0 and region[0] == "k":
                         player_buffer += f"{did+doffset} = {{\n"
                         if len(prefix) > 0:
                             player_buffer += f"\tprefix={prefix}\n"
@@ -708,6 +710,7 @@ def create_history(file_dir, base_dir, config, region_trees, cultures, pid_from_
             doffset += len(template["dynasties"]) + 1
             if len(template["chars"]) > 0:
                 coffset += max([char["cid"] for char in template["chars"].values()]) + 1
+        bookmark_buffer += "\n}\n"
     with open(os.path.join(file_dir, "common", "bookmarks", "bookmarks", "00_bookmarks.txt"),'w', encoding='utf_8_sig') as outf:
         outf.write(bookmark_buffer)
     with open(os.path.join(file_dir, "common", "bookmarks", "groups", "00_bookmark_groups.txt"),'w', encoding='utf_8_sig') as outf:
@@ -729,7 +732,7 @@ def create_default_map(file_dir, impassable, sea_min, sea_max):
         outf.write(f"sea_zones = RANGE {{ {sea_min} {sea_max} }}\n\n")
         for impid in impassable:
             outf.write(f"impassable_mountains = LIST {{ {impid} }}\n")
-        # outf.write(f"impassable_seas = LIST {{ {sea_max + 1} }}\n")
+        outf.write(f"impassable_seas = LIST {{ {sea_max + 1} }}\n")
         outf.write("\n")
 
 

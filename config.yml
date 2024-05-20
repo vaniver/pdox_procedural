@@ -9,47 +9,49 @@ BASE_EU4_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Europa Univers
 BASE_V3_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Victoria 3\\game"
 BASE_HOI4_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Hearts of Iron IV"
 CONTINENT_LISTS:
-- - e-e_islam
-  - 61-k_egypt
-  - 61-k_yemen
-  - 61-k_syria
-  - 22-d_mecca
-  - 24-d_bahrain
-  - 24-d_tahert
-  - 24-d_basra
-- - e-e_latin
-  - 61-k_scotland
-  - 61-k_france
-  - 61-k_lancaster
-  - 61-k_aquitaine
-  - 22-d_latium
-  - 22-d_barcelona
-  - 24-d_asturias
-  - 24-d_brittany
-  - 24-d_flanders
-  - 24-d_munster
-  - 24-d_valencia
-- - e-e_baltic
+- - e-e_germany
   - 61-k_bavaria
   - 61-k_pomerania
   - 61-k_saxony
-  # - 61-k_hungary
+  - 61-k_hungary
   - 22-d_bohemia
-  # - 22-d_osterreich
-  # - 24-d_east_franconia
-  # - 24-d_west_franconia
+  - 22-d_osterreich
   - 24-d_lower_silesia
   - 24-d_moravia
   - 24-d_tyrol
+  - 24-d_meissen
+  - 24-d_hesse
+- - e-e_britannia
+  - 61-k_lancaster
+  - 61-k_scotland
+  - 61-k_england
+  - 22-d_gloucester
+  - 24-d_munster
+  - 24-d_ulster
+  - 24-d_gwynedd
+- - e-e_france
+  - 61-k_aquitaine
+  - 61-k_burgundy
+  - 61-k_france
+  - 61-k_andalusia
+  - 22-d_holland
+  - 22-d_barcelona
+  - 24-d_leon
+  - 24-d_brittany
+  - 24-d_flanders
+  - 24-d_valencia
+  - 24-d_castilla
+angles: [1, 3, 5]
 ISLAND_LIST:
-# - 22-d_latium
-# - 6-k_cyprus
+- 22-d_latium
+- 6-k_cyprus
 - 6-k_krete
-# - 9-d_iceland
-# - 4-d_gotland
-# - 3-d_northern_isles
+# - 61-k_lithuania
+- 9-d_iceland
+- 4-d_gotland
+- 3-d_northern_isles
 # - 5-d_canarias
-seed: 20240512
+seed: 2024052613
 n_x: 171
 n_y: 57
 box_width: 8
@@ -58,6 +60,8 @@ max_x: 8192
 max_y: 4096
 ck3n_x: 338
 ck3n_y: 129
+SEA_PROVINCES: 3
+SEA_REGIONS: 1
 RELIGION_DIR: "data"
 PLAYER_HOLY_SITES: False
 GUARANTEED_INNOS:
