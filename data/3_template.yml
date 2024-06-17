@@ -1,0 +1,30 @@
+baronies:
+  0: castle_holding
+  1: castle_holding
+  2: castle_holding
+chars:
+  minor1:
+    bd: 9YY.M.D
+    cid: 0
+    dynasty: 0
+  minor2:
+    bd: 9YY.M.D
+    cid: 1
+    dynasty: 1
+  minor3:
+    bd: 9YY.M.D
+    cid: 2
+    dynasty: 2
+dynasties:
+  c_0: 0
+  c_1: 1
+  c_2: 2
+titles:
+  c_0:
+    99Y.1.1: 0
+  c_1:
+    99Y.1.1: 1
+  c_2:
+    99Y.1.1: 2
+  d_0:
+    development_level: 3
