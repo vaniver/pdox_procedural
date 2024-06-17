@@ -269,12 +269,18 @@ def create_adjacencies(file_dir, straits, pid_from_cube, name_from_pid, closest_
         outf.write("-1;-1;;-1;-1;-1;-1;-1;\n")
 
 
-def create_climate(file_dir):
+def create_climate(file_dir, pid_from_cube, terr_from_pid):
     """Creates the climate file."""
+    coldness = {pid: random.randint(1,8)+COLD_FROM_TERR[terr_from_pid[pid]]-cube.y for cube, pid in pid_from_cube.items() if terr_from_pid[pid] != BaseTerrain.ocean}
+    cold_pids = sorted(coldness.keys(), key=coldness.get)
+    lcp = len(cold_pids)
+    mild_pids = " ".join([str(x) for x in cold_pids[lcp//2:lcp*2//3]])
+    normal_pids = " ".join([str(x) for x in cold_pids[lcp*2//3:lcp*11//12]])
+    severe_pids = " ".join([str(x) for x in cold_pids[lcp*11//12:]])
     # TODO: Actually determine climate from location / terrain / etc.
     os.makedirs(os.path.join(file_dir, "map_data"), exist_ok=True)
     with open(os.path.join(file_dir, "map_data", "climate.txt"),'w', encoding="utf_8_sig") as outf:
-        outf.write("mild_winter = {\n}\nnormal_winter = {\n}\nsevere_winter = {\n}\n")
+        outf.write(f"mild_winter = {{\n\t{mild_pids}\n}}\nnormal_winter = {{\n\t{normal_pids}\n}}\nsevere_winter = {{\n\t{severe_pids}\n}}\n")
 
 def create_coa(file_dir, base_dir, custom_dir, title_list):
     """Populate common/coat_of_arms/coat_of_arms/01 and 90 with all the titles in title_list, drawing first from custom_dir and then from base_dir."""
@@ -287,6 +293,7 @@ def create_coa(file_dir, base_dir, custom_dir, title_list):
                 brackets = 0
                 title_name = ""
                 buffer = ""
+                # TODO: This is accidentally writing out too many }s.
                 for line in inf.readlines():
                     line = line.split("#")[0]  # Drop all comments
                     brackets += line.count("{")
@@ -848,7 +855,7 @@ def create_mod(file_dir, config, pid_from_cube, terr_from_cube, terr_from_pid, r
         sea_min = max(terr_from_pid.values()) + 1  # This is because we never added the sea pids to it.
     sea_max = max(pid_from_cube.values())
     create_default_map(file_dir, impassable, sea_min, sea_max)
-    create_climate(file_dir=file_dir)
+    create_climate(file_dir=file_dir, pid_from_cube=pid_from_cube, terr_from_pid=terr_from_pid)
     strip_base_files(file_dir, config["BASE_CK3_DIR"], subpaths=[
         "common\\decisions",
         "common\\travel",

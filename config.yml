@@ -27,8 +27,8 @@ CONTINENT_LISTS:
   - 61-k_england
   - 22-d_gloucester
   - 24-d_munster
-  - 24-d_ulster
   - 24-d_gwynedd
+  - 24-d_ulster
 - - e-e_france
   - 61-k_aquitaine
   - 61-k_burgundy
@@ -60,10 +60,11 @@ max_x: 8192
 max_y: 4096
 ck3n_x: 338
 ck3n_y: 129
-SEA_PROVINCES: 3
-SEA_REGIONS: 1
+SEA_PROVINCES: 28
+SEA_REGIONS: 6
+SEA_PROVINCE_STYLE: coastal
 RELIGION_DIR: "data"
-PLAYER_HOLY_SITES: False
+PLAYER_HOLY_SITES: True
 GUARANTEED_INNOS:
 - tribal
 - innovation_chronicle_writing

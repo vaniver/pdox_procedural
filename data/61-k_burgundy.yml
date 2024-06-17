@@ -28,8 +28,8 @@ children:
     title: c_nice
   - children:
     - b_arles|Arles
-    - b_orange|Orange
     - b_avignon|Avignon
+    - b_orange|Orange
     - b_vaison|Vaison
     color: 180 30 70
     l: Venaissin
@@ -143,7 +143,7 @@ children:
 color: 134 0 37
 cul: frankish
 l: Burgundy
-rel: catholic
+rel: adamites
 title: k_burgundy
 tag: BUR
 rough: forest

@@ -22,6 +22,14 @@ TERRAIN_HEIGHT = {
     BaseTerrain.mountains: 0.5,
 }
 
+COLD_FROM_TERR = {
+    BaseTerrain.ocean: 0,
+    BaseTerrain.farmlands: 1, BaseTerrain.plains: 1, BaseTerrain.marsh: 1, BaseTerrain.desert: -1,
+    BaseTerrain.jungle: 2, BaseTerrain.forest: 2,
+    BaseTerrain.hills: 5,
+    BaseTerrain.mountains: 10,
+}
+
 RAIL_DIST = {
     BaseTerrain.urban: 1, BaseTerrain.farmlands: 1, BaseTerrain.plains: 1,
     BaseTerrain.marsh: 2, BaseTerrain.desert: 2,

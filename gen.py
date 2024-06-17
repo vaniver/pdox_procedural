@@ -11,7 +11,7 @@ from area import Area
 from chunk_split import check_contiguous, find_contiguous, split_chunk, SplitChunkMaxIterationExceeded
 from cube import *
 from terrain import BaseTerrain, RAIL_DIST, TERRAIN_HEIGHT, WATER_HEIGHT
-from voronoi import area_voronoi, iterative_voronoi, growing_voronoi, voronoi
+from voronoi import area_voronoi, iterative_voronoi, growing_voronoi, max_voronoi, voronoi
 
 from region_tree import RegionTree
 import ck3
@@ -382,19 +382,20 @@ def create_triangle_continents(config, weight_from_cube = None, n_x=129, n_y=65,
     return continents, terr_templates, region_trees, all_sea_centers, last_pid, last_rid, last_srid, l_from_title,
 
 
-def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], min_province_distance=2, style="random"):
+def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], poss_centers=[], min_province_distance=2, style="random"):
     """Given the set of cubes sea_cubes, the overall config and optional centers (for regions or provinces), determine the sea regions and sea provinces."""
     # TODO: Add in option to force all centers to be on the coast.
     # Determine if any of the proposed centers are close to each other, and drop the spare(s) if so. 
     sea_province_centers = []
     rid_from_pid = {}
     for ind, k in enumerate(province_centers):
-        if not any([ok.sub(k).mag() <= min_province_distance for ok in province_centers[ind:]]):
+        if not any([ok.sub(k).mag() <= min_province_distance for ok in province_centers[:ind]]):
             sea_province_centers.append(k)
     if "SEA_PROVINCES" not in config:
         config["SEA_PROVINCES"] = len(sea_cubes) // config.get("SEA_PROVINCE_SIZE", 10)
     if style == "random":
         v_centers = random.sample(list(sea_cubes), max(0, config["SEA_PROVINCES"] - len(sea_province_centers))) + sea_province_centers
+        v_centers, pid_from_cube, _ = voronoi(v_centers, {k:1 for k in sea_cubes})
     elif style == "even":
         y_num = 20 #sqrt(config["SEA_PROVINCES"] * config["n_y"] / config["n_x"]).__round__()
         x_num = y_num * config["n_x"] // config["n_y"]
@@ -406,14 +407,18 @@ def assign_sea_zones(sea_cubes, config, province_centers=[], region_centers=[], 
                 center =  Cube(xx,-yy,-xx+yy)
                 if center in sea_cubes:
                     v_centers.append(center)
-    v_centers, pid_from_cube, _ = voronoi(v_centers, {k:1 for k in sea_cubes})  # TODO: This really ought to be better.
+        v_centers, pid_from_cube, _ = voronoi(v_centers, {k:1 for k in sea_cubes})
+    elif style == "coastal":
+        v_centers, pid_from_cube, _ = max_voronoi(sea_province_centers, {k:1 for k in sea_cubes}, poss_centers, config.get("SEA_PROVINCE_SIZE", 10) / 2)
+    else:
+        raise NotImplementedError
     # Group the provinces together into regions.
     pids = sorted(set(pid_from_cube.values()))
     pid_centers = sorted(set([pid_from_cube[rc] for rc in region_centers if rc in pid_from_cube]))
     extra_regions = max(0, config.get("SEA_REGIONS", 20) - len(pid_centers))
-    poss_centers = [x for x in pids if x not in pid_centers]
-    if len(poss_centers) > extra_regions >  0:
-        pid_centers.extend(random.sample(poss_centers, k=extra_regions))
+    poss_region_centers = [x for x in pids if x not in pid_centers]
+    if len(poss_region_centers) > extra_regions >  0:
+        pid_centers.extend(random.sample(poss_region_centers, k=extra_regions))
     # Now that we have a bunch of centers, we need to allocate all of the regions.
     # TODO: Fix this
     # rid_from_pid = area_voronoi(pid_from_cube, pid_centers)
@@ -854,8 +859,9 @@ def create_old_world_islands_and_seas(config, land_cubes, sea_centers, last_pid,
             region_tree.children[0].children.append(rt)
     island_cubes = earlier_island_cubes + later_island_cubes
     ow_sea = shallow.union(outer_coast).difference(island_cubes)
-    
-    return island_cubes, region_tree, l_from_title, earlier_terr_templates + later_terr_templates, ow_sea, last_pid, last_rid, last_srid
+    # Wasteful to recompute this but meh
+    sea_shore = [k for k in ow_sea if any([nbr in island_cubes or nbr in land_cubes for nbr in k.neighbors()])]
+    return island_cubes, region_tree, l_from_title, earlier_terr_templates + later_terr_templates, ow_sea, sea_shore, last_pid, last_rid, last_srid
 
 def create_data(config):
     """The main function that calls all the other functions in order. 
@@ -877,7 +883,7 @@ def create_data(config):
     land_cubes = set()
     for cont in continents:
         land_cubes = land_cubes.union(cont)
-    island_cubes, island_region_tree, island_l_from_title, island_terr_templates, ow_sea, last_pid, last_rid, last_srid = create_old_world_islands_and_seas(config, land_cubes, sea_centers, last_pid, last_rid, last_srid, med=med)
+    island_cubes, island_region_tree, island_l_from_title, island_terr_templates, ow_sea, sea_shore, last_pid, last_rid, last_srid = create_old_world_islands_and_seas(config, land_cubes, sea_centers, last_pid, last_rid, last_srid, med=med)
     if len(config["ISLAND_LIST"]) > 0:
         region_trees.append(island_region_tree)
         continents.append(island_cubes)
@@ -1002,7 +1008,7 @@ def create_data(config):
 
     print("Cropped down to",ow_nx,"hexes and a width of",ow_max_x,"for the old world.")
     print("Cropped down to",ow_ny,"hexes and a height of",ow_max_y,"for the old world.")
-    sid_from_cube, rid_from_sid, srid_from_sid = assign_sea_zones(ow_sea, config, province_centers=sea_centers, region_centers=sea_region_centers, style=config.get("SEA_PROVINCE_STYLE", "random"))
+    sid_from_cube, rid_from_sid, srid_from_sid = assign_sea_zones(ow_sea, config, province_centers=sea_centers, region_centers=sea_region_centers, poss_centers=sea_shore, style=config.get("SEA_PROVINCE_STYLE", "random"))
     print("assigned sea zones; time elapsed:", time.time()-start_time)
     pid_from_cube.update({k:v + last_pid for k,v in sid_from_cube.items()})
     sea_region = {"ocean": []}  # TODO: multiple oceans

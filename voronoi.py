@@ -65,6 +65,72 @@ def voronoi(centers, weight_from_cube):
     return centers, group_from_cube, mindistmap
 
 
+def max_voronoi(centers, weight_from_cube, poss_centers, max_dist):
+    """Uses the domain of weight_from_cube to determine which cubes are eligible to be filled.
+    - centers is a list of cubes; if they aren't unique they will be made unique
+    - weight_from_cube is a dictionary of cube tuples to numbers. Does not have to be connected!
+    - poss_centers is a list of cubes that could be added to centers
+    - max_dist is the maximum allowable distance of a center in poss_centers from a center on the list.
+    If weight_from_cube is disconnected and none of the original centers are in a region, even if some elements of poss_centers are in that region they will not be added to centers.
+    returns a dictionary of cube tuples to the index of the centers list that they correspond to, centers, and the distmap."""
+    centers = [Cube(x) for x in centers]  #If they're tuples, make them cubes.
+    centers = [x for x in centers if x in weight_from_cube]  # If they're not in the region, remove them.
+    # If any of the centers are duplicates, delete them. This will unfortunately muck up the ordering.
+    if len(centers) != sum([sum([x == c for x in centers]) for c in centers]):
+        centers = list(set(centers))
+    # Overall strategy: 
+    # - seed all of the centers with distance 0
+    # - add all neighbors of the centers to expand sets with the weight of the center as the 'distance'
+    # - while there are any elements in the expansion sets, pick the lowest distance one and expand it
+    # - if it's the lowest distance to the cell it expands to, add that to the expansion set
+    # = finally, point each cell at its lowest distance source. 
+    distmap = {Cube(k):{} for k in weight_from_cube.keys()}
+    # Each center is in its own voronoi cell
+    for cind, center in enumerate(centers):
+        distmap[center][cind] = 0
+        to_explore = set([center])
+        # explored = set()
+        while len(to_explore) > 0:
+            cub = to_explore.pop()
+            base_dist = distmap[cub][cind] + weight_from_cube[cub]
+            expanding = [c for c in cub.neighbors() if c in weight_from_cube ]  # and c not in explored]
+            for other in expanding:
+                if len(distmap[other]) == 0 or min(distmap[other].values()) > base_dist:
+                    distmap[other][cind] = base_dist
+                    to_explore.add(other)
+                else:
+                    continue
+    group_from_cube = dict()
+    mindistmap = dict()
+    for cub in weight_from_cube.keys():
+        dists = distmap.get(Cube(cub),None)
+        if dists is not None and len(dists) > 0:
+            group_from_cube[cub] = min(dists, key=dists.get)
+            mindistmap[cub] = min(dists.values())
+    while len(mindistmap) > 0 and max(mindistmap.values()) > max_dist:
+        eligible_centers = [c for c in poss_centers if c in mindistmap and mindistmap[c] > max_dist]
+        if len(eligible_centers) == 0:  # idk how this could happen
+            break
+        center = random.choice(eligible_centers)
+        cind += 1
+        distmap[center][cind] = 0
+        mindistmap[center] = 0
+        group_from_cube[center] = cind
+        to_explore = set([center])
+        while len(to_explore) > 0:
+            cub = to_explore.pop()
+            base_dist = distmap[cub][cind] + weight_from_cube[cub]
+            expanding = [c for c in cub.neighbors() if c in weight_from_cube ]  # and c not in explored]
+            for other in expanding:
+                if len(distmap[other]) == 0 or mindistmap[other] > base_dist:
+                    distmap[other][cind] = base_dist
+                    mindistmap[other] = base_dist
+                    group_from_cube[other] = cind
+                    to_explore.add(other)
+                else:
+                    continue
+    return centers, group_from_cube, mindistmap
+
 def growing_voronoi(centers, region_sizes, weight_from_cube):
     """Grow regions from their centers out to the appropriate size from region_sizes.
     Demands that all centers be unique.

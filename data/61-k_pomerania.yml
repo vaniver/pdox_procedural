@@ -132,8 +132,8 @@
     title: c_werle
   - children:
     - b_rostock|Rostock
-    - "b_gustrow|G\xFCstrow"
     - "b_rugen|R\xFCgen"
+    - "b_gustrow|G\xFCstrow"
     color: 145 162 132
     l: Rostock
     title: c_rostock
@@ -143,6 +143,7 @@
 color: 145 130 40
 cul: pommeranian
 l: Pomerania
-rel: slavic_pagan
+rel: lollard
 title: k_pomerania
 rough: forest
+holy: braslau
