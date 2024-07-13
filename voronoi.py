@@ -225,11 +225,11 @@ def iterative_voronoi(num_centers, weight_from_cube, min_size, max_iters=5):
 def area_voronoi(area_from_cube, centers):
     """Given a dictionary area_from_cube which maps from cubes to area ids, and a list of centers (indices of the areas list), return a dictionary from area index to center index."""
     rid_from_aid = {}
-    areas = []
+    areas = {}
     aids = sorted(set(area_from_cube.values()))
     for aid in aids:
-        areas.append(Area(aid, [k for k,v in area_from_cube.items() if v == aid]))
-        areas[-1].calc_edges(area_from_cube)
+        areas[aid] = Area(aid, [k for k,v in area_from_cube.items() if v == aid])
+        areas[aid].calc_edges(area_from_cube)
     distmap = {aid:{} for aid in aids}  # Each area will have a distance to other centers.
     for cind, center in enumerate(centers):
         if center in rid_from_aid: # We're going to silently remove duplicate centers instead of being loud about it. Maybe a mistake?

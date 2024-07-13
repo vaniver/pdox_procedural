@@ -979,8 +979,6 @@ def create_data(config):
         last_pid += 1
         last_rid += 1
     print("assigned impassable; time elapsed:", time.time()-start_time)
-    with open("pid_from_cube.txt",'wb') as outf:
-        pickle.dump((pid_from_cube, med), outf)
     # Now we 'crop' the old world.
     if "CROP_OW" in config:
         min_x = min(k.x for k in land_cubes) - 2
@@ -1011,6 +1009,8 @@ def create_data(config):
     sid_from_cube, rid_from_sid, srid_from_sid = assign_sea_zones(ow_sea, config, province_centers=sea_centers, region_centers=sea_region_centers, poss_centers=sea_shore, style=config.get("SEA_PROVINCE_STYLE", "random"))
     print("assigned sea zones; time elapsed:", time.time()-start_time)
     pid_from_cube.update({k:v + last_pid for k,v in sid_from_cube.items()})
+    with open("pid_from_cube.txt",'wb') as outf:
+        pickle.dump((pid_from_cube, med), outf)
     sea_region = {"ocean": []}  # TODO: multiple oceans
     for k, sid in sid_from_cube.items():
         pid = sid + last_pid
