@@ -1,0 +1,30 @@
+children:
+- children:
+  - Unamakik
+  - Acadia
+  - Kespukwitk
+  - Eskikewakik
+  - Piktuk
+  title: lower_acadia_area
+- children:
+  - Wolystoq
+  - Epekwitk
+  - Micmac
+  - Siknikt
+  title: upper_acadia_area
+- children:
+  - Beothuk
+  - Taqamkuk
+  - Placentia
+  - Madawaska
+  title: newfoundland_area
+- children:
+  - Labrador
+  - Sikumiut
+  - Naskapi
+  title: labrador_area
+title: acadia_region
+cul: mikmaq
+rel: totemist
+rough: forest
+tag: ACA

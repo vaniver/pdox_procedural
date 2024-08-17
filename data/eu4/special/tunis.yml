@@ -1,0 +1,28 @@
+﻿children:
+- children:
+  - Tunis
+  - Bizerte
+  - Souss
+  - Kairwan
+  title: tunisia_area
+- children:
+  - Tataouine
+  - Sfax
+  - Djerba
+  - Tripolitania
+  - Thubaqt
+  - Zuwarah
+  title: tripolitania_area
+- children:
+  - Oran
+  - Dahra
+  - Al-Djazair
+  - Kabylia
+  - Constantine
+  - Bône
+  title: barbary_coast_area
+title: tunis_region
+cul: tunisian
+rel: sunni
+rough: desert
+tag: MOR

@@ -1,0 +1,30 @@
+children:
+- children:
+  - Baroda
+  - Bhavnagar
+  - Ahmadabad
+  - Bharuch
+  - Cambay
+  title: ahmedabad_area
+- children:
+  - Girnar
+  - Rajkot
+  - Navanagar
+  - Porbandar
+  title: saurashtra_area
+- children:
+  - Kutch
+  - Patan
+  - Jhalavad
+  - Mahikantha
+  title: patan_area
+- children:
+  - Surat
+  - Baglana
+  - Daman
+  title: tapti_area
+title: gujarat_region
+cul: gujarati
+rel: hindu
+rough: jungle
+tag: GUJ

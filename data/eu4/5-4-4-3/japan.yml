@@ -1,0 +1,30 @@
+children:
+- children:
+  - Musashi
+  - Hitachi
+  - Echizen
+  - Dewa
+  - Kai
+  title: kanto_area
+- children:
+  - Owari
+  - Kyoto
+  - Suo
+  - Izumo
+  title: chubu_area
+- children:
+  - Satsuma
+  - Okinawa
+  - Hyuga
+  - Higo
+  title: kyushu_area
+- children:
+  - Tosa
+  - Awa
+  - Iyo
+  title: shikoku_area
+title: japan_region
+cul: togoku
+rel: shinto
+rough: forest
+tag: JAP

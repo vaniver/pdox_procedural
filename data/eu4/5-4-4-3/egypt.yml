@@ -1,0 +1,30 @@
+﻿children:
+- children:
+  - Cairo
+  - Alexandria
+  - Al Gharbia
+  - Mansura
+  - Buhaira
+  title: bahari_area
+- children:
+  - Cyrenaica
+  - Darnah
+  - Tarrana
+  - Bardiyah
+  title: cyrenaica_area
+- children:
+  - Sinai
+  - Suez
+  - Ras Gharib
+  - Queseer
+  title: gulf_of_arabia_area
+- children:
+  - Fayyum
+  - Minya
+  - Atfih
+  title: vostani_area
+title: egypt_region
+cul: egyptian
+rel: sunni
+rough: desert
+tag: EGY

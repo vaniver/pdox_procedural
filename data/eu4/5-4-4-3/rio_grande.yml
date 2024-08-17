@@ -1,0 +1,30 @@
+children:
+- children:
+  - Coahuilteco
+  - Karankawa
+  - Atakapa
+  - Ais
+  - Hasinai
+  title: coastal_prarie_area
+- children:
+  - Tonkawa
+  - Lipan
+  - Tanu
+  - Nabaydacu
+  title: texas_area
+- children:
+  - Waco
+  - Querecho
+  - Kitsash
+  - Tawakoni
+  title: texas_plains_area
+- children:
+  - Jumao
+  - Nitahende
+  - Tel Kondaha
+  title: pecos_area
+title: rio_grande_region
+cul: caddo
+rel: totemist
+rough: savanna
+tag: TEX

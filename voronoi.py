@@ -112,6 +112,7 @@ def max_voronoi(centers, weight_from_cube, poss_centers, max_dist):
         if len(eligible_centers) == 0:  # idk how this could happen
             break
         center = random.choice(eligible_centers)
+        centers.append(center)
         cind += 1
         distmap[center][cind] = 0
         mindistmap[center] = 0
@@ -131,7 +132,7 @@ def max_voronoi(centers, weight_from_cube, poss_centers, max_dist):
                     continue
     return centers, group_from_cube, mindistmap
 
-def growing_voronoi(centers, region_sizes, weight_from_cube):
+def growing_voronoi(centers, region_sizes, weight_from_cube, group_from_cube=None):
     """Grow regions from their centers out to the appropriate size from region_sizes.
     Demands that all centers be unique.
     They'll steal from neighbors if necessary to reach the correct size."""
@@ -184,7 +185,7 @@ def growing_voronoi(centers, region_sizes, weight_from_cube):
 def iterative_voronoi(num_centers, weight_from_cube, min_size, max_iters=5):
     """Given a set of weights, seed num_centers random centers and then keep going until all of the regions are at least min_size.
     Returns the pair of centers and ind_from_cube mapping."""
-    assert num_centers * min_size < len(weight_from_cube)
+    assert num_centers * min_size < len(weight_from_cube), (num_centers, min_size, len(weight_from_cube))
     centers = random.sample(list(weight_from_cube.keys()),num_centers)
     centers, guess, distmap = voronoi(centers, weight_from_cube)
     sizes = {c:0 for c in range(num_centers)}
@@ -194,7 +195,7 @@ def iterative_voronoi(num_centers, weight_from_cube, min_size, max_iters=5):
         means[ind].add_in_place(cub)
     print(sum([min_size <= sizes[ind] for ind in range(num_centers)]))
     if all([min_size <= sizes[ind] for ind in range(num_centers)]):
-        return centers, guess
+        return centers, guess, distmap
     iter = 1
     while not all([min_size <= sizes[ind] for ind in range(num_centers)]):
         to_remove = []
@@ -203,7 +204,11 @@ def iterative_voronoi(num_centers, weight_from_cube, min_size, max_iters=5):
                 x = means[ind].x // sizes[ind]
                 y = means[ind].y // sizes[ind]
                 z = -x-y
-                centers[ind] = Cube(x,y,z)
+                candidate = Cube(x,y,z)
+                if candidate in weight_from_cube:
+                    centers[ind] = candidate
+                else:
+                    centers[ind] = sorted([cub for cub, c_ind in guess.items() if c_ind == ind], key= lambda k: k.sub(candidate).mag())[0]
             elif sizes[ind] < min_size:
                 to_remove.append(ind)
         argmaxes = sorted(sizes, key=sizes.get, reverse=True)
@@ -218,7 +223,6 @@ def iterative_voronoi(num_centers, weight_from_cube, min_size, max_iters=5):
         for cub, ind in guess.items():
             sizes[ind] += 1
             means[ind].add_in_place(cub)
-        print(sum([min_size <= sizes[ind] for ind in range(num_centers)]))
     return centers, guess, distmap
 
 

@@ -1,0 +1,36 @@
+children:
+- children:
+  - Jenne
+  - Bara
+  - Kala
+  - Haayre
+  title: jenne_area
+- children:
+  - Hadiya
+  - Kaffa
+  - Illubabor
+  - Gambela
+  - Janjero
+  - Kefa
+  title: hadiya_area
+- children:
+  - Ogaden
+  - Haud
+  - Ifat
+  - Warder
+  - Afder
+  - Welayta
+  title: ogaden_area
+- children:
+  - Gobir
+  - Katsina
+  - Daura
+  - Kano
+  - Biram
+  - Rano
+  title: katsina_area
+title: central_africa_region
+cul: nubian
+rel: fetishist
+rough: jungle
+tag: CAR

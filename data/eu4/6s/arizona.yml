@@ -1,0 +1,54 @@
+children:
+- children:
+  - Pima
+  - Mojave
+  - Yavapai
+  - Hualapai
+  - Sobaipuri
+  - Apache
+  title: arizona_area
+- children:
+  - Canyon
+  - Navajo
+  - Hopi
+  - Zuni
+  - Chiricahua
+  - Tsekaadn
+  title: colorado_plateau_area
+- children:
+  - Pueblo
+  - Piro
+  - Acoma
+  - Towa
+  - Keres
+  - Pame
+  title: new_mexico_area
+- children:
+  - Yaqui
+  - Seri
+  - Mayo
+  - Opata
+  - Tohono
+  - Tzapotzingo
+  title: sonora_area
+- children:
+  - Suma
+  - Concho
+  - Toboso
+  - Jocome
+  - Borrado
+  - Huichol
+  title: chihuahua_area
+- children:
+  - Tepehuan
+  - Xecora
+  - Acaxee
+  - Tarahumara
+  - Acaxee
+  - Sinaloa
+  title: durango_area
+title: arizona_region
+cul: pueblo
+rel: totemist
+rough: desert
+tag: ARZ

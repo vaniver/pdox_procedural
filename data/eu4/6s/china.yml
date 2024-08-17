@@ -1,0 +1,36 @@
+children:
+- children:
+  - Beijing
+  - Chengde
+  - Xuanhua
+  - Yongping
+  title: hebei_area
+- children:
+  - Sanguan
+  - Changzhi
+  - Datong
+  - Ningwu
+  - Lu'an
+  - Fengyuan
+  title: shanxi_area
+- children:
+  - Guyuan
+  - Lanzhou
+  - Tianshui
+  - Pingliang
+  - Taozhou
+  - Yumen
+  title: gansu_area
+- children:
+  - Yichuan
+  - Hanyang
+  - Xiangyang
+  - Jingzhou
+  - Huangzhou
+  - Changsha
+  title: huguang_area
+title: china_region
+cul: jin
+rel: confucian
+rough: mountains
+tag: JIN

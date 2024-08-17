@@ -1,0 +1,30 @@
+children:
+- children:
+  - Nootka
+  - Squamish
+  - Kwakiutl
+  - Heiltsuk
+  - Secwepemc
+  title: straits_of_georgia_area
+- children:
+  - Kalapuya
+  - Klamath
+  - Kalapuya
+  - Umatilla
+  title: oregon_area
+- children:
+  - Chinook
+  - Yakima
+  - Spokane
+  - Palus
+  title: columbia_river_area
+- children:
+  - Salish
+  - Quileute
+  - Chehalis
+  title: salish_sea_area
+title: cascadia_region
+cul: salish
+rel: totemist
+rough: forest
+tag: ORE

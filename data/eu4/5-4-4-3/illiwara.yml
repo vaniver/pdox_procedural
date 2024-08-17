@@ -1,0 +1,30 @@
+children:
+- children:
+  - Eora
+  - Bundjalung
+  - Tharawal
+  - Gundungurra
+  - Dharug
+  title: illawara_area
+- children:
+  - Kaurna
+  - Gunditjmara
+  - Nukunu
+  - Ngadjuri
+  title: murray_river_area
+- children:
+  - Woiworung
+  - Wergaia
+  - Waveroo
+  - Wiradjuri
+  title: southern_australia_area
+- children:
+  - Kamilaroi
+  - Bundjalung
+  - Barunggam
+  title: eastern_australia_area
+title: illiwara_region
+cul: kuric
+rel: alcheringa
+rough: desert
+tag: ILL

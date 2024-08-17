@@ -1,0 +1,30 @@
+children:
+- children:
+  - Mogadishu
+  - Merca
+  - Warsheikh
+  - Barawa
+  - Meregh
+  title: mogadishu_area
+- children:
+  - Berbera
+  - Bosaso
+  - Las Khorey
+  - Sanaag
+  title: somaliland_area
+- children:
+  - Afgooye
+  - Beledweyne
+  - Gedo
+  - El Buur
+  title: ajuuran_area
+- children:
+  - Mayertern
+  - Ajiraan
+  - Hobyo
+  title: majarteen_area
+title: horn_of_africa_region
+cul: somali
+rel: fetishist
+rough: jungle
+tag: HOA

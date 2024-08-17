@@ -1,0 +1,30 @@
+children:
+- children:
+  - Thatta
+  - Umarkot
+  - Mansura
+  - Nasirpur
+  - Diu
+  title: sindh_area
+- children:
+  - Jaisalmer
+  - Marwar
+  - Gorwar
+  - Barmer
+  title: marwar_area
+- children:
+  - Jangladesh
+  - Merta
+  - Churu
+  - Nagaur
+  title: jangladesh_area
+- children:
+  - Sehwan
+  - Bhakkar
+  - Khairpur
+  title: northern_sindh_area
+title: sindh_region
+cul: sindhi
+rel: hindu
+rough: jungle
+tag: GUJ

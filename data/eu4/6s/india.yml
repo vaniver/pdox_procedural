@@ -1,0 +1,97 @@
+children:
+- children:
+  - Assam
+  - Darrang
+  - Sadiya
+  - Koch Hajo
+  - Narayanpur
+  - Raipur
+  title: assam_area
+- children:
+  - Chittorgarh
+  - Mewar
+  - Ajmer
+  - Bhilwara
+  - Vagad
+  - Khandesh
+  title: mewar_area
+- children:
+  - Mandu
+  - Rewakantha
+  - Bhelsa
+  - Mandsaur
+  - Dharangaon
+  - Ujjain
+  title: malwa_area
+
+
+- children:
+  - Dundhar
+  - Mewat
+  - Shekhawati
+  - Bharatpur
+  - Thalner
+  title: jaipur_area
+
+- children:
+  - Patna
+  - Rohtasgarh
+  - Monghir
+  - Hajipur
+  title: bihar_area
+- children:
+  - Jaunpur
+  - Gorakhpur
+  - Varanasi
+  - Ghazipur
+  title: purvanchal_area
+- children:
+  - Garhwal
+  title: himalayan_hills_area
+- children:
+  - Delhi
+  - Upper Doab
+  - Panipat
+  title: upper_doab_area
+- children:
+  - Sirhind
+  - Batthiana
+  - Samana
+  - Bhatnair
+  title: sirhind_area
+- children:
+  - Tirhut
+  - Makwanpur
+  - Saran
+  - Champaran
+  title: mithila_area
+- children:
+  - Baghelkhand
+  - Surguja
+  - Bandogarh
+  title: baghelkhand_area
+- children:
+  - Katehar
+  - Sambhal
+  - Bareily
+  title: katehar_area
+- children:
+  - Doti
+  - Baisi Rayja
+  title: baisi_rajya_area
+- children:
+  - Bundelkhand
+  - Kalpi
+  - Mahoba
+  - Kalinjar
+  title: bundelkhand_area
+- children:
+  - Margalla
+  - Bannu
+  - Bhera
+  title: sind_sagar_area
+title: india_region
+cul: assamese
+rel: hindu
+rough: jungle
+tag: IND

@@ -1,0 +1,22 @@
+children:
+- children:
+  - Malgana
+  - Kurrama
+  - Mangala
+  - Wunambul
+  - Walcha
+  - Geelong
+  title: pilbara_area
+- children:
+  - Wadjuk
+  - Minang
+  - Nyaki
+  - Yuat
+  - Yiman
+  - Yuin
+  title: western_australia_area
+title: australia_region
+cul: nyoongah
+rel: alcheringa
+rough: desert
+tag: PIL

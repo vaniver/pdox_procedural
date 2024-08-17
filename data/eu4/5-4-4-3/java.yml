@@ -1,0 +1,30 @@
+children:
+- children:
+  - Banten
+  - Sunda
+  - Pakuan
+  - West Java
+  - Surabaya
+  title: banten_area
+- children:
+  - Mataram
+  - Kendal
+  - Pajang
+  - East Kendal
+  title: central_java_area
+- children:
+  - Blambangan
+  - Kediri
+  - East Kediri
+  - Demak
+  title: east_java_area
+- children:
+  - Cirebon
+  - Priangan
+  - East Cirebon
+  title: west_java_area
+title: java_region
+cul: javanese
+rel: hindu
+rough: jungle
+tag: JAV

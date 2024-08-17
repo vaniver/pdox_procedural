@@ -1,0 +1,30 @@
+children:
+- children:
+  - Honduras
+  - Chortli
+  - Lenca
+  - Olancho
+  - Xicaque
+  title: honduras_area
+- children:
+  - Pipil
+  - Guatemala
+  - Iximché
+  - Qumarkaj
+  title: guatemala_area
+- children:
+  - Nicaragua
+  - Mosquito
+  - Managua
+  - Uluas
+  title: nicaragua_area
+- children:
+  - Nicoya
+  - Chorotega
+  - Talamanca
+  title: costa_rica_area
+title: honduras_region
+cul: miskito
+rel: animist
+rough: jungle
+tag: YUC

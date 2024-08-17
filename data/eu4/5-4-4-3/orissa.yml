@@ -1,0 +1,30 @@
+children:
+- children:
+  - Cuttack
+  - Midnapore
+  - Balasore
+  - Khurda
+  - Ganjam
+  title: orissa_area
+- children:
+  - Bastar
+  - Garjat
+  - Kanker
+  - Kalahandi
+  title: garjat_area
+- children:
+  - Sambalpur
+  - Patna-Garjat
+  - Sonpur
+  - Ratanpur
+  title: upper_mahanadi_area
+- children:
+  - Jharkand
+  - Mahurbanj
+  - Soumelpur
+  title: jharkhand_area
+title: orissa_region
+cul: oriya
+rel: hindu
+rough: jungle
+tag: ORS

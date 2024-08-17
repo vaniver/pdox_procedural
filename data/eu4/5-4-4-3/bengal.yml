@@ -1,0 +1,30 @@
+children:
+- children:
+  - Dacca
+  - Sunderbans
+  - Sonargaon
+  - Fathabad
+  - Haibatnagar
+  title: east_bengal_area
+- children:
+  - Bengal Delta
+  - Lakhnor
+  - Nadia
+  - Satgaon
+  title: west_bengal_area
+- children:
+  - Koch
+  - Rangpur
+  - Nasirabad
+  - Purnia
+  title: north_bengal_area
+- children:
+  - Gauda
+  - Bhagalpur
+  - Goraghat
+  title: gaur_area
+title: bengal_region
+cul: bengali
+rel: hindu
+rough: jungle
+tag: BEN

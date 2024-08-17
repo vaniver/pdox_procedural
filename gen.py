@@ -112,6 +112,39 @@ def dist_from_coast(main_region, coast_region):
         new_coast = []
     return dist_from_cube
 
+
+# TODO: use split_kingdom when possible.
+def split_kingdom(kingdom, allocated, cdistmap, adj_size_list):
+    poss_capitals = sorted([k for k in kingdom if sum([kn not in kingdom and kn not in allocated for kn in k.neighbors()]) == 1 and sum([kn in kingdom for kn in k.neighbors()]) == 5], key=cdistmap.get, reverse=True)
+    # This will sometimes count lakes, which is bad, but I think using cdist to sort it will mostly resolve that.
+    to_be_continued = True
+    attempt = 0
+    while to_be_continued:
+        for pc in poss_capitals:
+            if not to_be_continued:
+                break
+            attempt = 0
+            this_capital = [pc] + [pcn for pcn in pc.neighbors() if pcn in kingdom]
+            if len(this_capital) != 6:  # This shouldn't be necessary b/c of how poss_capitals is defined, but checking anyway
+                print("WTF: capital size")
+                continue
+            others = [k for k in kingdom if k not in this_capital]
+            if not check_contiguous(others):  # This doesn't actually seem necessary--it _might_ work otherwise--but probably speeds things up.
+                continue
+            while to_be_continued and attempt < 5:
+                attempt += 1
+                try:
+                    ksplit = split_chunk(others, adj_size_list)
+                    if any([any([kn in ksplit[0] for kn in k.neighbors()]) for k in this_capital]):  #The 17 is adjacent to 
+                        to_be_continued = False
+                except SplitChunkMaxIterationExceeded:
+                    continue
+                except AssertionError:  # The kingdom was incorrectly sized.
+                    print("Kingdom was incorrectly sized.")
+                    raise CreationError
+    return this_capital, ksplit
+
+
 def create_triangular_continent(weight_from_cube, chunks, candidate, config):
     """Chunks is a list of chunks; candidates is a tuple of chunk ids (of length 3, 4, or 5).
     This generates a continent out of a series of triangular chunk cliques and will return CreationFailure if the adjacencies aren't right.
@@ -873,8 +906,8 @@ def create_data(config):
     last_rid = 1  # region_id. They 1-index instead of 0-indexing.
     last_srid = 1  # strategic_region_id. They 1-index instead of 0-indexing.
     continents, terr_templates, region_trees, sea_centers, last_pid, last_rid, last_srid, name_from_title = create_triangle_continents(config, n_x=config["n_x"], n_y=config["n_y"], num_centers=config.get("num_centers", None), last_pid=last_pid, last_rid=last_rid, last_srid=last_srid, start_time=start_time)
-    m_x = config["ck3n_x"]//2
-    m_y = -(config["ck3n_y"]+config["ck3n_x"]//2)//2
+    m_x = config["eu4n_x"]//2
+    m_y = -(config["eu4n_y"]+config["eu4n_x"]//2)//2
     print("Continents created; time elapsed:", time.time()-start_time)
     continents, sea_region_centers, med = arrange_inner_sea(continents, Cube(m_x, m_y, -m_x-m_y), config.get("angles", [2,0,4]))
     sea_centers = sea_region_centers + sea_centers

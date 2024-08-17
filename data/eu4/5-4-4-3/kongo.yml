@@ -1,0 +1,31 @@
+children:
+- children:
+  - Mbwila
+  - Mayombe
+  - Kongo
+  - Mpangu
+  - Mbata
+  title: kongo_area
+- children:
+  - Loango
+  - Nsoyo
+  - Mayumba
+  - Ngoyo
+  - Soyo
+  title: coastal_kongo
+- children:
+  - Luanda
+  - Ndongo
+  - Benguela
+  - Angra Pequena
+  title: angola_namibia_area
+- children:
+  - Matamba
+  - Kasanje
+  - Malem
+  title: matamba_area
+title: kongo_region
+cul: kongolese
+rel: fetishist
+rough: jungle
+tag: KON

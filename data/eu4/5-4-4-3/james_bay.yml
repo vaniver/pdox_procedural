@@ -1,0 +1,30 @@
+children:
+- children:
+  - Ungava
+  - Nunavik
+  - Cree
+  - Moose Cree
+  - Attawapiskat
+  title: james_bay_area
+- children:
+  - Niitsitapi
+  - Nehiyawewin
+  - Tsuutina
+  - Siksikawa
+  title: prairies_area
+- children:
+  - Athabasca
+  - Nihithawak
+  - Danezaa
+  - Sekani
+  title: athabasca_area
+- children:
+  - Bungi
+  - Itscheabine
+  - Makandwewin
+  title: red_river_area
+title: james_bay_region
+cul: cree
+rel: totemist
+rough: tundra
+tag: JMB

@@ -1,0 +1,31 @@
+children:
+- children:
+  - Omushkego
+  - Swampy Cree
+  - Chipewyan
+  - Atikaki
+  - Quenebigon
+  title: hudson_bay_area
+- children:
+  - Winnipeg
+  - Manitoba
+  - Woods Cree
+  - Wappus
+  - Sihabi
+  title: manitoba_area
+- children:
+  - Asinaan
+  - Mahmikiwiniyak
+  - Hebina
+  - Wadopabina
+  title: assiniboia_area
+- children:
+  - Saskatchewan
+  - Kesyehotinne
+  - Sipiwininiwak
+  title: saskatchewan_area
+title: hudson_bay_region
+cul: inuit
+rel: totemist
+rough: tundra
+tag: HDB

@@ -1,0 +1,30 @@
+children:
+- children:
+  - Chumash
+  - Salinan
+  - Miwok
+  - Kumeyaay
+  - Ohlone
+  title: california_area
+- children:
+  - Pomo
+  - Yuki
+  - Maidu
+  - Shasta
+  title: northern_california_area
+- children:
+  - Yorkuts
+  - Tachi
+  - Taaqtam
+  - Choinumni
+  title: central_valley_area
+- children:
+  - Cochimi
+  - Guaycura
+  - Nakipa
+  title: baja_california_area
+title: california_region
+cul: yokuts
+rel: totemist
+rough: desert
+tag: CAL

@@ -1,0 +1,66 @@
+children:
+- children:
+  - Pawnee
+  - Omaha
+  - Skiri
+  - Pitahawirata
+  title: central_plains_area
+- children:
+  - Jicarilla
+  - Wichita
+  - Ozark
+  - Tawehash
+  title: lower_plains_area
+- children:
+  - Arapaho
+  - Baachinena
+  - Hinonoeino
+  - Teton
+  title: high_plains_area
+- children:
+  - Lakota
+  - Mandan
+  - Mandan
+  - Huhkpapha
+  title: dakota_area
+- children:
+  - Dakota
+  - Arikara
+  - Yankton
+  - Ponca
+  title: south_dakota_area
+- children:
+  - Apsáalooke
+  - Piegan
+  - Haaninin
+  - Ashshipite
+  title: upper_missouri_area
+- children:
+  - Great Plains
+  - Eelalapito
+  - Tsitsistas
+  - Selis
+  title: badlands_area
+- children:
+  - Iowa
+  - Moingwena
+  - Otoe
+  - Tapouaro
+  title: iowa_area
+- children:
+  - Nakota
+  - Minnesota
+  - Wahpekute
+  - Saone
+  title: minnessota_area
+- children:
+  - Kiowa
+  - Kansas
+  - Kitkehaki
+  - Neosho
+  title: kansas_area
+title: great_plains_region
+cul: pawnee
+rel: totemist
+rough: steppe
+tag: GPL

@@ -1,0 +1,30 @@
+children:
+- children:
+  - Menabe
+  - Besalampy
+  - Iboina
+  - Antsalova
+  - Fiherana
+  title: sakalava_area
+- children:
+  - Antemoro
+  - Mahafaly
+  - Antanosy
+  - Bara
+  title: southern_madagascar
+- children:
+  - Antankara
+  - Maroantsetra
+  - Vatomandry
+  - Zumbo
+  title: betsimasaraka_area
+- children:
+  - Merina
+  - Tsimihety
+  - Betsileo
+  title: madagascar_highlands_area
+title: madagascar_region
+cul: malagasy
+rel: fetishist
+rough: jungle
+tag: MAD

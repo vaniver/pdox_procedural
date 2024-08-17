@@ -1,0 +1,63 @@
+children:
+- children:
+  - Nimiipu
+  - Bannock
+  - Bohogue
+  - Goshute
+  - Kuccuntikka
+  - Dakelh
+  title: snake_river_area
+- children:
+  - Tsimshian
+  - Haida
+  - Nisga'a
+  - Ktunaxa
+  - Tsilhoqotin
+  - Okanagan
+  title: hecate_strait_area
+- children:
+  - Kenai
+  - Aleut
+  - Kodiak
+  - Tlingit
+  - Yakutat
+  - Sitka
+  title: alaska_area
+- children:
+  - Abitbi
+  - Piscatang
+  - Kesagami
+  - Shaggami
+  - Outoulibi
+  - Anticosti
+  title: inner_ontario_area
+- children:
+  - Ontario
+  - Huron
+  - Kichesipi
+  - Tkaronto
+  - Niagara
+  - Algonquin
+  title: huronia_area
+- children:
+  - Ottawa
+  - Sault
+  - Ojibwa
+  - Nipigon
+  - Missisage
+  - Timiskaming
+  title: upper_ontario_area
+- children:
+- children:
+  - Kichesipirini
+  - Iroquet
+  - Keinouche
+  - Tionontate
+  - Odawa
+  - Ottagotouemin
+  title: ottawa_valley_area
+title: alaska_region
+cul: aleutian
+rel: totemist
+rough: forest
+tag: ALA

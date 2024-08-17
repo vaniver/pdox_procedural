@@ -1,0 +1,58 @@
+children:
+- children:
+  - Multan
+  - Dera Ghazi Khan
+  - Cholistan
+  - Bahawalpur
+  title: multan_area
+- children:
+  - Central Doab
+  - Lower Doab
+  - Etawah
+  - Kora
+  title: lower_doab_area
+- children:
+  - Katmandu
+  - Chaubisi Rajas
+  - Limbuwan
+  - Morung
+  - Palpa
+  - Dang
+  title: nepal_area
+- children:
+  - Oudh
+  - Bahreich
+  - Khairabad
+  - Feyzabad
+  - Qannauj
+  - Kumaon
+  title: oudh_area
+- children:
+  - Kashmir
+  - Baltistan
+  - Ladakh
+  - Jammu
+  - Skardu
+  - Kangra
+  title: kashmir_area
+- children:
+  - Lahore
+  - Doaba
+  - Sialkot
+  - Shorkot
+  - Dipalpur
+  - Sirmur
+  title: lahore_area
+- children:
+  - Gird
+  - Hadoti
+  - Chanderi
+  - Bundi
+  - Ranthambore
+  - Saugor
+  title: gird_area
+title: hindusthan_region
+cul: hindavi
+rel: hindu
+rough: jungle
+tag: HIN

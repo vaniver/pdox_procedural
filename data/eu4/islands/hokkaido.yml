@@ -1,0 +1,13 @@
+children:
+- children:
+  - Kamikawa
+  - Kurils
+  - Shiribeshi
+  - Tokachi
+  - Oshima
+  title: hokkaido_area
+title: hokkaido_region
+cul: ainu
+rel: animist
+rough: marsh
+tag: HOK

@@ -1,0 +1,14 @@
+﻿
+- children:
+  - Cape Verde
+  - Arguin
+  title: cap_verde_area
+- children:
+  - Fernando Po
+  - Sao Tome
+  title: sao_tome_area
+- children:
+  - Mahe
+  - Mauritius
+  - Bourbon
+  title: mascarenes_area

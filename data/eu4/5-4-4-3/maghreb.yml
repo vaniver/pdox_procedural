@@ -1,0 +1,30 @@
+﻿children:
+- children:
+  - Tangiers
+  - Mellila
+  - Ceuta
+  - Sale
+  - Tetouan
+  title: northern_morocco_area
+- children:
+  - Fez
+  - Marrakech
+  - Meknes
+  - Tadla
+  title: marrekesh_area
+- children:
+  - Toubkhal
+  - Safi
+  - Dukkala
+  - Anfa
+  title: western_morocco_area
+- children:
+  - Ifni
+  - Rio de Oro
+  - Haha
+  title: southern_morocco_area
+title: maghreb_region
+cul: maghreb
+rel: sunni
+rough: desert
+tag: MOR

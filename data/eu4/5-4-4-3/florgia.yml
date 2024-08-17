@@ -1,0 +1,31 @@
+children:
+- children:
+  - Seminole
+  - Calusa
+  - Mayaimi
+  - Potano
+  - Mayaca
+  title: florida_area
+- children:
+  - Muskogee
+  - Hitchiti
+  - Yamasee
+  - Mocama
+  - Combahee
+  title: american_georgia_area
+- children:
+  - Yamasee
+  - Chiaha
+  - Coweta
+  - Sawokli
+  title: upper_american_georgia_area
+- children:
+  - Timucua
+  - Apalachee
+  - Yustaga
+  title: north_florida_area
+title: florgia_region
+cul: yamasee
+rel: totemist
+rough: marsh
+tag: FLO

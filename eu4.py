@@ -43,13 +43,16 @@ class EU4Map(BasicMap):
         rgb_from_ijk = {k.tuple(): COLOR_FROM_TERR[terr] for k, terr in terr_from_cube.items()}
         create_hex_map(rgb_from_ijk=rgb_from_ijk, max_x=self.max_x, max_y=self.max_y, mode='P', palette=get_palette(os.path.join(base_loc, self.map_dir, "terrain"+file_ext)), default=254, n_x=self.n_x, n_y=self.n_y).save(os.path.join(self.file_dir, self.map_dir, "terrain"+file_ext))
 
+    def prov_extra(self, rgb_from_pid, pid_from_cube, name_from_pid,):
+        pass
+
     
 def create_dot_mod(file_dir, mod_name, mod_disp_name):
     """Creates the basic mod structure and metadata file."""
     shared = "version = \"0.0.1\"\n"
     shared += "tags = {\n\t\"Alternative History\"\n\t\"Map\"\n}\n"
     shared += "name = \"{}\"\n".format(mod_disp_name)
-    shared += "supported_version = \"1.13.7\"\n"
+    shared += "supported_version = \"1.37.2\"\n"
     outer = "path = \"mod/{}\"\n".format(mod_name)
     
     replace_paths = [
@@ -115,7 +118,7 @@ def create_geography(file_dir, pids_from_rid, srid_from_pid, name_from_rid, name
     region_names = {}
     with open(os.path.join(file_dir, "map", "area.txt"), 'w', encoding="utf-8") as outf:
         for rid, pids in pids_from_rid.items():
-            outf.write(f"{name_from_rid[rid]} = {{\n\t{' '.join([ pid for pid in pids])}\n}}\n\n")
+            outf.write(f"{name_from_rid[rid]} = {{\n\t{' '.join([str(pid) for pid in pids])}\n}}\n\n")
             srid = srid_from_pid[pids[0]]
             if srid in region_names:
                 region_names[srid].add(name_from_rid[rid])
@@ -142,15 +145,15 @@ def create_mod(file_dir, config, region_trees, rgb_from_pid, name_from_pid, pids
     # Make the basic filestructure that other things go in.
     file_dir = create_dot_mod(file_dir=file_dir, mod_name=config.get("MOD_NAME", "testmod"), mod_disp_name=config.get("MOD_DISPLAY_NAME", "testing_worldgen"))
     create_blanks(file_dir, file_paths=[
-        ["maps", "lakes", "00_lakes.txt"],
-        ["maps", "ambient_object.txt"],
-        ["maps", "trade_winds.txt"],
+        ["map", "lakes", "00_lakes.txt"],
+        ["map", "ambient_object.txt"],
+        ["map", "trade_winds.txt"],
     ], encoding="utf-8")
     player_tags = ["NOR"]
     create_bookmarks(file_dir, player_tags)
     create_colonial_regions(file_dir)
     create_countries(file_dir, region_trees, gov_from_tag)
-    eu4map = EU4Map(file_dir, max_x=config["max_x"], max_y=config["max_y"], n_x=config["n_x"], n_y=config["n_y"])
+    eu4map = EU4Map(file_dir, max_x=config["eu4max_x"], max_y=config["eu4max_y"], n_x=config["eu4n_x"], n_y=config["eu4n_y"])
     eu4map.create_provinces(rgb_from_pid, pid_from_cube, ".bmp", name_from_pid=name_from_pid)
     eu4map.create_terrain(terr_from_cube=terr_from_cube, base_loc=config["BASE_EU4_DIR"], file_ext=".bmp")
     eu4map.create_heightmap(base_from_vertex=base_from_vertex, mask_from_vertex=mask_from_vertex, file_ext=".bmp")

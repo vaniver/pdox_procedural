@@ -1,0 +1,31 @@
+children:
+- children:
+  - Awngthim
+  - Guugu Yimithirr
+  - Wulgurukaba
+  - Mingin
+  - Kurtjar
+  title: northern_australia_area
+- children:
+  - Gubbi Gubbi
+  - Baiali
+  - Biri
+  - Barunggam
+  title: north_queensland_area
+- children:
+  - Gureng
+  - WuliWuli
+  - Bidjara
+  - Badtjala
+  title: south_queensland_area
+- children:
+  - Tiwi
+  - Yolngu
+  - Woolna
+  - Yunawa
+  title: top_end_area
+title: queensland_region
+cul: paman
+rel: alcheringa
+rough: desert
+tag: QUE

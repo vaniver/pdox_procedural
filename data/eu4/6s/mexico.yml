@@ -1,0 +1,94 @@
+children:
+- children:
+  - Zapotec
+  - Coyolapan
+  - Mitla
+  - Tochtepec
+  - Zaachila
+  - Cuetlaxtlan
+  title: oaxaca_area
+- children:
+  - Mixtec
+  - Tlapanec
+  - Coixtlahuacan
+  - Yohualtepec
+  - Cihuatlan
+  - Teloloapan
+  title: mixteca_area
+- children:
+  - Mexico
+  - Tulucan
+  - Texcoco
+  - Tlacopan
+  - Malinalco
+  - Yopitzinco
+  title: mexico_area
+- children:
+  - Cuitzeo
+  - Cutzamala
+  - Patzcuaro
+  - Acambaro
+  - Ihuatzio
+  - Xilotepec
+  title: michoacan_area
+- children:
+  - Huichol
+  - Tizapan
+  - Colima
+  - Amaxocotlan
+  - Sayultecas
+  - Guachichil
+  title: jalisco_area
+- children:
+  - Tarasco
+  - Apatzingan
+  - Puruaran
+  - Sayula
+  - Tecoman
+  - Metztitlan
+  title: tierra_caliente_area
+- children:
+  - Zacatecas
+  - Xiconaque
+  - Xochipillan
+  - Tohancapan
+  - Tziccoac
+  - Cuauhtochco
+  title: zacatecas_area
+- children:
+  - Tlaxcala
+  - Tepeacac
+  - Cholula
+  - Xocotla
+  - Teotitlan
+  - Tecpatitlan
+  title: puebla_area
+- children:
+  - Mescalero
+  - Comanche
+  - Jicarilla
+  - Lipiyanes
+  - Natahende
+  - Tamaulipas
+  title: llano_estacado_area
+- children:
+  - Coahuila
+  - Laguneros
+  - Tuintsundé
+  - Cacaxtes
+  - Chichitames
+  - Cotoname
+  title: northeast_mexico_area
+- children:
+  - Chiapas
+  - Xoconochco
+  - Tehuantepec
+  - Tzotzil
+  - Jakaltek
+  - Ulva
+  title: chiapas_area
+title: mexico_region
+cul: aztec
+rel: nahuatl
+rough: jungle
+tag: MEX

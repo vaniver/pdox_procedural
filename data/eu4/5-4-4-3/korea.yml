@@ -1,0 +1,30 @@
+children:
+- children:
+  - Hanseong
+  - Hwangju
+  - Suwon
+  - Haeju
+  - Hamheung
+  title: western_korea_area
+- children:
+  - Gangwon
+  - Sangju
+  - East Gangwon
+  - Daegu
+  title: eastern_korea_area
+- children:
+  - Jeonju
+  - Cheongju
+  - Naju
+  - Chungju
+  title: south_korea_area
+- children:
+  - Pyeongyang
+  - Nyeongbyeon
+  - Ganggye
+  title: pyongan_area
+title: korea_region
+cul: korean
+rel: confucian
+rough: forest
+tag: KOR

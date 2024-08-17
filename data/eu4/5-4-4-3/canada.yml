@@ -1,0 +1,30 @@
+children:
+- children:
+  - Kespek
+  - Stadacona
+  - Atiamekw
+  - Maliseet
+  - Etchemins
+  title: notre_dame_mountains_area
+- children:
+  - Innu
+  - Mingan
+  - Manicouagan
+  - Piekougami
+  title: cote_nord_area
+- children:
+  - Kwedech
+  - Arsigantegok
+  - Atikamekw
+  - Nebesek
+  title: trois_rivieres_area
+- children:
+  - Hochelega
+  - Loup
+  - Batiscan
+  title: lower_canada_area
+title: canada_region
+cul: laurentian
+rel: totemist
+rough: forest
+tag: CAN

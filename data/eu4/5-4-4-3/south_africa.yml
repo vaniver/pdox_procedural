@@ -1,0 +1,30 @@
+children:
+- children:
+  - Cape
+  - Graaff-Reinet
+  - Lesser Namaqualand
+  - Swellendam
+  - Transkei
+  title: cape_of_good_hope_area
+- children:
+  - Roggeveld
+  - Great Karoo
+  - Griqualand
+  - Senqu
+  title: south_african_plateau_area
+- children:
+  - Mtetwa
+  - Natal
+  - Delagoa Bay
+  - Limpopo
+  title: limpopo_area
+- children:
+  - Transvaal
+  - Tswana
+  - Swazi
+  title: transvaal_area
+title: south_africa_region
+cul: khoisan
+rel: fetishist
+rough: steppes
+tag: SAF

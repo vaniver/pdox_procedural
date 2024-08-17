@@ -1,11 +1,12 @@
 MOD_NAME: testmod
 MOD_DISPLAY_NAME: testing_worldgen
 MOD_OUTPUTS:
-  CK3: "C:\\Users\\vaniv\\Documents\\Paradox Interactive\\Crusader Kings III\\mod"
+  # CK3: "C:\\Users\\vaniv\\Documents\\Paradox Interactive\\Crusader Kings III\\mod"
+  EU4: "C:\\Users\\vaniv\\Documents\\Paradox Interactive\\Europa Universalis IV\\mod"
   # V3: "C:\\Users\\vaniv\\Documents\\Paradox Interactive\\Victoria 3\\mod"
   # HOI4: "C:\\Users\\vaniv\\Documents\\Paradox Interactive\\Hearts of Iron IV\\mod"
 BASE_CK3_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Crusader Kings III\\game"
-BASE_EU4_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Europa Universalis IV\\game"
+BASE_EU4_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Europa Universalis IV"
 BASE_V3_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Victoria 3\\game"
 BASE_HOI4_DIR: "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Hearts of Iron IV"
 CONTINENT_LISTS:
@@ -60,6 +61,10 @@ max_x: 8192
 max_y: 4096
 ck3n_x: 338
 ck3n_y: 129
+eu4n_x: 235
+eu4n_y: 65
+eu4max_x: 5632
+eu4max_y: 2048
 SEA_PROVINCES: 28
 SEA_REGIONS: 6
 SEA_PROVINCE_STYLE: coastal

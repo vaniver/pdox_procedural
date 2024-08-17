@@ -1,0 +1,30 @@
+children:
+- children:
+  - Petén
+  - Belize
+  - Chacujal
+  - Moran
+  - Tzul
+  title: guatemala_lowlands_area
+- children:
+  - Yucatan
+  - Mani
+  - Ah Canul
+  - Xiu
+  title: yucatan_area
+- children:
+  - Uaymil
+  - Ecab
+  - Kobox
+  - Sotuta
+  title: east_yucatan_area
+- children:
+  - Campeche
+  - Xicallanco
+  - Champutun
+  title: campeche_area
+title: yucatan_region
+cul: yucatec
+rel: mayan
+rough: jungle
+tag: YUC

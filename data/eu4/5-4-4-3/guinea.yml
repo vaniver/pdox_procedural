@@ -1,0 +1,30 @@
+children:
+- children:
+  - Ivory Coast
+  - Gold Coast
+  - Whydah
+  - Denkyira
+  - Cape Coast
+  title: west_africa_coast_area
+- children:
+  - Benin
+  - Ondo
+  - Ijebu
+  - Warri
+  title: benin_area
+- children:
+  - Sierra Leone
+  - Grain Coast
+  - Beafada
+  - Karou
+  title: guinea_coast_area
+- children:
+  - Calabar
+  - Cameroon
+  - Gabon
+  title: gulf_of_guinea_area
+title: guinea_region
+cul: yoruba
+rel: fetishist
+rough: jungle
+tag: GUI

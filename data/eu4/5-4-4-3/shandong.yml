@@ -1,0 +1,30 @@
+children:
+- children:
+  - Shandong Bandao
+  - Jinan
+  - Wuding
+  - Laizhou
+  - Yanzhou
+  title: shandong_area
+- children:
+  - Hejian
+  - Xuan Fu
+  - Daming
+  - Zhending
+  title: south_hebei_area
+- children:
+  - Xuzhou
+  - Huai'an
+  - Haizhou
+  - Shangqiu
+  title: jiangsu_area
+- children:
+  - Hefei
+  - Fengyang
+  - Fuyang
+  title: anhui_area
+title: shandong_region
+cul: shandong
+rel: confucian
+rough: farmland
+tag: QIC
