@@ -378,7 +378,7 @@ with open("00_province_terrain.txt") as inf:
         try:
             sline = line.split("=")
             pid = int(sline[0])
-            terr = EU4Terrain_from_BaseTerrain[BaseTerrain[sline[1].strip()]]
+            terr =BaseTerrain[sline[1].strip()]
             tfp[pid] = terr
         except:
             continue
@@ -388,10 +388,10 @@ cube_from_pid = {v:k for k,v in pid_from_cube.items()}
 for cid in range(1, 291):
     terrs = []
     for pid in pids_from_cid[cid]:
-        terr_from_cube[cube_from_pid[pid]] = tfp[pid]
+        terr_from_cube[cube_from_pid[pid].add(offset)] = tfp[pid]
         terrs.append(tfp[pid])
     if len(terrs) > 5:
-        terr_from_cid[cid] = EU4Terrain.farmlands
+        terr_from_cid[cid] = BaseTerrain.farmlands
     else:
         terr_from_cid[cid] = random.choice(terrs)
 rgb_from_cid = {}
@@ -523,5 +523,5 @@ for v in range(max(grp_from_cube.values()) + 1):
 print("Ocean:", max_pid)
 
 emap = EU4Map("", max_x=max_x, max_y=max_y, n_x=n_x, n_y=n_y)
-emap.create_provinces(orig_rgb, pid_from_cube, ".bmp")
+emap.create_provinces(orig_rgb, cid_from_cube, ".bmp", name_from_pid={pid: f"c_{pid}" for pid in sorted(set(pid_from_cube.values()))})
 emap.create_terrain(terr_from_cube, config["BASE_EU4_DIR"], ".bmp")
