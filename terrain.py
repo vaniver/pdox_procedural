@@ -13,10 +13,10 @@ SPLIT = 2
 WATER = 254
 LAND = 255
 
-BaseTerrain = Enum('BaseTerrain', 'plains farmlands hills mountains forest desert marsh jungle ocean urban')
+BaseTerrain = Enum('BaseTerrain', 'plains farmlands hills mountains forest desert marsh jungle ocean steppe urban')
 TERRAIN_HEIGHT = {
     BaseTerrain.ocean: 0,
-    BaseTerrain.farmlands: -2, BaseTerrain.plains: -2, BaseTerrain.marsh: -2, BaseTerrain.desert: -0.8,
+    BaseTerrain.farmlands: -2, BaseTerrain.plains: -2, BaseTerrain.marsh: -2, BaseTerrain.steppe: -2, BaseTerrain.urban: -1, BaseTerrain.desert: -0.8,
     BaseTerrain.jungle: 0.1, BaseTerrain.forest: 0.1,
     BaseTerrain.hills: 0.2,
     BaseTerrain.mountains: 0.5,
@@ -24,14 +24,14 @@ TERRAIN_HEIGHT = {
 
 COLD_FROM_TERR = {
     BaseTerrain.ocean: 0,
-    BaseTerrain.farmlands: 1, BaseTerrain.plains: 1, BaseTerrain.marsh: 1, BaseTerrain.desert: -1,
+    BaseTerrain.farmlands: 1, BaseTerrain.plains: 1, BaseTerrain.marsh: 1, BaseTerrain.steppe: 1, BaseTerrain.urban: 1, BaseTerrain.desert: -1,
     BaseTerrain.jungle: 2, BaseTerrain.forest: 2,
     BaseTerrain.hills: 5,
     BaseTerrain.mountains: 10,
 }
 
 RAIL_DIST = {
-    BaseTerrain.urban: 1, BaseTerrain.farmlands: 1, BaseTerrain.plains: 1,
+    BaseTerrain.urban: 1, BaseTerrain.farmlands: 1, BaseTerrain.plains: 1, BaseTerrain.steppe: 1,
     BaseTerrain.marsh: 2, BaseTerrain.desert: 2,
     BaseTerrain.forest: 3,
     BaseTerrain.hills: 5, BaseTerrain.jungle: 5,
@@ -51,7 +51,7 @@ CK3Terrain_from_BaseTerrain = {
     BaseTerrain.jungle: CK3Terrain.jungle,
 }
 
-EU4Terrain = Enum('EU4Terrain', 'grasslands farmlands hills mountains forest desert marsh jungle')
+EU4Terrain = Enum('EU4Terrain', 'grasslands farmlands hills mountains forest desert marsh jungle ocean steppe')
 EU4Terrain_from_BaseTerrain = {
     BaseTerrain.plains: EU4Terrain.grasslands,
     BaseTerrain.farmlands: EU4Terrain.farmlands,
@@ -61,6 +61,8 @@ EU4Terrain_from_BaseTerrain = {
     BaseTerrain.desert: EU4Terrain.desert,
     BaseTerrain.marsh: EU4Terrain.marsh,
     BaseTerrain.jungle: EU4Terrain.jungle,
+    BaseTerrain.ocean: EU4Terrain.ocean,
+    BaseTerrain.steppe: EU4Terrain.steppe,
 }
 
 V3Terrain = Enum('V3Terrain', 'plains farmland hills mountain forest desert wetland jungle')

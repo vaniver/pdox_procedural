@@ -240,3 +240,35 @@ class RegionTree:
         with open(filename, encoding='utf_8_sig') as inf:
             contents = yaml.load(inf, yaml.Loader)
         return cls.from_dict(contents, last_pid, last_rid, last_srid)
+
+    @classmethod
+    def from_eu4_dict(cls, contents, last_pid=1, last_rid=1, last_srid=1):
+        """Given a dictionary of region details, recursively create a RegionTree. Also returns pid/rid/srid and localization dictionary."""
+        children = contents.get("children", [])
+        result_children = []
+        if len(children) > 0 and isinstance(children[0], str):
+            result_children = children
+            last_pid += len(children)
+        else:
+            for child in children:
+                result, last_pid, last_rid, last_srid = cls.from_eu4_dict(child, last_pid, last_rid, last_srid)
+                result_children.append(result)
+        title = contents["title"]  # This should break if it's not there
+        if "area" in title:
+            last_rid += 1
+        if "region" in title:
+            last_srid += 1
+        culture = contents.get("cul", None)
+        religion = contents.get("rel", None)
+        holy_site = contents.get("holy", None)
+        tag = contents.get("tag", None)
+        rough = contents.get("rough", None)
+        result = cls(title=title, color=None, tag=tag, culture=culture, religion=religion, rough=rough, holy_site=holy_site, capital_rid=last_rid, children=result_children)
+        return result, last_pid, last_rid, last_srid
+    
+    @classmethod
+    def from_eu4_yml(cls, filename, last_pid=1, last_rid=1, last_srid=1):
+        """Processes a .yml file to create a dictionary, which is then run thru from_dict. """
+        with open(filename, encoding='utf_8_sig') as inf:
+            contents = yaml.load(inf, yaml.Loader)
+        return cls.from_eu4_dict(contents, last_pid, last_rid, last_srid)

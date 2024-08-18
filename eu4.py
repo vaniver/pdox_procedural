@@ -18,6 +18,7 @@ TERR_NAMES = {
     BaseTerrain.jungle: "jungle",
     BaseTerrain.ocean: "ocean",
     BaseTerrain.urban: "urban",
+    BaseTerrain.steppe: "steppe",
 }
 
 COLOR_FROM_TERR = {
@@ -30,6 +31,7 @@ COLOR_FROM_TERR = {
     BaseTerrain.marsh: 9,
     BaseTerrain.jungle: 254,
     BaseTerrain.ocean: 15,
+    BaseTerrain.steppe: 5,
 }
 
 

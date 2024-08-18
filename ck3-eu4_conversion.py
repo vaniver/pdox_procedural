@@ -3,9 +3,11 @@ import pickle
 import random
 import yaml
 
+from eu4 import *
 from gen import *
 from map_io import *
 from region_tree import RegionTree
+from terrain import BaseTerrain, EU4Terrain, EU4Terrain_from_BaseTerrain
 
 with open("config.yml", 'r') as inf:
     config = yaml.load(inf, yaml.Loader)
@@ -51,14 +53,13 @@ while yearning:
     ind += 1
     subweights = {k:v for k,v in weight_from_cube.items() if any([k in chunks[cid].members for cid in candidates[ind][0]])}
     try:
-        continent, terr_template, sea_centers = create_triangular_continent(subweights, chunks, candidates[ind], config)
+        china, terr_template, sea_centers = create_triangular_continent(subweights, chunks, candidates[ind], config)
         yearning = False
     except CreationError:
         print("Creation error")
         if ind == len(candidates) - 1:
             yearning = False
             print("Total error.")
-china = continent
 china_inds = candidates[ind][0]
 candidates = compute_func(chunks, cids, 4)
 ind = 0
@@ -69,14 +70,13 @@ while yearning:
         continue
     subweights = {k:v for k,v in weight_from_cube.items() if any([k in chunks[cid].members for cid in candidates[ind][0]])}
     try:
-        continent, terr_template, sea_centers = create_triangular_continent(subweights, chunks, candidates[ind], config)
+        india, terr_template, sea_centers = create_triangular_continent(subweights, chunks, candidates[ind], config)
         yearning = False
     except CreationError:
         print("Creation error")
         if ind == len(candidates) - 1:
             yearning = False
             print("Total error.")
-india = continent
 india_inds = candidates[ind][0]
 aussi_possi = []
 for chid, chunk in enumerate(chunks):
@@ -233,7 +233,7 @@ base_chunk = -1
 for x in candidates[ind][0]:
     if sea_centers[0] in chunks[x].members:
         base_chunk = x
-poss = [x for x in chunks[base_chunk].members if x.z + 1 < sea_centers[0].z and x not in continent]
+poss = [x for x in chunks[base_chunk].members if x.z + 1 < sea_centers[0].z and x not in africa]
 grow_center = sorted(poss, key=lambda x: sea_centers[0].sub(x).mag())[0]
 allocated = set()
 adj_size_list = [x for x in config["KINGDOM_DUCHY_LIST"]]
@@ -264,7 +264,7 @@ for x in candidates[ind][0]:
         left_chunk = x
     if sea_centers[2] in chunks[x].members:
         right_chunk = x
-poss = [k for k in chunks[left_chunk].members if (k.x - 1 > sea_centers[1].x or k.y + 1 < sea_centers[1].y) and k not in continent] + [k for k in chunks[right_chunk].members if (k.x + 1 < sea_centers[2].x or k.z - 1 > sea_centers[2].z) and k not in continent]
+poss = [k for k in chunks[left_chunk].members if (k.x - 1 > sea_centers[1].x or k.y + 1 < sea_centers[1].y) and k not in africa] + [k for k in chunks[right_chunk].members if (k.x + 1 < sea_centers[2].x or k.z - 1 > sea_centers[2].z) and k not in africa]
 out_edge = [x for x in poss if any([nbr in africa for nbr in x.neighbors()])]
 grow_centers = [sorted(out_edge, key=lambda x: sea_centers[1].sub(x).mag())[0]] + [sorted(poss, key=lambda x: sea_centers[2].sub(x).mag())[0]]
 _, _, distmap = voronoi(grow_centers, {k: 1 for k in out_edge + grow_centers})
@@ -273,12 +273,45 @@ grow_centers.extend(random.sample([k for k,v in distmap.items() if v == maxdist]
 grow_centers.extend(random.sample([k for k,v in distmap.items() if v == maxdist // 2], k=2))
 subweights = {k: 1 if k in out_edge else weight_from_cube[k] for k in poss}
 _, gfc = growing_voronoi(grow_centers, [config["KINGDOM_SIZE"]] * 2 + [config["CENTER_SIZE"]] + [config["BORDER_SIZE"]]*2, subweights)
-bad_cube = [k for k,v in gfc.items() if v == 4 and any(gfc.get(nbr,-1) == 3 for nbr in k.neighbors())][0]
+bad_cube = [k for k,v in gfc.items() if v == 3 and any(gfc.get(nbr,-1) == 4 for nbr in k.neighbors())][0]
 good_spot = [k for k,v in gfc.items() if v == -1 and all(gfc.get(nbr,-1) != -1 for nbr in k.neighbors())][0]
-print(bad_cube, good_spot)
 gfc[good_spot] = gfc[bad_cube]
 gfc[bad_cube] = -1
-
+rgb_from_ijk = {k.tuple(): (128,128,128) for k in africa}
+for k,v in gfc.items():
+    if v < 0:
+        continue
+    rgb_from_ijk[k.tuple()] = (255,40*v,255-40*v)
+for gid in [0,1]:
+    kingdom = [x for x, y in gfc.items() if y == gid]
+    cdistmap = {k: 1 for k in subweights}
+    this_capital, ksplit = split_kingdom(kingdom, allocated, cdistmap, adj_size_list)
+    pid += 1
+    for k in this_capital:
+        africa.append(k)
+    for dind, duchy in enumerate(ksplit):
+        start_ind = 1 if dind == 0 else 0  # We don't need to split out the capital county for the capital duchy; it's already done for us.
+        try:
+            dsplit = split_chunk(duchy, config["KINGDOM_SIZE_LIST"][dind][start_ind:])
+        except:
+            print("Kingdom failed to split.")
+            raise CreationError
+        for county in dsplit:
+            pid += 1
+            for k in county:
+                africa.append(k)
+gid = 2
+dsplit = split_chunk([x for x, y in gfc.items() if y == gid], config["CENTER_SIZE_LIST"])
+for county in dsplit:
+    pid += 1
+    for k in county:
+        africa.append(k)
+for gid in [3,4]:
+    dsplit = split_chunk([x for x, y in gfc.items() if y == gid], config["BORDER_SIZE_LIST"])
+    for county in dsplit:
+        pid += 1
+        for k in county:
+            africa.append(k)
 
 # Put it all together
 max_x = 5632
@@ -339,6 +372,28 @@ for cube, pid in pid_from_cube.items():
             max_pid += 1
             seen_pids[pid] = max_pid
             cid_from_cube[cube.add(offset)] = max_pid
+tfp = {}
+with open("00_province_terrain.txt") as inf:
+    for line in inf.readlines():
+        try:
+            sline = line.split("=")
+            pid = int(sline[0])
+            terr = EU4Terrain_from_BaseTerrain[BaseTerrain[sline[1].strip()]]
+            tfp[pid] = terr
+        except:
+            continue
+terr_from_cube = {}
+terr_from_cid = {}
+cube_from_pid = {v:k for k,v in pid_from_cube.items()}
+for cid in range(1, 291):
+    terrs = []
+    for pid in pids_from_cid[cid]:
+        terr_from_cube[cube_from_pid[pid]] = tfp[pid]
+        terrs.append(tfp[pid])
+    if len(terrs) > 5:
+        terr_from_cid[cid] = EU4Terrain.farmlands
+    else:
+        terr_from_cid[cid] = random.choice(terrs)
 rgb_from_cid = {}
 for cid in range(291):
     rgb_from_cid[cid] = assign_color(rgb_from_cid,True)
@@ -387,6 +442,36 @@ for k,v in australia.items():
 for _ in range(max(australia.values())+1):
     max_pid += 1
     rgb_from_cid[max_pid] = assign_color(rgb_from_cid,True)
+# Africa
+offset = Cube(s_x, -m_x, m_x-s_x)
+max_srid += 1
+max_rid += 1
+srid_from_rid[max_rid] = max_srid
+africa_size_list = [config["CENTER_SIZE_LIST"]] + [config["BORDER_SIZE_LIST"]] * 3  + [config["KINGDOM_SIZE_LIST"]] * 6 + [config["CENTER_SIZE_LIST"]] + [config["BORDER_SIZE_LIST"]] * 2
+ind = 0
+for size_list in africa_size_list:
+    if isinstance(size_list[0], int):  # It's an area
+        max_rid += 1
+        srid_from_rid[max_rid] = max_srid
+        for size in size_list:
+            max_pid += 1
+            rgb_from_cid[max_pid] = assign_color(rgb_from_cid,True)
+            rid_from_pid[max_pid] = max_rid
+            for cc in range(size):
+                cid_from_cube[africa[ind].add(offset)] = max_pid
+                ind += 1
+    else:
+        for sl in size_list:
+            assert isinstance(sl[0], int)
+            max_rid += 1
+            srid_from_rid[max_rid] = max_srid
+            for size in sl:
+                max_pid += 1
+                rgb_from_cid[max_pid] = assign_color(rgb_from_cid,True)
+                rid_from_pid[max_pid] = max_rid
+                for cc in range(size):
+                    cid_from_cube[africa[ind].add(offset)] = max_pid
+                    ind += 1
 # America (diff offset)
 max_srid += 1
 offset = Cube(0, 0, 0)  # Doing this for uniformity's sake
@@ -436,4 +521,7 @@ for v in range(max(grp_from_cube.values()) + 1):
     center_from_pid[max_pid] = centers[v]
     rgb_from_cid[max_pid] = assign_color(rgb_from_cid,False)
 print("Ocean:", max_pid)
-create_hex_map(rgb_from_ijk={k.tuple():orig_rgb[v] for k,v in cid_from_cube.items()}, max_x=max_x, n_x=n_x, max_y=max_y, n_y=n_y,).save("provinces.bmp")
+
+emap = EU4Map("", max_x=max_x, max_y=max_y, n_x=n_x, n_y=n_y)
+emap.create_provinces(orig_rgb, pid_from_cube, ".bmp")
+emap.create_terrain(terr_from_cube, config["BASE_EU4_DIR"], ".bmp")
